@@ -1,7 +1,6 @@
 @import '~antd/dist/antd.css';
 
 .App {
-  text-align: center;
   height: 100%;
   width: 100%;
   position: relative;
@@ -22,12 +21,16 @@
 }
 
 .direction {
-  position: absolute;
+  text-align: center;
   bottom: 0;
-  width: 100%;
   left: 0;
+  position: absolute;
 }
-
+.direction .pointer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;

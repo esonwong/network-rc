@@ -8,7 +8,7 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
   width: 100%;
-  background-color: rgb(133, 133, 133);
+  background-color: rgb(240, 240, 240);
 }
 
 code {
