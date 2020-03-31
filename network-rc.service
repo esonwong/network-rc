@@ -1,0 +1,15 @@
+[Unit]
+Description=frpc daemon
+After=syslog.target  network.target
+Wants=network.target
+
+[Service]
+User=pi
+Type=simple
+ExecStart=python3 /home/pi/network-rc/server.py
+Restart= always
+RestartSec=1min
+
+
+[Install]
+WantedBy=multi-user.target
