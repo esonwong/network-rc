@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import store from "store";
-
+import {
+  ExpandOutlined,
+  AimOutlined,
+  DownOutlined,
+  UpOutlined
+} from "@ant-design/icons";
 import { InputNumber, Form, Switch, Input, Button, Slider, Tabs } from "antd";
+import Keyboard from "./Keyboard";
 import "./App.css";
+import Player from "./Player";
 
 const { TabPane } = Tabs;
 let current;
@@ -13,7 +20,7 @@ window.addEventListener("deviceorientation", event => {
 
 const layout = {
   labelCol: {
-    span: 4
+    span: 6
   },
   wrapperCol: {
     span: 16
@@ -22,6 +29,14 @@ const layout = {
 
 const tailLayout = {
   wrapperCol: { offset: 4, span: 16 }
+};
+
+const marks = {
+  0: "0%",
+  25: "25%",
+  50: "50%",
+  75: "75%",
+  100: "100%"
 };
 
 export default class App extends Component {
@@ -43,25 +58,44 @@ export default class App extends Component {
       speedRate: 0,
       directionReverse: store.get("directionReverse") || true,
       wsConnected: false,
-      wsAddress: store.get("wsAddress")
+      wsAddress: store.get("wsAddress"),
+      playerWsAddress: store.get("playerWsAddress"),
+      playerEnabled: false
+    };
+
+    this.controller = {
+      speed: v => {
+        const {
+          changeSpeed,
+          state: { speedMaxRate, speedReverseMaxRate, speedZeroRate }
+        } = this;
+        const rate =
+          v > 0
+            ? speedZeroRate + (speedMaxRate - speedZeroRate) * v
+            : speedZeroRate + (speedZeroRate - speedReverseMaxRate) * v;
+        changeSpeed(rate);
+      },
+      direction: v => {
+        const { changeDirection } = this;
+        changeDirection(v * 5 + 7.5);
+      }
     };
   }
 
   componentDidMount() {
     const {
       deviceorientation,
-      keyboardBind,
       connectWs,
       state: { wsAddress }
     } = this;
     window.addEventListener(
       "deviceorientation",
-      event => {
+      () => {
         deviceorientation();
       },
       false
     );
-    keyboardBind();
+
     connectWs({ wsAddress });
   }
 
@@ -97,57 +131,8 @@ export default class App extends Component {
     // changeSpeed(speedRate);
   };
 
-  keyboardBind = () => {
-    const { changeDirection, changeSpeed } = this;
-    document.addEventListener(
-      "keydown",
-      event => {
-        const {
-          state: { wsConnected, speedMaxRate, speedReverseMaxRate }
-        } = this;
-        if (!wsConnected) return;
-        const keyName = event.key;
-        if (keyName === "w") {
-          changeSpeed(speedMaxRate);
-        }
-        if (keyName === "s") {
-          changeSpeed(speedReverseMaxRate);
-        }
-        if (keyName === "a") {
-          changeDirection(12.5);
-        }
-        if (keyName === "d") {
-          changeDirection(2.5);
-        }
-      },
-      false
-    );
-    document.addEventListener(
-      "keyup",
-      event => {
-        const {
-          state: { wsConnected, speedZeroRate }
-        } = this;
-        if (!wsConnected) return;
-        const keyName = event.key;
-        if (keyName === "w") {
-          changeSpeed(speedZeroRate);
-        }
-        if (keyName === "s") {
-          changeSpeed(speedZeroRate);
-        }
-        if (keyName === "a") {
-          changeDirection(7.5);
-        }
-        if (keyName === "d") {
-          changeDirection(7.5);
-        }
-      },
-      false
-    );
-  };
-
-  connectWs = ({ wsAddress }) => {
+  connectWs = ({ wsAddress, playerWsAddress }) => {
+    if (!wsAddress) return;
     if (this.socket) {
       this.socket.close();
       this.socket = undefined;
@@ -162,6 +147,12 @@ export default class App extends Component {
     this.socket.on("disconnect", () => {
       this.setState({ wsConnected: false });
     });
+
+    if (!playerWsAddress) return;
+    this.setState({
+      playerWsAddress
+    });
+    store.set("playerWsAddress", playerWsAddress);
   };
 
   disconnectWs = e => {
@@ -204,92 +195,124 @@ export default class App extends Component {
       disconnectWs,
       changeSpeed,
       changeDirection,
+      controller,
       state: {
         wsConnected,
-        hold,
         directionReverse,
         direction,
         speedReverseMaxRate,
         speedMaxRate,
         speedZeroRate,
         speedRate,
-        wsAddress
+        wsAddress,
+        playerWsAddress,
+        playerEnabled
       }
     } = this;
     return (
       <div className="App" ref={this.appRef}>
-        <Form layout="inline" className="status">
+        <Form layout="inline" className="status" size="small">
           <Form.Item label="连接状态">
             <Switch checked={wsConnected} disabled />
           </Form.Item>
-          <Form.Item label="全屏">
-            <Switch
-              onChange={v => {
-                if (v) {
-                  this.appRef.current.requestFullscreen();
-                } else {
-                  window.document.exitFullscreen();
-                }
-              }}
-            />
-          </Form.Item>
-          <Form.Item label="方向感应控制">
-            <Switch checked={hold} disabled />
-          </Form.Item>
-          <Form.Item label="舵机">
-            <Slider
-              value={direction}
-              min={0}
-              max={100}
-              onChange={changeDirection}
-              style={{ width: "10vw" }}
-            />
-          </Form.Item>
+
           <Form.Item label="舵机 PWM">
             <InputNumber
-              min={0}
-              max={20}
               style={{ margin: "0 16px" }}
               value={direction}
               onChange={changeDirection}
-            />
-          </Form.Item>
-          <Form.Item label="电调">
-            <Slider
-              value={speedRate}
-              min={0}
-              max={100}
-              onChange={changeSpeed}
-              style={{ width: "10vw" }}
             />
           </Form.Item>
           <Form.Item label="电调 PWM">
             <InputNumber
-              min={0}
-              max={100}
               style={{ margin: "0 16px" }}
               value={speedRate}
               onChange={changeSpeed}
             />
           </Form.Item>
+          <Form.Item label="全屏">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<ExpandOutlined />}
+              onClick={() => {
+                this.appRef.current.requestFullscreen();
+              }}
+            ></Button>
+          </Form.Item>
         </Form>
-        <Tabs tabPosition="left">
-          <TabPane tab="连接" key={1}>
-            <Form
-              {...layout}
-              onFinish={connectWs}
-              initialValues={{ wsAddress }}
-            >
-              <br />
-              <Form.Item
-                label="连接地址"
-                name="wsAddress"
-                rules={[{ required: true, message: "请输入连接地址!" }]}
-              >
-                <Input />
+        <Tabs>
+          <TabPane tab="控制" key={1} className="control-pane">
+            <Form className="controller" size="small" layout="inline">
+              <Form.Item>
+                <Button
+                  type="danger"
+                  onClick={() => {
+                    this.setState({ base: { ...current } });
+                  }}
+                  icon={<AimOutlined />}
+                >
+                  舵机校准
+                </Button>
               </Form.Item>
-              <Form.Item label="电调 0 功率 PWM 空占比">
-                <InputNumber
+              <Form.Item label="舵机反向">
+                <Switch
+                  checked={directionReverse}
+                  onChange={v => {
+                    this.setState({
+                      directionReverse: v
+                    });
+                  }}
+                />
+              </Form.Item>
+            </Form>
+            <Button
+              className="forward-button"
+              shape="circle"
+              size="large"
+              type="primary"
+              onTouchStart={() => {
+                this.setState({ hold: true });
+                this.changeSpeed(speedMaxRate);
+              }}
+              onTouchEnd={() => {
+                this.setState({ hold: false });
+                this.changeSpeed(speedZeroRate);
+              }}
+              icon={<UpOutlined />}
+            ></Button>
+
+            <Button
+              className="backward-button"
+              shape="circle"
+              size="large"
+              type="primary"
+              onTouchStart={() => {
+                this.setState({ hold: true });
+                this.changeSpeed(speedReverseMaxRate);
+              }}
+              onTouchEnd={() => {
+                this.setState({ hold: false });
+                this.changeSpeed(speedZeroRate);
+              }}
+              icon={<DownOutlined />}
+            ></Button>
+          </TabPane>
+          <TabPane tab="键盘控制" key={2}>
+            <Keyboard controller={controller} />
+          </TabPane>
+          <TabPane tab="设置" key="setting">
+            <Form {...layout}>
+              <Form.Item label="摄像头">
+                <Switch
+                  checked={playerEnabled}
+                  onChange={playerEnabled => {
+                    this.setState({ playerEnabled });
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="电调无输出 PWM 空占比">
+                <Slider
                   value={speedZeroRate}
                   min={0}
                   max={100}
@@ -297,12 +320,16 @@ export default class App extends Component {
                     this.changeZeroSpeedRate(v);
                     store.set("speedZeroRate", v);
                   }}
+                  included={false}
+                  tooltipVisible
+                  marks={marks}
+                  disabled
                 />
               </Form.Item>
-              <Form.Item label="电调输出最大功率 PWM 空占比">
-                <InputNumber
+              <Form.Item label="电调最大 PWM 空占比">
+                <Slider
                   value={speedMaxRate}
-                  min={0}
+                  min={speedZeroRate}
                   max={100}
                   onChange={v => {
                     this.setState({
@@ -310,20 +337,41 @@ export default class App extends Component {
                     });
                     store.set("speedMaxRate", v);
                   }}
+                  marks={marks}
                 />
               </Form.Item>
-              <Form.Item label="电调反向输出最大功率 PWM 空占比">
-                <InputNumber
+              <Form.Item label="电调反向最大 PWM 空占比">
+                <Slider
                   value={speedReverseMaxRate}
                   min={0}
-                  max={100}
+                  max={speedZeroRate}
                   onChange={v => {
                     this.setState({
                       speedReverseMaxRate: v
                     });
                     store.set("speedReverseMaxRate", v);
                   }}
+                  marks={marks}
                 />
+              </Form.Item>
+            </Form>
+          </TabPane>
+          <TabPane tab="连接" key={3}>
+            <Form
+              {...layout}
+              onFinish={connectWs}
+              initialValues={{ wsAddress, playerWsAddress }}
+            >
+              <br />
+              <Form.Item
+                label="控制连接地址"
+                name="wsAddress"
+                rules={[{ required: true, message: "请输入连接地址!" }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item label="媒体连接地址" name="playerWsAddress">
+                <Input />
               </Form.Item>
               <Form.Item {...tailLayout}>
                 {wsConnected ? (
@@ -338,68 +386,26 @@ export default class App extends Component {
               </Form.Item>
             </Form>
           </TabPane>
-          <TabPane tab="键盘控制" key={2}>
-            <Form {...layout}></Form>
-          </TabPane>
-          <TabPane tab="方向感应控制" key={3}>
-            <Form {...layout}>
-              <Form.Item label="舵机反向">
-                <Switch
-                  checked={directionReverse}
-                  onChange={v => {
-                    this.setState({
-                      directionReverse: v
-                    });
-                  }}
-                />
-              </Form.Item>
-              <Form.Item {...tailLayout}>
-                <Button
-                  type="danger"
-                  onClick={() => {
-                    this.setState({ base: { ...current } });
-                  }}
-                >
-                  归零校准
-                </Button>
-              </Form.Item>
-
-              <Button
-                className="forward-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  this.setState({ hold: true });
-                  this.changeSpeed(speedMaxRate);
-                }}
-                onTouchEnd={() => {
-                  this.setState({ hold: false });
-                  this.changeSpeed(speedZeroRate);
-                }}
-              >
-                前进
-              </Button>
-
-              <Button
-                className="backward-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  this.setState({ hold: true });
-                  this.changeSpeed(speedReverseMaxRate);
-                }}
-                onTouchEnd={() => {
-                  this.setState({ hold: false });
-                  this.changeSpeed(speedZeroRate);
-                }}
-              >
-                后退
-              </Button>
-            </Form>
+          <TabPane tab="调试" key={4}>
+            <Form.Item label="电调">
+              <Slider
+                value={speedRate}
+                min={0}
+                max={100}
+                onChange={changeSpeed}
+              />
+            </Form.Item>
+            <Form.Item label="舵机">
+              <Slider
+                value={direction}
+                min={0}
+                max={100}
+                onChange={changeDirection}
+              />
+            </Form.Item>
           </TabPane>
         </Tabs>
+        <Player disabled={!playerEnabled} address={playerWsAddress} />
       </div>
     );
   }
