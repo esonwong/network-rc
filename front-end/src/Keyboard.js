@@ -16,7 +16,7 @@ export default class Keybord extends Component {
         controller: { speed, direction }
       }
     } = this;
-    this.ref.current.addEventListener(
+    window.document.addEventListener(
       "keydown",
       event => {
         const keyName = event.key;
@@ -35,7 +35,7 @@ export default class Keybord extends Component {
       },
       false
     );
-    this.ref.current.addEventListener(
+    window.document.addEventListener(
       "keyup",
       event => {
         const {

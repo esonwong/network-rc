@@ -31,6 +31,7 @@ export default class Player extends Component {
   disconnect() {
     if (this.wsavc) {
       this.wsavc.disconnect();
+      this.wsavc.initCanvas();
       this.wsavc = undefined;
     }
   }
