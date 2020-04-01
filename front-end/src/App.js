@@ -85,16 +85,16 @@ export default class App extends Component {
       (directionReverse ? -bateDegree / 30 : bateDegree / 30) * 5 + 7.5;
     changeDirection(directionRate);
 
-    if (!hold) return;
-    let gamaDegree = current.gamma - baseGamma;
-    gamaDegree = gamaDegree < -30 ? -30 : gamaDegree;
-    gamaDegree = gamaDegree > 30 ? 30 : gamaDegree;
-    const speedRate =
-      gamaDegree > 0
-        ? (gamaDegree / 30) * (speedMaxRate - speedZeroRate) + speedZeroRate
-        : speedZeroRate +
-          (gamaDegree / 30) * (speedZeroRate - speedReverseMaxRate);
-    changeSpeed(speedRate);
+    // if (!hold) return;
+    // let gamaDegree = current.gamma - baseGamma;
+    // gamaDegree = gamaDegree < -30 ? -30 : gamaDegree;
+    // gamaDegree = gamaDegree > 30 ? 30 : gamaDegree;
+    // const speedRate =
+    //   gamaDegree > 0
+    //     ? (gamaDegree / 30) * (speedMaxRate - speedZeroRate) + speedZeroRate
+    //     : speedZeroRate +
+    //       (gamaDegree / 30) * (speedZeroRate - speedReverseMaxRate);
+    // changeSpeed(speedRate);
   };
 
   keyboardBind = () => {
@@ -365,20 +365,37 @@ export default class App extends Component {
               </Form.Item>
 
               <Button
-                className="hold-button"
+                className="forward-button"
                 shape="circle"
                 size="large"
                 type="primary"
                 onTouchStart={() => {
                   this.setState({ hold: true });
+                  this.changeSpeed(speedMaxRate);
                 }}
                 onTouchEnd={() => {
                   this.setState({ hold: false });
                   this.changeSpeed(speedZeroRate);
-                  this.changeDirection(0);
                 }}
               >
-                启动
+                前进
+              </Button>
+
+              <Button
+                className="backward-button"
+                shape="circle"
+                size="large"
+                type="primary"
+                onTouchStart={() => {
+                  this.setState({ hold: true });
+                  this.changeSpeed(speedReverseMaxRate);
+                }}
+                onTouchEnd={() => {
+                  this.setState({ hold: false });
+                  this.changeSpeed(speedZeroRate);
+                }}
+              >
+                后退
               </Button>
             </Form>
           </TabPane>
