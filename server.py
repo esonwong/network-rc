@@ -15,12 +15,12 @@ speed = GPIO.PWM(speedPin, 500)
 
 direction.start(0)
 speed.start(0)
-speed.ChangeDutyCycle(75);
 
 app = Flask(__name__,static_folder='public')
 app.secret_key = "eson"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+speedZeroRate = 75;
 
 @app.route('/')
 def root():
@@ -33,7 +33,7 @@ def connect_handler():
 
 @socketio.on('disconnect')
 def disconnect_handler():
-    speed.ChangeDutyCycle(75);
+    speed.ChangeDutyCycle(speedZeroRate)
     direction.ChangeDutyCycle(0);
     print('disconnect')
 
@@ -47,6 +47,12 @@ def handle_direction(rate):
     print('received directioni rate: ' + str(rate))
     direction.ChangeDutyCycle(rate)
 
+
+@socketio.on("speed zero rate")
+def handle_speed_zero_rate(rate):
+    print('received speed zero rate: ' + str(rate))
+    speedZeroRate = rate
+    speed.ChangeDutyCycle(speedZeroRate)
 
 @socketio.on("speed rate")
 def handle_speed_rate(rate):

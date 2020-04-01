@@ -1,12 +1,12 @@
 [Unit]
-Description=network-rc
+Description=media-stream-player
 After=syslog.target  network.target
 Wants=network.target
 
 [Service]
 User=pi
 Type=simple
-ExecStart=python3 /home/pi/network-rc/server.py
+ExecStart=node /home/pi/network-rc/media-server/server-rpi.js
 Restart= always
 RestartSec=1min
 
