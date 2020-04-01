@@ -5,13 +5,25 @@
   width: 100%;
   position: relative;
   user-select: none;
-  background-color: rgb(240, 240, 240);
+  /* background-color: rgb(240, 240, 240); */
+  overflow: hidden;
 }
 
 .App .status {
   padding: 1em;
 }
 
+.App .ant-tabs {
+  height: calc(100vh - 52px);
+}
+
+.App .ant-tabs .ant-tabs-tabpane {
+  height: calc(100vh - 52px - 45px);
+}
+
+.control-pane {
+  position: relative;
+}
 .accelerator {
   position: absolute;
   bottom: 5vh;
@@ -23,16 +35,39 @@
   position: absolute;
   top: 3vh;
   right: 5vw;
+  z-index: 2;
 }
+.controller {
+  position: absolute;
+  bottom: 5vw;
+  left: 5vw;
 
+}
 .backward-button {
-  position: fixed;
+  position: absolute;
   bottom: 5vw;
   right: 5vw;
 }
 
 .forward-button {
-  position: fixed;
+  position: absolute;
   bottom: 15vw;
   right: 5vw;
+}
+
+.player {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content:center;
+  align-items: center;
+}
+.canvas {
+  height: 100%;
 }
