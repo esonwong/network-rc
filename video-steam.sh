@@ -1,1 +1,1 @@
-ffmpeg -f avfoundation -framerate 30 -video_size 1280x720 -i "0" -tune zerolatency -preset ultrafast -vcodec libx264 -s 720x405 -f mpegts udp://127.0.0.1:999
+sudo ffmpeg -f video4linux2 -input_format h264 -video_size 620x480 -framerate 30 -i /dev/video0 -vcodec copy -f mpegts udp://10.0.0.10:8891
