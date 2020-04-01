@@ -25,8 +25,14 @@
   right: 5vw;
 }
 
-.hold-button {
+.backward-button {
   position: fixed;
   bottom: 5vw;
+  right: 5vw;
+}
+
+.forward-button {
+  position: fixed;
+  bottom: 15vw;
   right: 5vw;
 }
