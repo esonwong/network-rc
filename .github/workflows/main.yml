@@ -24,7 +24,6 @@ jobs:
     - name: Build
       run: |
         cd front-end
-        PUBLIC_URL=/network-rc
         npm install && npm run build
 
     # Runs a set of commands using the runners shell
