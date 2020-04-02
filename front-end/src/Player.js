@@ -3,7 +3,10 @@ import React, { Component, createRef } from "react";
 export default class Player extends Component {
   constructor(props) {
     super(props);
-    this.canvasRef = createRef();
+    this.setCanvasRef = ref => {
+      this.canvasRef = ref;
+      props.setCanvasRef && props.setCanvasRef(ref);
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -19,7 +22,7 @@ export default class Player extends Component {
   connect() {
     const { address } = this.props;
     if (!address) return;
-    this.wsavc = new window.WSAvcPlayer(this.canvasRef.current, "webgl", 1, 35);
+    this.wsavc = new window.WSAvcPlayer(this.canvasRef, "webgl", 1, 35);
     this.wsavc.connect(
       `${window.location.protocol === "https:" ? "wss" : "ws"}://${address}`,
       () => {
@@ -39,7 +42,7 @@ export default class Player extends Component {
   render() {
     return (
       <div className="player">
-        <canvas className="canvas" ref={this.canvasRef}></canvas>
+        <canvas className="canvas" ref={this.setCanvasRef}></canvas>
       </div>
     );
   }
