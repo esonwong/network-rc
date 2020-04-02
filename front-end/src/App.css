@@ -20,6 +20,10 @@
 .App .ant-tabs .ant-tabs-tabpane {
   height: calc(100vh - 52px - 45px);
 }
+.ant-spin-nested-loading, .ant-spin-container {
+  height: 100%;
+  overflow-y: auto;
+}
 
 .control-pane {
   position: relative;

@@ -134,9 +134,9 @@ export default class Ai extends Component {
 
   predict = async () => {
     const {
-      props: { canvasRef }
+      props: { canvasRef, onAi }
     } = this;
-
+    onAi(true);
     this.setState(
       {
         isPredicting: true
@@ -171,6 +171,7 @@ export default class Ai extends Component {
           this.doAction({ speed, direction });
           await tf.nextFrame();
         }
+        onAi(false);
       }
     );
   };
@@ -198,7 +199,14 @@ export default class Ai extends Component {
 
   render() {
     const {
-      state: { exampleList, loading, isRecording, isTraining, isPredicting, loss },
+      state: {
+        exampleList,
+        loading,
+        isRecording,
+        isTraining,
+        isPredicting,
+        loss
+      },
       exampleHandler,
       record,
       predict

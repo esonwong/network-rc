@@ -43,6 +43,7 @@ export default class App extends Component {
       playerWsAddress: store.get("playerWsAddress"),
       playerEnabled: false,
       canvasRef: undefined,
+      isAiControlling: false,
       action: {
         speed: 0,
         direction: 0
@@ -102,9 +103,12 @@ export default class App extends Component {
         directionReverse,
         speedZeroRate,
         speedMaxRate,
-        speedReverseMaxRate
+        speedReverseMaxRate,
+        isAiControlling
       }
     } = this;
+
+    if (isAiControlling) return;
     let bateDegree = current.beta - baseBeta;
     bateDegree = bateDegree < -30 ? -30 : bateDegree;
     bateDegree = bateDegree > 30 ? 30 : bateDegree;
@@ -400,7 +404,12 @@ export default class App extends Component {
             </Form.Item>
           </TabPane>
           <TabPane tab="Ai" key="ai">
-            <Ai canvasRef={canvasRef} action={action} controller={controller} />
+            <Ai
+              canvasRef={canvasRef}
+              action={action}
+              controller={controller}
+              onAi={isAiControlling => this.setState({ isAiControlling })}
+            />
           </TabPane>
         </Tabs>
         <Player
