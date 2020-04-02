@@ -10,6 +10,8 @@ import { InputNumber, Form, Switch, Input, Button, Slider, Tabs } from "antd";
 import Keyboard from "./Keyboard";
 import "./App.css";
 import Player from "./Player";
+import Ai from "./Ai";
+import { layout, tailLayout, marks } from "./unit";
 
 const { TabPane } = Tabs;
 let current;
@@ -17,27 +19,6 @@ window.addEventListener("deviceorientation", event => {
   const { alpha, beta, gamma } = event;
   current = { alpha, beta, gamma };
 });
-
-const layout = {
-  labelCol: {
-    span: 6
-  },
-  wrapperCol: {
-    span: 16
-  }
-};
-
-const tailLayout = {
-  wrapperCol: { offset: 4, span: 16 }
-};
-
-const marks = {
-  0: "0%",
-  25: "25%",
-  50: "50%",
-  75: "75%",
-  100: "100%"
-};
 
 export default class App extends Component {
   constructor(props) {
@@ -60,24 +41,36 @@ export default class App extends Component {
       wsConnected: false,
       wsAddress: store.get("wsAddress"),
       playerWsAddress: store.get("playerWsAddress"),
-      playerEnabled: false
+      playerEnabled: false,
+      canvasRef: undefined,
+      action: {
+        speed: 0,
+        direction: 0
+      }
     };
 
     this.controller = {
       speed: v => {
         const {
           changeSpeed,
-          state: { speedMaxRate, speedReverseMaxRate, speedZeroRate }
+          state: { speedMaxRate, speedReverseMaxRate, speedZeroRate, action }
         } = this;
+        action.speed = v;
         const rate =
           v > 0
             ? speedZeroRate + (speedMaxRate - speedZeroRate) * v
             : speedZeroRate + (speedZeroRate - speedReverseMaxRate) * v;
+        this.setState({ action });
         changeSpeed(rate);
       },
       direction: v => {
-        const { changeDirection } = this;
+        const {
+          changeDirection,
+          state: { action }
+        } = this;
+        action.direction = v;
         changeDirection(v * 5 + 7.5);
+        this.setState({ action });
       }
     };
   }
@@ -206,7 +199,9 @@ export default class App extends Component {
         speedRate,
         wsAddress,
         playerWsAddress,
-        playerEnabled
+        playerEnabled,
+        canvasRef,
+        action
       }
     } = this;
     return (
@@ -404,8 +399,17 @@ export default class App extends Component {
               />
             </Form.Item>
           </TabPane>
+          <TabPane tab="Ai" key="ai">
+            <Ai canvasRef={canvasRef} action={action} controller={controller} />
+          </TabPane>
         </Tabs>
-        <Player disabled={!playerEnabled} address={playerWsAddress} />
+        <Player
+          disabled={!playerEnabled}
+          address={playerWsAddress}
+          setCanvasRef={canvasRef => {
+            this.setState({ canvasRef });
+          }}
+        />
       </div>
     );
   }

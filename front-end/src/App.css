@@ -71,3 +71,14 @@
 .canvas {
   height: 100%;
 }
+
+
+.ai-canvas {
+  position: fixed;
+  top: -9999px;
+}
+
+.ai-example-list {
+  background-color: #fff;
+  padding: 5vw;
+}
