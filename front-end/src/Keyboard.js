@@ -13,7 +13,8 @@ export default class Keybord extends Component {
   keyboardBind = () => {
     const {
       props: {
-        controller: { speed, direction }
+        controller: { speed, direction },
+        onControl
       }
     } = this;
     window.document.addEventListener(
@@ -32,6 +33,7 @@ export default class Keybord extends Component {
         if (keyName === "d") {
           direction(-1);
         }
+        onControl && onControl();
       },
       false
     );
@@ -40,7 +42,8 @@ export default class Keybord extends Component {
       event => {
         const {
           props: {
-            controller: { speed, direction }
+            controller: { speed, direction },
+            onControl
           }
         } = this;
         const keyName = event.key;
@@ -56,16 +59,13 @@ export default class Keybord extends Component {
         if (keyName === "d") {
           direction(0);
         }
+        onControl && onControl();
       },
       false
     );
   };
 
   render() {
-    return (
-      <div  tabIndex="0" ref={this.ref}>
-        wads
-      </div>
-    );
+    return <div></div>;
   }
 }

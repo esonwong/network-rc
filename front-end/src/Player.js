@@ -1,4 +1,4 @@
-import React, { Component, createRef } from "react";
+import React, { Component } from "react";
 
 export default class Player extends Component {
   constructor(props) {

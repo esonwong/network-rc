@@ -25,6 +25,10 @@
   overflow-y: auto;
 }
 
+.form-item-button .ant-btn{
+  margin-right: 1em;
+}
+
 .control-pane {
   position: relative;
 }

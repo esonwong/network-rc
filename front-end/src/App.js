@@ -61,7 +61,7 @@ export default class App extends Component {
           v > 0
             ? speedZeroRate + (speedMaxRate - speedZeroRate) * v
             : speedZeroRate + (speedZeroRate - speedReverseMaxRate) * v;
-        this.setState({ action });
+        this.setState({ action: { ...action } });
         changeSpeed(rate);
       },
       direction: v => {
@@ -71,7 +71,7 @@ export default class App extends Component {
         } = this;
         action.direction = v;
         changeDirection(v * 5 + 7.5);
-        this.setState({ action });
+        this.setState({ action: { ...action } });
       }
     };
   }
@@ -229,6 +229,14 @@ export default class App extends Component {
               onChange={changeSpeed}
             />
           </Form.Item>
+          <Form.Item label="摄像头">
+            <Switch
+              checked={playerEnabled}
+              onChange={playerEnabled => {
+                this.setState({ playerEnabled });
+              }}
+            />
+          </Form.Item>
           <Form.Item label="全屏">
             <Button
               type="primary"
@@ -297,19 +305,8 @@ export default class App extends Component {
               icon={<DownOutlined />}
             ></Button>
           </TabPane>
-          <TabPane tab="键盘控制" key={2}>
-            <Keyboard controller={controller} />
-          </TabPane>
           <TabPane tab="设置" key="setting">
             <Form {...layout}>
-              <Form.Item label="摄像头">
-                <Switch
-                  checked={playerEnabled}
-                  onChange={playerEnabled => {
-                    this.setState({ playerEnabled });
-                  }}
-                />
-              </Form.Item>
               <Form.Item label="电调无输出 PWM 空占比">
                 <Slider
                   value={speedZeroRate}
@@ -419,6 +416,7 @@ export default class App extends Component {
             this.setState({ canvasRef });
           }}
         />
+        <Keyboard controller={controller} />
       </div>
     );
   }

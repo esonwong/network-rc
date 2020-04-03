@@ -39,7 +39,7 @@ export class ControllerDataset {
    */
   addExample(example, action) {
     // One-hot encode the label.
-    const y = tf.tidy(() => tf.tensor2d(action,[1,2]));
+    const y = tf.tidy(() => tf.tensor2d(action, [1, 2]));
 
     if (this.xs == null) {
       // For the first example that gets added, keep example and y so that the
@@ -60,4 +60,18 @@ export class ControllerDataset {
       y.dispose();
     }
   }
+  clean() {
+    this.xs.dispose();
+    this.ys.dispose();
+    this.xs = null;
+    this.ys = null;
+  }
+}
+
+export async function sleep(time) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, time);
+  });
 }
