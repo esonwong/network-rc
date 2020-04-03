@@ -1,7 +1,7 @@
 import React, { Component, createRef } from "react";
 import { Form, Button, Spin, InputNumber, List, Card, Select } from "antd";
 import * as tf from "@tensorflow/tfjs";
-import { AppstoreAddOutlined, CloseOutlined } from "@ant-design/icons";
+import { AppstoreAddOutlined, CloseOutlined, ArrowLeftOutlined, ArrowRightOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import {
   layout,
   tailLayout,
@@ -44,7 +44,11 @@ export default class Ai extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.action !== this.props.action && this.state.isRecording && !isBuildingExample) {
+    if (
+      prevProps.action !== this.props.action &&
+      this.state.isRecording &&
+      !isBuildingExample
+    ) {
       this.exampleHandler(this.props.action);
     }
   }
@@ -320,6 +324,21 @@ export default class Ai extends Component {
               htmlType="submit"
               type="primary"
               icon={<AppstoreAddOutlined />}
+            />
+            <Button
+              type="primary"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => exampleHandler({ speed: 1, direction: 1 })}
+            />
+            <Button
+              type="primary"
+              icon={<ArrowRightOutlined />}
+              onClick={() => exampleHandler({ speed: 1, direction: -1 })}
+            />
+            <Button
+              type="primary"
+              icon={<ArrowUpOutlined />}
+              onClick={() => exampleHandler({ speed: 1, direction: 0 })}
             />
             <Button
               type="primary"
