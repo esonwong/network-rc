@@ -153,11 +153,11 @@ export default class Ai extends Component {
           this.setState({ loss: logs.loss.toFixed(5) });
         },
         onTrainEnd: logs => {
-          const loss = logs.loss.toFixed(5);
-          console.log("Train End Loss: " + logs.loss.toFixed(5));
+          // const loss = logs.loss.toFixed(5);
+          // console.log("Train End Loss: " + logs.loss.toFixed(5));
           this.setState({
-            isTraining: false,
-            loss
+            isTraining: false
+            // loss
           });
         }
       }
