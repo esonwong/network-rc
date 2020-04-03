@@ -14,6 +14,8 @@ let truncatedMobileNet, model;
 const controllerDataset = new ControllerDataset();
 const { Option } = Select;
 
+let isBuildingExample = false;
+
 export default class Ai extends Component {
   constructor(props) {
     super(props);
@@ -42,7 +44,7 @@ export default class Ai extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.action !== this.props.action && this.state.isRecording) {
+    if (prevProps.action !== this.props.action && this.state.isRecording && !isBuildingExample) {
       this.exampleHandler(this.props.action);
     }
   }
@@ -55,6 +57,7 @@ export default class Ai extends Component {
   };
 
   exampleHandler = async action => {
+    isBuildingExample = true;
     const {
       state: { exampleList },
       props: { action: propAction, canvasRef }
@@ -73,8 +76,8 @@ export default class Ai extends Component {
     const { speed, direction } = _action;
     console.log("example", _action);
     controllerDataset.addExample(truncatedMobileNet.predict(processedImg), [
-      (speed + 1) / 2,
-      (direction + 1) / 2
+      speed,
+      direction
     ]);
     await tf.browser.toPixels(smallImg, this.smallCanvasRef.current);
     exampleList.push({
@@ -83,6 +86,7 @@ export default class Ai extends Component {
     });
     this.setState({ exampleList });
     img.dispose();
+    isBuildingExample = false;
   };
 
   train = async learnArgument => {
@@ -175,6 +179,7 @@ export default class Ai extends Component {
       },
       async () => {
         while (this.state.isPredicting) {
+          await sleep(200);
           const img = tf.tidy(() =>
             tf.browser
               .fromPixels(canvasRef)
@@ -199,14 +204,13 @@ export default class Ai extends Component {
           const [speed, direction] = await predictions.data();
 
           const action = {
-            speed: speed * 2 - 1,
-            direction: direction * 2 - 1
+            speed,
+            direction
           };
           console.log("Ai 动作：", action);
           img.dispose();
 
           this.doAction(action);
-          await sleep(200);
           await tf.nextFrame();
         }
         onAi(false);
@@ -272,7 +276,7 @@ export default class Ai extends Component {
             <Select>
               <Option value={10}>10</Option>
               <Option value={20}>20</Option>
-              <Option value={40}></Option>40
+              <Option value={40}>40</Option>
             </Select>
           </Form.Item>
           <Form.Item label="Hidden units" name="hiddenUnits">
