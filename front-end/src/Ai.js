@@ -1,17 +1,18 @@
 import React, { Component, createRef } from "react";
-import { Form, Button, Spin, InputNumber, List, Card, Space } from "antd";
+import { Form, Button, Spin, InputNumber, List, Card, Select } from "antd";
 import * as tf from "@tensorflow/tfjs";
-import * as tfd from "@tensorflow/tfjs-data";
 import { AppstoreAddOutlined, CloseOutlined } from "@ant-design/icons";
 import {
   layout,
   tailLayout,
   loadTruncatedMobileNet,
-  ControllerDataset
+  ControllerDataset,
+  sleep
 } from "./unit";
 
 let truncatedMobileNet, model;
 const controllerDataset = new ControllerDataset();
+const { Option } = Select;
 
 export default class Ai extends Component {
   constructor(props) {
@@ -23,7 +24,13 @@ export default class Ai extends Component {
       training: false,
       isPredicting: false,
       isRecording: false,
-      loss: 0
+      loss: 0,
+      learnArgument: {
+        learnRate: 0.001,
+        batchSize: 0.4,
+        epochs: 20,
+        hiddenUnits: 100
+      }
     };
     this.smallCanvasRef = createRef();
   }
@@ -33,6 +40,19 @@ export default class Ai extends Component {
     truncatedMobileNet = await loadTruncatedMobileNet();
     this.setState({ loading: false });
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.action !== this.props.action && this.state.isRecording) {
+      this.exampleHandler(this.props.action);
+    }
+  }
+
+  exampleCleanHandler = async () => {
+    this.setState({
+      exampleList: []
+    });
+    controllerDataset.clean();
+  };
 
   exampleHandler = async action => {
     const {
@@ -51,9 +71,10 @@ export default class Ai extends Component {
     );
     const _action = action || propAction;
     const { speed, direction } = _action;
+    console.log("example", _action);
     controllerDataset.addExample(truncatedMobileNet.predict(processedImg), [
-      speed,
-      direction
+      (speed + 1) / 2,
+      (direction + 1) / 2
     ]);
     await tf.browser.toPixels(smallImg, this.smallCanvasRef.current);
     exampleList.push({
@@ -64,10 +85,11 @@ export default class Ai extends Component {
     img.dispose();
   };
 
-  train = async () => {
+  train = async learnArgument => {
     this.setState({
       isTraining: true
     });
+    console.log("Learnning Argument", learnArgument);
     if (controllerDataset.xs == null) {
       throw new Error("Add some examples before training!");
     }
@@ -85,7 +107,7 @@ export default class Ai extends Component {
         }),
         // Layer 1.
         tf.layers.dense({
-          units: 100,
+          units: learnArgument.hiddenUnits,
           activation: "relu",
           kernelInitializer: "varianceScaling",
           useBias: true
@@ -102,17 +124,19 @@ export default class Ai extends Component {
     });
 
     // Creates the optimizers which drives training of the model.
-    const optimizer = tf.train.adam(0.0001);
+    const optimizer = tf.train.adam(learnArgument.learnRate);
     // We use categoricalCrossentropy which is the loss function we use for
     // categorical classification which measures the error between our predicted
     // probability distribution over classes (probability that an input is of each
     // class), versus the label (100% probability in the true class)>
-    model.compile({ optimizer: optimizer, loss: "categoricalCrossentropy" });
+    model.compile({ optimizer: optimizer, loss: "meanSquaredError" });
 
     // We parameterize batch size as a fraction of the entire dataset because the
     // number of examples that are collected depends on how many examples the user
     // collects. This allows us to have a flexible batch size.
-    const batchSize = Math.floor(controllerDataset.xs.shape[0] * 0.4);
+    const batchSize = Math.floor(
+      controllerDataset.xs.shape[0] * learnArgument.batchSize
+    );
     if (!(batchSize > 0)) {
       throw new Error(
         `Batch size is 0 or NaN. Please choose a non-zero fraction.`
@@ -122,11 +146,19 @@ export default class Ai extends Component {
     // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
     model.fit(controllerDataset.xs, controllerDataset.ys, {
       batchSize,
-      epochs: 20,
+      epochs: learnArgument.epochs,
       callbacks: {
         onBatchEnd: async (batch, logs) => {
           console.log("Loss: " + logs.loss.toFixed(5));
           this.setState({ loss: logs.loss.toFixed(5) });
+        },
+        onTrainEnd: logs => {
+          const loss = logs.loss.toFixed(5);
+          console.log("Train End Loss: " + logs.loss.toFixed(5));
+          this.setState({
+            isTraining: false,
+            loss
+          });
         }
       }
     });
@@ -164,11 +196,17 @@ export default class Ai extends Component {
           // Returns the index with the maximum probability. This number corresponds
           // to the class the model thinks is the most probable given the input.
 
-          const [speed, direction] = await predictions.as1D().data();
-          console.log("Ai 动作：", { speed, direction });
+          const [speed, direction] = await predictions.data();
+
+          const action = {
+            speed: speed * 2 - 1,
+            direction: direction * 2 - 1
+          };
+          console.log("Ai 动作：", action);
           img.dispose();
 
-          this.doAction({ speed, direction });
+          this.doAction(action);
+          await sleep(200);
           await tf.nextFrame();
         }
         onAi(false);
@@ -180,12 +218,13 @@ export default class Ai extends Component {
     this.setState(
       {
         isRecording: true
-      },
-      async () => {
-        while (this.state.isRecording) {
-          await this.exampleHandler();
-        }
       }
+      // async () => {
+      //   while (this.state.isRecording) {
+      //     await this.exampleHandler();
+      //     await sleep(1000);
+      //   }
+      // }
     );
   };
 
@@ -205,9 +244,11 @@ export default class Ai extends Component {
         isRecording,
         isTraining,
         isPredicting,
-        loss
+        loss,
+        learnArgument
       },
       exampleHandler,
+      exampleCleanHandler,
       record,
       predict
     } = this;
@@ -215,9 +256,48 @@ export default class Ai extends Component {
     return (
       <Spin spinning={loading}>
         <canvas className="ai-canvas" ref={this.smallCanvasRef}></canvas>
-        <Form {...layout}>
-          <Form.Item label="Learning rate"></Form.Item>
-          <Form.Item label=""></Form.Item>
+        <Form {...layout} initialValues={learnArgument} onFinish={this.train}>
+          <Form.Item label="Learning rate" name="learnRate">
+            <InputNumber />
+          </Form.Item>
+          <Form.Item label="Batch Size" name="batchSize">
+            <Select>
+              <Option value={0.05}>0.05</Option>
+              <Option value={0.1}>0.1</Option>
+              <Option value={0.4}>0.4</Option>
+              <Option value={1}>1</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Epochs" name="epochs">
+            <Select>
+              <Option value={10}>10</Option>
+              <Option value={20}>20</Option>
+              <Option value={40}></Option>40
+            </Select>
+          </Form.Item>
+          <Form.Item label="Hidden units" name="hiddenUnits">
+            <Select>
+              <Option value={100}>100</Option>
+              <Option value={200}>200</Option>
+              <Option value={300}>300</Option>
+              <Option value={400}>400</Option>
+              <Option value={500}>500</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="loss">
+            <InputNumber value={loss} />
+          </Form.Item>
+          <Form.Item {...tailLayout}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              key="fit"
+              loading={isTraining}
+              disabled={!exampleList.length}
+            >
+              学习
+            </Button>
+          </Form.Item>
         </Form>
         <Form
           {...layout}
@@ -230,57 +310,56 @@ export default class Ai extends Component {
           <Form.Item name="direction" label="方向" required>
             <InputNumber />
           </Form.Item>
-          <Form.Item {...tailLayout}>
-            <Space>
-              <Button
-                key="record-once"
-                htmlType="submit"
-                type="primary"
-                icon={<AppstoreAddOutlined />}
-              />
-              <Button
-                type="primary"
-                key="record"
-                loading={isRecording}
-                onClick={record}
-              >
-                开始记录
-              </Button>
-              <Button
-                key="stop"
-                onClick={() => {
-                  this.setState({ isRecording: false });
-                }}
-                disabled={!isRecording}
-              >
-                停止记录
-              </Button>
-              <Button onClick={this.train} key="fit" loading={isTraining}>
-                学习
-              </Button>
-              <span>loss: {loss}</span>
-            </Space>
+          <Form.Item {...tailLayout} className="form-item-button">
+            <Button
+              key="record-once"
+              htmlType="submit"
+              type="primary"
+              icon={<AppstoreAddOutlined />}
+            />
+            <Button
+              type="primary"
+              key="record"
+              loading={isRecording}
+              onClick={record}
+            >
+              开始记录
+            </Button>
+            <Button
+              key="stop"
+              onClick={() => {
+                this.setState({ isRecording: false });
+              }}
+              disabled={!isRecording}
+            >
+              停止记录
+            </Button>
+            <Button
+              type="danger"
+              disabled={!exampleList.length}
+              onClick={exampleCleanHandler}
+            >
+              清除
+            </Button>
           </Form.Item>
-          <Form.Item {...tailLayout}>
-            <Space>
-              <Button
-                type="danger"
-                key="predic"
-                loading={isPredicting}
-                onClick={predict}
-              >
-                开始 Ai 驾驶
-              </Button>
-              <Button
-                onClick={() => {
-                  this.setState({ isPredicting: false });
-                }}
-                disabled={!isPredicting}
-                key="stop"
-              >
-                停止 Ai 驾驶
-              </Button>
-            </Space>
+          <Form.Item {...tailLayout} className="form-item-button">
+            <Button
+              type="danger"
+              key="predic"
+              loading={isPredicting}
+              onClick={predict}
+            >
+              开始 Ai 驾驶
+            </Button>
+            <Button
+              onClick={() => {
+                this.setState({ isPredicting: false });
+              }}
+              disabled={!isPredicting}
+              key="stop"
+            >
+              停止 Ai 驾驶
+            </Button>
           </Form.Item>
         </Form>
         <List
@@ -301,7 +380,7 @@ export default class Ai extends Component {
                   <Button size="small" icon={<CloseOutlined />} type="danger" />
                 ]}
               >
-                <img src={img} />
+                <img style={{ maxWidth: "100%" }} src={img} alt="example" />
               </Card>
             </List.Item>
           )}
