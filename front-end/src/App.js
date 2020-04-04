@@ -237,7 +237,7 @@ export default class App extends Component {
               }}
             />
           </Form.Item>
-          <Form.Item label="全屏">
+          {/* <Form.Item label="全屏">
             <Button
               type="primary"
               shape="circle"
@@ -246,7 +246,7 @@ export default class App extends Component {
                 this.appRef.current.requestFullscreen();
               }}
             ></Button>
-          </Form.Item>
+          </Form.Item> */}
         </Form>
         <Tabs>
           <TabPane tab="控制" key={1} className="control-pane">
