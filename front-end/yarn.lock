@@ -10165,6 +10165,11 @@ stream-shift@^1.0.0:
   resolved "https://registry.yarnpkg.com/stream-shift/-/stream-shift-1.0.1.tgz#d7088281559ab2778424279b0877da3c392d5a3d"
   integrity sha512-AiisoFqQ0vbGcZgQPY1cdP2I76glaVA/RauYR4G4thNFgkTqr90yXTo4LYX60Jl+sIlPNHHdGSwo01AvbKUSVQ==
 
+stream-split@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/stream-split/-/stream-split-1.1.0.tgz#d9b5c5e0fa0991a4da95f96e91f5f151804d3d3c"
+  integrity sha1-2bXF4PoJkaTalflukfXxUYBNPTw=
+
 strict-uri-encode@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/strict-uri-encode/-/strict-uri-encode-1.1.0.tgz#279b225df1d582b1f54e65addd4352e18faa0713"
@@ -10190,6 +10195,14 @@ string-length@^3.1.0:
   dependencies:
     astral-regex "^1.0.0"
     strip-ansi "^5.2.0"
+
+string-replace-loader@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/string-replace-loader/-/string-replace-loader-2.2.0.tgz#0a0e6543fcec783d85c353a3e96a23872d45a94f"
+  integrity sha512-Ukt4ZC8+xVWdBRut3/iwnPJCNL1yV8AbVKXn8UcWdYrHgtuW4UDDAbBSi/J/CQDEWQBt824AJvPYahF23eJLRg==
+  dependencies:
+    loader-utils "^1.2.3"
+    schema-utils "^1.0.0"
 
 string-width@^1.0.1:
   version "1.0.2"
@@ -10401,6 +10414,11 @@ svgo@^1.0.0, svgo@^1.2.2:
     stable "^0.1.8"
     unquote "~1.1.1"
     util.promisify "~1.0.0"
+
+sylvester.js@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/sylvester.js/-/sylvester.js-0.1.1.tgz#09ecc85782b82ee872396b678601168c3c759826"
+  integrity sha1-CezIV4K4LuhyOWtnhgEWjDx1mCY=
 
 symbol-tree@^3.2.2:
   version "3.2.4"
@@ -11305,6 +11323,16 @@ write@1.0.3:
   integrity sha512-/lg70HAjtkUgWPVZhZcm+T4hkL8Zbtp1nFNOn3lRrxnlv50SRBv7cR7RqR+GMsd3hUXy9hWBo4CHTbFTcOYwig==
   dependencies:
     mkdirp "^0.5.1"
+
+ws-avc-player@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/ws-avc-player/-/ws-avc-player-2.0.2.tgz#dc17c2888545bb05cbcf9bb5d5a7d2e6782e37f4"
+  integrity sha512-v9OLt5OZE2KGsIWxPwboHOO2zhbkkzndzj+F0u4SW39j13zPFs3u2JHxBCr9Q6oquNzIjLTbWA3BxOetqeDgFw==
+  dependencies:
+    debug "^4.1.1"
+    stream-split "^1.1.0"
+    string-replace-loader "^2.2.0"
+    sylvester.js "^0.1.1"
 
 ws@^5.2.0:
   version "5.2.2"

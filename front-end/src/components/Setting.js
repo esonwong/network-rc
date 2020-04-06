@@ -12,16 +12,16 @@ export default function Setting({
   return (
     <Form {...layout} onFinish={onSubmit} initialValues={form}>
       <br />
-      <Form.Item
+      {/* <Form.Item
         label="控制连接地址"
         name="wsAddress"
         rules={[{ required: true, message: "请输入连接地址!" }]}
       >
         <Input />
-      </Form.Item>
-      <Form.Item label="媒体连接地址" name="playerWsAddress">
+      </Form.Item> */}
+      {/* <Form.Item label="媒体连接地址" name="playerWsAddress">
         <Input />
-      </Form.Item>
+      </Form.Item> */}
       <Form.Item label="电调无输出 PWM 空占比" name="speedZeroRate">
         <Slider min={0} max={100} included={false} tooltipVisible disabled />
       </Form.Item>

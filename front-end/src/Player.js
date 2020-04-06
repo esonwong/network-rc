@@ -1,12 +1,17 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 
 export default class Player extends Component {
   constructor(props) {
     super(props);
-    this.setCanvasRef = ref => {
-      this.canvasRef = ref;
-      props.setCanvasRef && props.setCanvasRef(ref);
-    };
+
+    this.ref = createRef();
+  }
+
+  componentDidMount() {
+    const { setCanvasRef } = this.props;
+    this.ref.current.appendChild(this.wsavc.AvcPlayer.canvas);
+    setCanvasRef && setCanvasRef(this.wsavc.AvcPlayer.canvas);
+
   }
 
   componentWillReceiveProps(nextProps) {
@@ -20,29 +25,31 @@ export default class Player extends Component {
   }
 
   connect() {
-    const { address } = this.props;
-    if (!address) return;
-    this.wsavc = new window.WSAvcPlayer(this.canvasRef, "webgl", 1, 35);
+    if (!this.wsavc) return;
     this.wsavc.connect(
-      `${window.location.protocol === "https:" ? "wss" : "ws"}://${address}`,
-      () => {
-        this.wsavc.playStream();
-      }
+      `${window.location.protocol === "https:" ? "wss" : "ws"}://${
+        window.location.host
+      }`
     );
+        this.wsavc.connect("ws://localhost:8080");
+    // this.wsavc.connect(
+    //   `${window.location.protocol === "https:" ? "wss" : "ws"}://${
+    //     window.location.host
+    //   }`
+    // );
   }
 
   disconnect() {
     if (this.wsavc) {
       this.wsavc.disconnect();
-      this.wsavc.initCanvas();
       this.wsavc = undefined;
     }
   }
 
   render() {
     return (
-      <div className="player">
-        <canvas className="canvas" ref={this.setCanvasRef}></canvas>
+      <div className="player" ref={this.ref}>
+        {/* <canvas className="canvas" ref={this.setCanvasRef}></canvas> */}
       </div>
     );
   }
