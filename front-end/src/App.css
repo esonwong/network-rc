@@ -1,66 +1,57 @@
-@import '~antd/dist/antd.css';
+@import "~antd/dist/antd.css";
 
 .App {
   height: 100%;
   width: 100%;
-  position: relative;
   user-select: none;
   /* background-color: rgb(240, 240, 240); */
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.App .status {
+.app-status {
   padding: 1em;
 }
 
-.App .ant-tabs {
-  height: calc(100vh - 52px);
-}
-
-.App .ant-tabs .ant-tabs-tabpane {
-  height: calc(100vh - 52px - 45px);
-}
-.ant-spin-nested-loading, .ant-spin-container {
-  height: 100%;
+.app-page {
   overflow-y: auto;
+  flex: auto;
 }
 
-.form-item-button .ant-btn{
-  margin-right: 1em;
-}
-
-.control-pane {
-  position: relative;
-}
-.accelerator {
-  position: absolute;
-  bottom: 5vh;
-  right: 5vw;
-  font-size: 20vh;
-}
-
-.speed {
-  position: absolute;
-  top: 3vh;
-  right: 5vw;
-  z-index: 2;
-}
 .controller {
-  position: absolute;
-  bottom: 5vw;
-  left: 5vw;
-
+  position: relative;
+  height: 100%;
+  width: 100%;
 }
+
+.controller-form {
+  position: fixed;
+  bottom: 0;
+  padding: 0 1em;
+}
+
 .backward-button {
-  position: absolute;
-  bottom: 5vw;
+  position: fixed;
+  bottom: 30vh;
   right: 5vw;
 }
 
 .forward-button {
-  position: absolute;
-  bottom: 15vw;
+  position: fixed;
+  bottom: 55vh;
   right: 5vw;
+}
+.left-button {
+  position: fixed;
+  bottom: 40vh;
+  left: 5vw;
+}
+
+.right-button {
+  position: fixed;
+  bottom: 40vh;
+ left: 15vw;
 }
 
 .player {
@@ -73,17 +64,11 @@
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content:center;
+  justify-content: center;
   align-items: center;
 }
 .canvas {
   height: 100%;
-}
-
-
-.ai-canvas {
-  position: fixed;
-  top: -9999px;
 }
 
 .ai-example-list {
