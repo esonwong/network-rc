@@ -1,32 +1,29 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import store from "store";
-
 import { InputNumber, Form, Switch, Button } from "antd";
-import Keyboard from "./Keyboard";
 import "./App.css";
-import Player from "./Player";
 import Ai from "./Ai";
 import { Router } from "@reach/router";
 import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
 import { ExpandOutlined } from "@ant-design/icons";
+import WSAvcPlayer from "ws-avc-player";
 
 export default class App extends Component {
   constructor(props) {
     super(props);
-    this.appRef = React.createRef();
+    this.appRef = createRef();
+    this.playerBoxRef = createRef();
     this.state = {
       setting: {
         speedMaxRate: store.get("speedMaxRate") || 80,
         speedReverseMaxRate: store.get("speedReverseMaxRate") || 70,
         speedZeroRate: store.get("speedZeroRate") || 75,
-        wsAddress: store.get("wsAddress"),
-        playerWsAddress: store.get("playerWsAddress"),
         ...store.get("setting"),
       },
       wsConnected: false,
-      playerEnabled: false,
+      cameraEnabled: false,
       canvasRef: undefined,
       isAiControlling: false,
       action: {
@@ -65,71 +62,84 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const {
-      connectWs,
-      state: { wsAddress },
-    } = this;
+    const { connect } = this;
 
-    connectWs({ wsAddress });
+    connect();
   }
 
-  connectWs = ({ wsAddress, playerWsAddress }) => {
-    if (!wsAddress) return;
-    if (this.socket) {
-      this.socket.close();
-      this.socket = undefined;
+  connect = () => {
+    if (this.wsavc) {
+      this.wsavc.disconnect();
     }
-
-    this.socket = window.io(wsAddress);
-    this.socket.on("connect", () => {
-      this.setState({ wsConnected: true });
-      this.changeZeroSpeedRate(this.state.speedZeroRate);
-      store.set("wsAddress", wsAddress);
-    });
-    this.socket.on("disconnect", () => {
+    this.wsavc = new WSAvcPlayer({ useWorker: true });
+    this.wsavc.connect("ws://localhost:8080");
+    this.wsavc.on("disconnected", () => {
+      console.log("WS Disconnected");
       this.setState({ wsConnected: false });
+      this.wsavc = undefined;
     });
+    this.wsavc.on("connected", () => {
+      console.log("WS connected");
+      this.setState({ wsConnected: true });
+    });
+    this.wsavc.on("frame_shift", (fbl) => {
+      // console.log("Stream frame shift: ", fbl);
+    });
+    this.wsavc.on("resized", (payload) => {
+      console.log("resized", payload);
+    });
+    this.wsavc.on("stream_active", (cameraEnabled) => {
+      console.log("Stream is ", cameraEnabled ? "active" : "offline");
+      if (cameraEnabled) {
+        this.playerBoxRef.current.appendChild(this.wsavc.AvcPlayer.canvas);
+      } else {
+        debugger;
+      }
 
-    if (!playerWsAddress) return;
-    this.setState({
-      playerWsAddress,
+      this.setState({ cameraEnabled });
     });
-    store.set("playerWsAddress", playerWsAddress);
   };
 
-  disconnectWs = (e) => {
+  disconnect = (e) => {
     e && e.preventDefault();
-    this.socket.close();
+    if (!this.wsavc) return;
+    this.wsavc.disconnect();
+  };
+
+  changeCamera = (enable) => {
+    if (!this.wsavc) return;
+    this.wsavc.send("open camera", enable);
   };
 
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
-    this.connectWs(setting);
+    this.connect();
   };
 
   changeZeroSpeedRate = (speedZeroRate) => {
     if (!this.state.wsConnected) return;
-    this.socket.emit("speed zero rate", speedZeroRate);
+    this.wsavc.send("speed zero rate", speedZeroRate);
     this.setState({ speedZeroRate });
   };
 
   changeSpeed = (speedRate) => {
     if (!this.state.wsConnected) return;
-    this.socket.emit("speed rate", speedRate);
+    this.wsavc.send("speed rate", speedRate);
   };
 
   changeDirection = (directionRate) => {
     if (!this.state.wsConnected) return;
-    this.socket.emit("direction rate", directionRate);
+    this.wsavc.send("direction rate", directionRate);
   };
 
   render() {
     const {
-      disconnectWs,
+      disconnect,
       controller,
       changeSetting,
-      state: { setting, wsConnected, playerEnabled, canvasRef, action },
+      changeCamera,
+      state: { setting, wsConnected, cameraEnabled, canvasRef, action },
     } = this;
     return (
       <div className="App" ref={this.appRef}>
@@ -145,12 +155,7 @@ export default class App extends Component {
             <InputNumber value={action.speed} />
           </Form.Item>
           <Form.Item label="摄像头">
-            <Switch
-              checked={playerEnabled}
-              onChange={(playerEnabled) => {
-                this.setState({ playerEnabled });
-              }}
-            />
+            <Switch checked={cameraEnabled} onChange={changeCamera} />
           </Form.Item>
           <Form.Item label="全屏">
             <Button
@@ -168,12 +173,12 @@ export default class App extends Component {
         <Nav className="app-nav" />
 
         <Router className="app-page">
-          <Controller path="controller" controller={controller} />
+          <Controller path="/" controller={controller} />
           <Setting
             path="setting"
             {...setting}
             wsConnected={wsConnected}
-            onDisconnect={disconnectWs}
+            onDisconnect={disconnect}
             onSubmit={changeSetting}
           />
           <Ai
@@ -185,14 +190,15 @@ export default class App extends Component {
           />
         </Router>
 
-        <Player
+        {/* <Player
           disabled={!playerEnabled}
           address={setting.playerWsAddress}
           setCanvasRef={(canvasRef) => {
             this.setState({ canvasRef });
+            this.connect(canvasRef);
           }}
-        />
-        <Keyboard controller={controller} />
+        /> */}
+        <div className="player-box" ref={this.playerBoxRef}></div>
       </div>
     );
   }

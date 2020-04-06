@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Form, Button, Switch, Slider } from "antd";
 import { AimOutlined, DownOutlined, UpOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import store from "store";
+import Keybord from "../Keyboard";
 
 let curentOrientation;
 const deviceorientation = (e) => {
@@ -154,6 +155,7 @@ export default class Controller extends Component {
             />
           </Form.Item>
         </Form>
+        <Keybord controller={controller} />
       </div>
     );
   }
