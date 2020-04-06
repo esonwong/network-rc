@@ -9,10 +9,12 @@ const { WebSocketServer } = require("@clusterws/cws");
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
-const wss = new WebSocketServer({ server });
+const width = 400,
+  height = 300;
 
+const wss = new WebSocketServer({ server });
 const useRaspivid = process.argv.includes("raspivid");
-const avcServer = new AvcServer(wss, 400, 300);
+const avcServer = new AvcServer(wss, width, height);
 
 avcServer.on("client_connected", () => {});
 
