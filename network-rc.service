@@ -4,9 +4,9 @@ After=syslog.target  network.target
 Wants=network.target
 
 [Service]
-User=pi
+User=root
 Type=simple
-ExecStart=python3 /home/pi/network-rc/server.py
+ExecStart=node /home/pi/network-rc/index.js
 Restart= always
 RestartSec=1min
 
