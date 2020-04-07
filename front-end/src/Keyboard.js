@@ -14,18 +14,19 @@ export default class Keybord extends Component {
     const {
       props: {
         controller: { speed, direction },
-        onControl
-      }
+        onControl,
+      },
     } = this;
     window.document.addEventListener(
       "keydown",
-      event => {
+      (event) => {
+        const { forwardPower, backwardPower } = this.props;
         const keyName = event.key;
         if (keyName === "w") {
-          speed(1);
+          speed((1 * forwardPower) / 100);
         }
         if (keyName === "s") {
-          speed(-1);
+          speed((-1 * backwardPower) / 100);
         }
         if (keyName === "a") {
           direction(1);
@@ -39,12 +40,12 @@ export default class Keybord extends Component {
     );
     window.document.addEventListener(
       "keyup",
-      event => {
+      (event) => {
         const {
           props: {
             controller: { speed, direction },
-            onControl
-          }
+            onControl,
+          },
         } = this;
         const keyName = event.key;
         if (keyName === "w") {

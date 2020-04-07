@@ -1,6 +1,12 @@
 import React, { Component } from "react";
 import { Form, Button, Switch, Slider } from "antd";
-import { AimOutlined, DownOutlined, UpOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import {
+  AimOutlined,
+  DownOutlined,
+  UpOutlined,
+  LeftOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import store from "store";
 import Keybord from "../Keyboard";
 
@@ -155,7 +161,11 @@ export default class Controller extends Component {
             />
           </Form.Item>
         </Form>
-        <Keybord controller={controller} />
+        <Keybord
+          controller={controller}
+          backwardPower={backwardPower}
+          forwardPower={forwardPower}
+        />
       </div>
     );
   }
