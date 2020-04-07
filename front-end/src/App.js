@@ -3,11 +3,11 @@ import store from "store";
 import { InputNumber, Form, Switch, Button } from "antd";
 import "./App.css";
 import Ai from "./Ai";
-import { Router } from "@reach/router";
-import Nav from "./components/Nav";
+import { Router, Link } from "@reach/router";
+// import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
-import { ExpandOutlined } from "@ant-design/icons";
+import { SettingOutlined } from "@ant-design/icons";
 import WSAvcPlayer from "ws-avc-player";
 
 export default class App extends Component {
@@ -63,20 +63,15 @@ export default class App extends Component {
 
   componentDidMount() {
     const { connect } = this;
-
+    this.wsavc = new WSAvcPlayer({ useWorker: true });
     connect();
   }
 
   connect = () => {
-    if (this.wsavc) {
-      this.wsavc.disconnect();
-    }
-    this.wsavc = new WSAvcPlayer({ useWorker: true });
-    this.wsavc.connect("ws://localhost:8080");
+    this.wsavc.connect("ws://10.0.6:8080");
     this.wsavc.on("disconnected", () => {
-      console.log("WS Disconnected");
-      this.setState({ wsConnected: false });
-      this.wsavc = undefined;
+      console.log("WS disconnected");
+      this.setState({ wsConnected: false, cameraEnabled: false });
     });
     this.wsavc.on("connected", () => {
       console.log("WS connected");
@@ -92,16 +87,14 @@ export default class App extends Component {
       console.log("Stream is ", cameraEnabled ? "active" : "offline");
       if (cameraEnabled) {
         this.playerBoxRef.current.appendChild(this.wsavc.AvcPlayer.canvas);
-      } else {
-        debugger;
       }
-
       this.setState({ cameraEnabled });
     });
   };
 
   disconnect = (e) => {
     e && e.preventDefault();
+    this.setState({ wsConnected: false });
     if (!this.wsavc) return;
     this.wsavc.disconnect();
   };
@@ -136,6 +129,7 @@ export default class App extends Component {
   render() {
     const {
       disconnect,
+      connect,
       controller,
       changeSetting,
       changeCamera,
@@ -145,7 +139,13 @@ export default class App extends Component {
       <div className="App" ref={this.appRef}>
         <Form layout="inline" className="app-status" size="small">
           <Form.Item label="连接状态">
-            <Switch checked={wsConnected} disabled />
+            <Switch
+              checked={wsConnected}
+              onChange={(v) => {
+                if (v) connect();
+                else disconnect();
+              }}
+            />
           </Form.Item>
 
           <Form.Item label="舵机">
@@ -157,7 +157,7 @@ export default class App extends Component {
           <Form.Item label="摄像头">
             <Switch checked={cameraEnabled} onChange={changeCamera} />
           </Form.Item>
-          <Form.Item label="全屏">
+          {/* <Form.Item label="全屏">
             <Button
               type="primary"
               shape="circle"
@@ -167,10 +167,20 @@ export default class App extends Component {
                 el.requestFullscreen && el.requestFullscreen();
               }}
             ></Button>
+          </Form.Item> */}
+
+          <Form.Item label="设置">
+            <Link to="setting">
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<SettingOutlined />}
+              />
+            </Link>
           </Form.Item>
         </Form>
 
-        <Nav className="app-nav" />
+        {/* <Nav className="app-nav" /> */}
 
         <Router className="app-page">
           <Controller path="/" controller={controller} />
@@ -189,15 +199,6 @@ export default class App extends Component {
             onAi={(isAiControlling) => this.setState({ isAiControlling })}
           />
         </Router>
-
-        {/* <Player
-          disabled={!playerEnabled}
-          address={setting.playerWsAddress}
-          setCanvasRef={(canvasRef) => {
-            this.setState({ canvasRef });
-            this.connect(canvasRef);
-          }}
-        /> */}
         <div className="player-box" ref={this.playerBoxRef}></div>
       </div>
     );
