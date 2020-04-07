@@ -16,12 +16,7 @@ export default class App extends Component {
     this.appRef = createRef();
     this.playerBoxRef = createRef();
     this.state = {
-      setting: {
-        speedMaxRate: store.get("speedMaxRate") || 80,
-        speedReverseMaxRate: store.get("speedReverseMaxRate") || 70,
-        speedZeroRate: store.get("speedZeroRate") || 75,
-        ...store.get("setting"),
-      },
+      setting: { speedMax: 10, ...store.get("setting") },
       wsConnected: false,
       cameraEnabled: false,
       canvasRef: undefined,
@@ -37,17 +32,17 @@ export default class App extends Component {
         const {
           changeSpeed,
           state: {
-            setting: { speedMaxRate, speedReverseMaxRate, speedZeroRate },
+            setting: { speedMax },
             action,
           },
         } = this;
-        action.speed = v;
-        const rate =
-          v > 0
-            ? speedZeroRate + (speedMaxRate - speedZeroRate) * v
-            : speedZeroRate + (speedZeroRate - speedReverseMaxRate) * v;
+        let vAbs = Math.abs(v);
+        if (vAbs > speedMax / 100) {
+          vAbs = speedMax / 100;
+        }
+        action.speed = v > 0 ? vAbs : -vAbs;
         this.setState({ action: { ...action } });
-        changeSpeed(rate);
+        changeSpeed(action.speed);
       },
       direction: (v) => {
         const {
@@ -55,7 +50,7 @@ export default class App extends Component {
           state: { action },
         } = this;
         action.direction = v;
-        changeDirection(v * 5 + 7.5);
+        changeDirection(v);
         this.setState({ action: { ...action } });
       },
     };
@@ -107,7 +102,7 @@ export default class App extends Component {
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
-    this.connect();
+    // this.connect();
   };
 
   changeZeroSpeedRate = (speedZeroRate) => {

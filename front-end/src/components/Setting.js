@@ -8,7 +8,6 @@ export default function Setting({
   onSubmit,
   ...form
 }) {
-  const { speedZeroRate } = form;
   return (
     <Form {...layout} onFinish={onSubmit} initialValues={form}>
       <br />
@@ -22,16 +21,15 @@ export default function Setting({
       {/* <Form.Item label="媒体连接地址" name="playerWsAddress">
         <Input />
       </Form.Item> */}
-      <Form.Item label="电调无输出 PWM 空占比" name="speedZeroRate">
-        <Slider min={0} max={100} included={false} tooltipVisible disabled />
-      </Form.Item>
-      <Form.Item label="电调最大 PWM 空占比" name="speedMaxRate">
-        <Slider min={speedZeroRate} max={100} tooltipVisible />
-      </Form.Item>
-      <Form.Item name="speedReverseMaxRate" label="电调反向最大 PWM 空占比">
-        <Slider tooltipVisible min={0} max={speedZeroRate} />
+      <Form.Item label="最大速度" name="speedMax">
+        <Slider min={0} max={100} tooltipVisible />
       </Form.Item>
       <Form.Item {...tailLayout}>
+        <Button type="primary" htmlType="submit">
+          保存
+        </Button>
+      </Form.Item>
+      {/* <Form.Item {...tailLayout}>
         {wsConnected ? (
           <Button type="danger" onClick={onDisconnect}>
             断开
@@ -41,7 +39,7 @@ export default function Setting({
             连接
           </Button>
         )}
-      </Form.Item>
+      </Form.Item> */}
     </Form>
   );
 }
