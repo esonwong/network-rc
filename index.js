@@ -11,7 +11,7 @@ const rpio = require("rpio");
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
 const width = 400,
-  height = 300;
+  height = 300,fps=15;
 
 const directionPin = 32,
   speedPin = 33;
@@ -20,7 +20,7 @@ rpio.open(speedPin, rpio.PWM);
 rpio.pwmSetClockDivider(512);
 rpio.pwmSetRange(directionPin, 100);
 rpio.pwmSetRange(speedPin, 100);
-rpio.pwmSetData(speedPin, 55);
+rpio.pwmSetData(speedPin, 60);
 rpio.pwmSetData(directionPin, 60);
 
 // direction range 100 data 30 ~ 90
@@ -28,17 +28,17 @@ rpio.pwmSetData(directionPin, 60);
 
 const changeSpeed = function (v) {
   if (v == 0) {
-    rpio.pwmSetData(speedPin, 0);
+    rpio.pwmSetData(speedPin, 60);
   } else {
-    rpio.pwmSetData(speedPin, 60 + v * 20);
+    rpio.pwmSetData(speedPin, Math.round(60 + v * 20));
   }
 };
 
 const changeDirection = function (v) {
   if (v == 0) {
-    rpio.pwmSetData(directionPin, 0);
+    rpio.pwmSetData(directionPin, 60);
   } else {
-    rpio.pwmSetData(directionPin, 60 + v * 30);
+    rpio.pwmSetData(directionPin, Math.round(60 + v * 30));
   }
 };
 
@@ -72,6 +72,7 @@ avcServer.client_events.on("direction rate", (v) => {
 
 avcServer.on("client_disconnected", () => {
   console.log("client disconnected");
+  changeSpeed(0);
   if (avcServer.clients.size < 1) {
     if (!streamer) {
       return;
@@ -84,27 +85,41 @@ let streamer = null;
 
 const startStreamer = () => {
   console.log("starting streamer");
+//  streamer = spawn("raspivid", [
+//    "-pf",
+//    "baseline",
+//    "-ih",
+//    "-t",
+//    "0",
+//    "-w",
+//    width,
+//    "-h",
+//    height,
+//    "-hf",
+//    "-fps",
+//    "15",
+//    "-g",
+//    "30",
+//    "-o",
+//    "-",
+//  ]);
   streamer = spawn("raspivid", [
-    "-pf",
-    "baseline",
-    "-ih",
-    "-t",
-    "0",
-    "-w",
-    width,
-    "-h",
-    height,
-    "-hf",
-    "-fps",
-    "15",
-    "-g",
-    "30",
-    "-o",
-    "-",
+      "-t",
+      "0",
+      "-o",
+      "-",
+      "-w",
+      width,
+      "-h",
+      height,
+      "-fps",
+      fps,
+      "-pf",
+      "baseline"
   ]);
   streamer.on("close", () => {
-    streamer = null;
-  });
+      streamer = null;
+      });
 
   avcServer.setVideoStream(streamer.stdout);
 };
