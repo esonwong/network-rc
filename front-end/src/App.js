@@ -63,7 +63,8 @@ export default class App extends Component {
   }
 
   connect = () => {
-    this.wsavc.connect("ws://10.0.6:8080");
+    // this.wsavc.connect("ws://10.0.6:8080");
+    this.wsavc.connect(`${window.location.protocol === "https:" ? "wss://": "ws://"}${window.location.host}`);
     this.wsavc.on("disconnected", () => {
       console.log("WS disconnected");
       this.setState({ wsConnected: false, cameraEnabled: false });
