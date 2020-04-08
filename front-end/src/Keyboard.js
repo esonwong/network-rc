@@ -10,60 +10,64 @@ export default class Keybord extends Component {
     this.keyboardBind();
   }
 
-  keyboardBind = () => {
+  componentWillUnmount() {
+    const { handleKeyDown, handleKeyUp } = this;
+    window.document.removeEventListener("keydown", handleKeyDown, false);
+    window.document.removeEventListener("keyup", handleKeyUp, false);
+  }
+
+  handleKeyDown = (event) => {
+    const {
+      props: {
+        controller: { speed, direction },
+        onControl,
+        forwardPower,
+        backwardPower,
+      },
+    } = this;
+    const keyName = event.key;
+    if (keyName === "w") {
+      speed((1 * forwardPower) / 100);
+    }
+    if (keyName === "s") {
+      speed((-1 * backwardPower) / 100);
+    }
+    if (keyName === "a") {
+      direction(1);
+    }
+    if (keyName === "d") {
+      direction(-1);
+    }
+    onControl && onControl();
+  };
+
+  handleKeyUp = (event) => {
     const {
       props: {
         controller: { speed, direction },
         onControl,
       },
     } = this;
-    window.document.addEventListener(
-      "keydown",
-      (event) => {
-        const { forwardPower, backwardPower } = this.props;
-        const keyName = event.key;
-        if (keyName === "w") {
-          speed((1 * forwardPower) / 100);
-        }
-        if (keyName === "s") {
-          speed((-1 * backwardPower) / 100);
-        }
-        if (keyName === "a") {
-          direction(1);
-        }
-        if (keyName === "d") {
-          direction(-1);
-        }
-        onControl && onControl();
-      },
-      false
-    );
-    window.document.addEventListener(
-      "keyup",
-      (event) => {
-        const {
-          props: {
-            controller: { speed, direction },
-            onControl,
-          },
-        } = this;
-        const keyName = event.key;
-        if (keyName === "w") {
-          speed(0);
-        }
-        if (keyName === "s") {
-          speed(0);
-        }
-        if (keyName === "a") {
-          direction(0);
-        }
-        if (keyName === "d") {
-          direction(0);
-        }
-        onControl && onControl();
-      },
-      false
-    );
+    const keyName = event.key;
+    if (keyName === "w") {
+      speed(0);
+    }
+    if (keyName === "s") {
+      speed(0);
+    }
+    if (keyName === "a") {
+      direction(0);
+    }
+    if (keyName === "d") {
+      direction(0);
+    }
+    onControl && onControl();
+  };
+
+  keyboardBind = () => {
+    const { handleKeyDown, handleKeyUp } = this;
+    window.document.addEventListener("keydown", handleKeyDown, false);
+    window.document.addEventListener("keyup", handleKeyUp, false);
   };
 
   render() {

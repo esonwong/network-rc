@@ -1,14 +1,14 @@
 import React, { Component, createRef } from "react";
 import store from "store";
-import { InputNumber, Form, Switch, Button } from "antd";
+import { InputNumber, Form, Switch, Dropdown } from "antd";
 import "./App.css";
 import Ai from "./Ai";
-import { Router, Link } from "@reach/router";
-// import Nav from "./components/Nav";
+import { Router, Location } from "@reach/router";
+import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
-import { SettingOutlined } from "@ant-design/icons";
 import WSAvcPlayer from "ws-avc-player";
+import { HomeOutlined } from "@ant-design/icons";
 
 export default class App extends Component {
   constructor(props) {
@@ -16,7 +16,11 @@ export default class App extends Component {
     this.appRef = createRef();
     this.playerBoxRef = createRef();
     this.state = {
-      setting: { speedMax: 10, ...store.get("setting") },
+      setting: {
+        speedMax: 20,
+        wsAddress: window.location.host,
+        ...store.get("setting"),
+      },
       wsConnected: false,
       cameraEnabled: false,
       canvasRef: undefined,
@@ -36,11 +40,12 @@ export default class App extends Component {
             action,
           },
         } = this;
-        let vAbs = Math.abs(v);
-        if (vAbs > speedMax / 100) {
-          vAbs = speedMax / 100;
-        }
-        action.speed = v > 0 ? vAbs : -vAbs;
+        // let vAbs = Math.abs(v);
+        // if (vAbs > speedMax / 100) {
+        //   vAbs = speedMax / 100;
+        // }
+        // action.speed = v > 0 ? vAbs : -vAbs;
+        action.speed = (v * speedMax) / 100;
         this.setState({ action: { ...action } });
         changeSpeed(action.speed);
       },
@@ -63,8 +68,12 @@ export default class App extends Component {
   }
 
   connect = () => {
-    // this.wsavc.connect("ws://10.0.6:8080");
-    this.wsavc.connect(`${window.location.protocol === "https:" ? "wss://": "ws://"}${window.location.host}`);
+    const { wsAddress } = this.state.setting;
+    this.wsavc.connect(
+      `${
+        window.location.protocol === "https:" ? "wss://" : "ws://"
+      }${wsAddress}`
+    );
     this.wsavc.on("disconnected", () => {
       console.log("WS disconnected");
       this.setState({ wsConnected: false, cameraEnabled: false });
@@ -134,6 +143,19 @@ export default class App extends Component {
     return (
       <div className="App" ref={this.appRef}>
         <Form layout="inline" className="app-status" size="small">
+          <Form.Item>
+            <Location>
+              {({ navigate }) => (
+                <Dropdown.Button
+                  overlay={Nav}
+                  onClick={() => navigate("/")}
+                  type="primary"
+                >
+                  <HomeOutlined /> 控制
+                </Dropdown.Button>
+              )}
+            </Location>
+          </Form.Item>
           <Form.Item label="连接状态">
             <Switch
               checked={wsConnected}
@@ -143,6 +165,9 @@ export default class App extends Component {
               }}
             />
           </Form.Item>
+          <Form.Item label="摄像头">
+            <Switch checked={cameraEnabled} onChange={changeCamera} />
+          </Form.Item>
 
           <Form.Item label="舵机">
             <InputNumber value={action.direction} />
@@ -150,9 +175,7 @@ export default class App extends Component {
           <Form.Item label="电调">
             <InputNumber value={action.speed} />
           </Form.Item>
-          <Form.Item label="摄像头">
-            <Switch checked={cameraEnabled} onChange={changeCamera} />
-          </Form.Item>
+
           {/* <Form.Item label="全屏">
             <Button
               type="primary"
@@ -164,19 +187,7 @@ export default class App extends Component {
               }}
             ></Button>
           </Form.Item> */}
-
-          <Form.Item label="设置">
-            <Link to="setting">
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<SettingOutlined />}
-              />
-            </Link>
-          </Form.Item>
         </Form>
-
-        {/* <Nav className="app-nav" /> */}
 
         <Router className="app-page">
           <Controller path="/" controller={controller} />
@@ -195,7 +206,11 @@ export default class App extends Component {
             onAi={(isAiControlling) => this.setState({ isAiControlling })}
           />
         </Router>
-        <div className="player-box" ref={this.playerBoxRef}></div>
+        <div
+          className="player-box"
+          ref={this.playerBoxRef}
+          style={{ display: cameraEnabled ? "flex" : "hidden" }}
+        ></div>
       </div>
     );
   }

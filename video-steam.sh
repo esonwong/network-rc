@@ -1,1 +1,0 @@
-sudo ffmpeg -f video4linux2 -input_format h264 -video_size 620x480 -framerate 30 -i /dev/video0 -vcodec copy -f mpegts udp://10.0.0.10:8891
