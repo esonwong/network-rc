@@ -7,8 +7,8 @@
   "author": "Eson Wong <itiwll@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon index.js raspivid",
-    "server": "node index.js raspivid"
+    "start": "nodemon index.js",
+    "server": "node index.js"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",

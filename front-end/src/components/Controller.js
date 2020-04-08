@@ -12,7 +12,6 @@ import Keybord from "../Keyboard";
 
 let curentOrientation;
 const deviceorientation = (e) => {
-  debugger;
   const { alpha, beta, gamma } = e;
   curentOrientation = { alpha, beta, gamma };
 };
@@ -49,9 +48,9 @@ export default class Controller extends Component {
     if (isAiControlling) return;
     const { beta: baseBeta } = zeroOrientation;
     let bateDegree = beta - baseBeta;
-    bateDegree = bateDegree < -45 ? -45 : bateDegree;
-    bateDegree = bateDegree > 45 ? 45 : bateDegree;
-    controller.direction((bateDegree / 45) * (directionReverse ? -1 : 1));
+    bateDegree = bateDegree < -30 ? -30 : bateDegree;
+    bateDegree = bateDegree > 30 ? 30 : bateDegree;
+    controller.direction((bateDegree / 30) * (directionReverse ? -1 : 1));
   };
 
   render() {
