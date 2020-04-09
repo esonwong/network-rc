@@ -9,7 +9,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "server": "node index.js",
-    "build": "pkg --targets=node12-linux-armv7  index.js"
+    "build": "webpack"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
@@ -19,7 +19,8 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.2",
-    "pkg": "^4.4.6"
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "pkg": {
     "assets": "front-end/build/**/*"
