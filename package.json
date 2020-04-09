@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon index.js",
-    "server": "node index.js"
+    "server": "node index.js",
+    "build": "pkg index.js"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
@@ -18,6 +19,9 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.2",
-    "watch": "^1.0.2"
+    "pkg": "^4.4.6"
+  },
+  "pkg": {
+    "assets": "front-end/build/**/*"
   }
 }
