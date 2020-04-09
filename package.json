@@ -9,7 +9,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "server": "node index.js",
-    "build": "pkg index.js"
+    "build": "pkg --targets=node12-linux-armv7  index.js"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
