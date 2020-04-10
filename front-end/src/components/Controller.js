@@ -11,9 +11,13 @@ import store from "store";
 import Keybord from "../Keyboard";
 
 let curentOrientation;
+let isSupportedOrientaion = false;
 const deviceorientation = (e) => {
   const { alpha, beta, gamma } = e;
   curentOrientation = { alpha, beta, gamma };
+  if (alpha || isSupportedOrientaion) {
+    isSupportedOrientaion = true;
+  }
 };
 
 window.addEventListener("deviceorientation", deviceorientation);
@@ -59,7 +63,9 @@ export default class Controller extends Component {
     return (
       <div className="controller">
         <Form className="controller-form" size="small" layout="inline">
-          <Form.Item>
+          <Form.Item
+            style={{ display: isSupportedOrientaion ? undefined : "none" }}
+          >
             <Button
               type="danger"
               onClick={() => {
@@ -93,6 +99,7 @@ export default class Controller extends Component {
               controller.direction(0);
             }}
             icon={<LeftOutlined />}
+            style={{ display: !isSupportedOrientaion ? undefined : "none" }}
           ></Button>
 
           <Button
@@ -107,6 +114,7 @@ export default class Controller extends Component {
               controller.direction(0);
             }}
             icon={<RightOutlined />}
+            style={{ display: !isSupportedOrientaion ? undefined : "none" }}
           ></Button>
           <Button
             className="forward-button"
