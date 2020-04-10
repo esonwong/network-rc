@@ -209,7 +209,7 @@ export default class App extends Component {
         <div
           className="player-box"
           ref={this.playerBoxRef}
-          style={{ display: cameraEnabled ? "flex" : "hidden" }}
+          style={{ display: cameraEnabled ? "flex" : "none" }}
         ></div>
       </div>
     );
