@@ -23,20 +23,22 @@ export default class Keybord extends Component {
         onControl,
         forwardPower,
         backwardPower,
+        directionReverse,
+        speedReverse,
       },
     } = this;
     const keyName = event.key;
     if (keyName === "w") {
-      speed((1 * forwardPower) / 100);
+      speed(((1 * forwardPower) / 100) * (speedReverse ? -1 : 1));
     }
     if (keyName === "s") {
-      speed((-1 * backwardPower) / 100);
+      speed(((-1 * backwardPower) / 100) * (speedReverse ? -1 : 1));
     }
     if (keyName === "a") {
-      direction(1);
+      direction(directionReverse ? -1 : 1);
     }
     if (keyName === "d") {
-      direction(-1);
+      direction(directionReverse ? 1 : -1);
     }
     onControl && onControl();
   };
