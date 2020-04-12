@@ -13,29 +13,45 @@ const width = 400,
   height = 300,
   fps = 15;
 
-const refresh = 500,
-  stepTimeUs = refresh / 100,
-  pwmCfg = {
-    cycle_time_us: refresh, // default 20000us (20ms)
-    step_time_us: stepTimeUs, // default 10us
-    delay_hw: 0, // 0=PWM, 1=PCM, (default 0)
-    invert: 0, // invert high/low (default 0=no invert)
-  },
-  ch = pwm.create_dma_channel(14, pwmCfg),
-  directionPin = ch.create_pwm(12),
-  speedPin = ch.create_pwm(13);
+let speedPin,directionPin,speedCh,directionCh;
 
-function setRound(pin, round) {
-  pin.set_width(round, stepTimeUs * round);
+function initSpeedPin(pin=13, refresh=400, round=60){
+  const cycleTimeUs = 1000 / refresh *1000, 
+  stepTimeUs = cycleTimeUs / 100, 
+  pwmCfg = {
+    cycle_time_us: cycleTimeUs, 
+    step_time_us: stepTimeUs, 
+    delay_hw: 0
+  };
+  speedCh = pwm.create_dma_channel(13, pwmCfg),
+  speedPin = speedCh.create_pwm(pin);
 }
 
-process.on("exit", function () {
-  ch.shutdown();
-  console.log("Goodbye!");
-});
+function initDirectionPin(pin=12, refresh=50){
+  const cycleTimeUs = 1000 / refresh *1000, 
+  stepTimeUs = cycleTimeUs / 100, 
+  pwmCfg = {
+    cycle_time_us: cycleTimeUs, 
+    step_time_us: stepTimeUs, 
+    delay_hw: 1
+  };
+  directionCh = pwm.create_dma_channel(14, pwmCfg),
+  directionPin = directionCh.create_pwm(pin);
+}
 
-// direction range 100 data 30 ~ 90
-// speed range 100 data 36~60~80
+initSpeedPin();
+initDirectionPin();
+
+function setRound(pin, round) {
+  pin.set_width( round);
+}
+
+process.on("SIGINT", function () {
+  speedCh.shutdown();
+  directionCh.shutdown();
+  console.log("Goodbye!");
+  process.exit();
+});
 
 const changeSpeed = function (v) {
   if (v == 0) {
@@ -47,18 +63,20 @@ const changeSpeed = function (v) {
 
 const changeDirection = function (v) {
   if (v == 0) {
-    setRound(directionPin, 75);
+    setRound(directionPin, 7.5);
   } else {
-    setRound(directionPin, Math.round(v * 25 + 50));
+    setRound(directionPin, Math.round(v * 2.5 + 7.5));
   }
 };
+
+
+changeSpeed(0);
 
 const wss = new WebSocketServer({ server });
 const avcServer = new AvcServer(wss, width, height);
 
 avcServer.on("client_connected", () => {
   console.log("client connected");
-  initGPIO();
 });
 
 avcServer.client_events.on("open camera", function (v) {
