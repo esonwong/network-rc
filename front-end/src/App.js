@@ -1,6 +1,6 @@
 import React, { Component, createRef } from "react";
 import store from "store";
-import { InputNumber, Form, Switch, Dropdown, Button } from "antd";
+import { InputNumber, Form, Switch, Dropdown, Button, Popover } from "antd";
 import "./App.css";
 import Ai from "./Ai";
 import { Router, Location } from "@reach/router";
@@ -12,6 +12,7 @@ import {
   HomeOutlined,
   ExpandOutlined,
   CompressOutlined,
+  ControlOutlined,
 } from "@ant-design/icons";
 
 export default class App extends Component {
@@ -146,16 +147,32 @@ export default class App extends Component {
     this.wsavc.send("direction rate", directionRate);
   };
 
+  switchContent = () => {
+    const {
+      changeCamera,
+      changeLight,
+      state: { lightEnabled, cameraEnabled },
+    } = this;
+    return (
+      <Form>
+        <Form.Item label="摄像头">
+          <Switch checked={cameraEnabled} onChange={changeCamera} />
+        </Form.Item>
+        <Form.Item label="车灯">
+          <Switch checked={lightEnabled} onChange={changeLight} />
+        </Form.Item>
+      </Form>
+    );
+  };
+
   render() {
     const {
       disconnect,
       connect,
       controller,
       changeSetting,
-      changeCamera,
-      changeLight,
+      switchContent,
       state: {
-        lightEnabled,
         setting,
         wsConnected,
         cameraEnabled,
@@ -180,7 +197,7 @@ export default class App extends Component {
               )}
             </Location>
           </Form.Item>
-          <Form.Item label="连接状态">
+          <Form.Item label="连接">
             <Switch
               checked={wsConnected}
               onChange={(v) => {
@@ -189,11 +206,10 @@ export default class App extends Component {
               }}
             />
           </Form.Item>
-          <Form.Item label="摄像头">
-            <Switch checked={cameraEnabled} onChange={changeCamera} />
-          </Form.Item>
-          <Form.Item label="车灯">
-            <Switch checked={lightEnabled} onChange={changeLight} />
+          <Form.Item>
+            <Popover content={switchContent} title="开关" trigger="click">
+              <Button icon={<ControlOutlined />}>开关</Button>
+            </Popover>
           </Form.Item>
 
           <Form.Item label="舵机">
@@ -204,7 +220,7 @@ export default class App extends Component {
           </Form.Item>
 
           {document.body.requestFullscreen && (
-            <Form.Item label="全屏">
+            <Form.Item>
               <Button
                 type="primary"
                 shape="circle"
