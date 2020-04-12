@@ -28,6 +28,7 @@ export default class Controller extends Component {
     this.state = {
       zeroOrientation: undefined,
       directionReverse: store.get("directionReverse") || true,
+      speedReverse: store.get("speedReverse") || false,
       backwardPower: 50,
       forwardPower: 50,
     };
@@ -58,8 +59,13 @@ export default class Controller extends Component {
   };
 
   render() {
-    const { directionReverse, controller } = this.props;
-    const { forwardPower, backwardPower } = this.state;
+    const { controller } = this.props;
+    const {
+      directionReverse,
+      forwardPower,
+      backwardPower,
+      speedReverse,
+    } = this.state;
     return (
       <div className="controller">
         <Form className="controller-form" size="small" layout="inline">
@@ -87,13 +93,25 @@ export default class Controller extends Component {
               }}
             />
           </Form.Item>
+          <Form.Item label="油门反向">
+            <Switch
+              checked={speedReverse}
+              onChange={(v) => {
+                debugger;
+                this.setState({
+                  speedReverse: v,
+                });
+                store.set("speedReverse", v);
+              }}
+            />
+          </Form.Item>
           <Button
             className="left-button"
             shape="circle"
             size="large"
             type="primary"
             onTouchStart={() => {
-              controller.direction(1);
+              controller.direction(directionReverse ? -1 : 1);
             }}
             onTouchEnd={() => {
               controller.direction(0);
@@ -108,7 +126,7 @@ export default class Controller extends Component {
             size="large"
             type="primary"
             onTouchStart={() => {
-              controller.direction(-1);
+              controller.direction(directionReverse ? 1 : -1);
             }}
             onTouchEnd={() => {
               controller.direction(0);
@@ -122,7 +140,9 @@ export default class Controller extends Component {
             size="large"
             type="primary"
             onTouchStart={() => {
-              controller.speed((1 * forwardPower) / 100);
+              controller.speed(
+                ((speedReverse ? -1 : 1) * (1 * forwardPower)) / 100
+              );
             }}
             onTouchEnd={() => {
               controller.speed(0);
@@ -136,7 +156,9 @@ export default class Controller extends Component {
             size="large"
             type="primary"
             onTouchStart={() => {
-              controller.speed((-1 * backwardPower) / 100);
+              controller.speed(
+                ((speedReverse ? -1 : 1) * (-1 * backwardPower)) / 100
+              );
             }}
             onTouchEnd={() => {
               controller.speed(0);
@@ -172,6 +194,8 @@ export default class Controller extends Component {
           controller={controller}
           backwardPower={backwardPower}
           forwardPower={forwardPower}
+          directionReverse={directionReverse}
+          speedReverse={speedReverse}
         />
       </div>
     );
