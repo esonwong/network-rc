@@ -6,6 +6,10 @@ const server = require("http").Server(app);
 const spawn = require("child_process").spawn;
 const { WebSocketServer } = require("@clusterws/cws");
 const pwm = require("rpio-pwm");
+const rpio = require('rpio');
+const package = require("./package.json");
+
+console.info("版本",package.version);
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
@@ -39,19 +43,11 @@ function initDirectionPin(pin=12, refresh=50){
   directionPin = directionCh.create_pwm(pin);
 }
 
-initSpeedPin();
-initDirectionPin();
 
 function setRound(pin, round) {
   pin.set_width( round);
 }
 
-process.on("SIGINT", function () {
-  speedCh.shutdown();
-  directionCh.shutdown();
-  console.log("Goodbye!");
-  process.exit();
-});
 
 const changeSpeed = function (v) {
   if (v == 0) {
@@ -69,11 +65,36 @@ const changeDirection = function (v) {
   }
 };
 
+const changeLight = function(enabled) {
+  if(enabled) {
+    rpio.open(8, rpio.INPUT);
+  }else {
+    rpio.open(8, rpio.OUTPUT);
+  }
+  avcServer.broadcast("light enabled", enabled)
+}
 
-changeSpeed(0);
+
 
 const wss = new WebSocketServer({ server });
 const avcServer = new AvcServer(wss, width, height);
+
+
+
+// init
+initSpeedPin();
+initDirectionPin();
+changeSpeed(0);
+changeLight(false)
+
+
+process.on("SIGINT", function () {
+  speedCh.shutdown();
+  directionCh.shutdown();
+  changeLight(false)
+  console.log("Goodbye!");
+  process.exit();
+});
 
 avcServer.on("client_connected", () => {
   console.log("client connected");
@@ -102,6 +123,12 @@ avcServer.client_events.on("direction rate", (v) => {
   changeDirection(v);
 });
 
+
+avcServer.client_events.on("open light", (enabled) => {
+  console.log("open light", enabled);
+  changeLight(enabled);
+});
+
 avcServer.on("client_disconnected", () => {
   console.log("client disconnected");
   changeSpeed(0);
@@ -110,6 +137,7 @@ avcServer.on("client_disconnected", () => {
       return;
     }
     streamer.kill("SIGTERM");
+    changeLight(false);
   }
 });
 

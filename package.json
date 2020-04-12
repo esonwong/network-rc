@@ -9,11 +9,12 @@
   "scripts": {
     "start": "nodemon index.js",
     "server": "node index.js",
-    "build": "rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
+    "build": "rm -fr network-rc dist && mkdir network-rc && cp index.js,package.json network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
     "express": "^4.17.1",
+    "rpio": "^2.1.1",
     "rpio-pwm": "^1.0.3",
     "ws-avc-player": "^2.0.2"
   },
