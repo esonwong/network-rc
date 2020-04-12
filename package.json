@@ -14,7 +14,7 @@
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
     "express": "^4.17.1",
-    "rpio": "^2.1.1",
+    "rpio-pwm": "^1.0.3",
     "ws-avc-player": "^2.0.2"
   },
   "devDependencies": {
