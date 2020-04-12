@@ -1,6 +1,6 @@
 import React, { Component, createRef } from "react";
 import store from "store";
-import { InputNumber, Form, Switch, Dropdown } from "antd";
+import { InputNumber, Form, Switch, Dropdown, Button } from "antd";
 import "./App.css";
 import Ai from "./Ai";
 import { Router, Location } from "@reach/router";
@@ -8,7 +8,11 @@ import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
 import WSAvcPlayer from "ws-avc-player";
-import { HomeOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  ExpandOutlined,
+  CompressOutlined,
+} from "@ant-design/icons";
 
 export default class App extends Component {
   constructor(props) {
@@ -23,8 +27,10 @@ export default class App extends Component {
       },
       wsConnected: false,
       cameraEnabled: false,
+      lightEnabled: false,
       canvasRef: undefined,
       isAiControlling: false,
+      isFullscreen: false,
       action: {
         speed: 0,
         direction: 0,
@@ -95,6 +101,10 @@ export default class App extends Component {
       }
       this.setState({ cameraEnabled });
     });
+
+    this.wsavc.on("light enabled", (lightEnabled) => {
+      this.setState({ lightEnabled });
+    });
   };
 
   disconnect = (e) => {
@@ -107,6 +117,11 @@ export default class App extends Component {
   changeCamera = (enable) => {
     if (!this.wsavc) return;
     this.wsavc.send("open camera", enable);
+  };
+
+  changeLight = (enable) => {
+    if (!this.wsavc) return;
+    this.wsavc.send("open light", enable);
   };
 
   changeSetting = (setting) => {
@@ -138,7 +153,16 @@ export default class App extends Component {
       controller,
       changeSetting,
       changeCamera,
-      state: { setting, wsConnected, cameraEnabled, canvasRef, action },
+      changeLight,
+      state: {
+        lightEnabled,
+        setting,
+        wsConnected,
+        cameraEnabled,
+        canvasRef,
+        action,
+        isFullscreen,
+      },
     } = this;
     return (
       <div className="App" ref={this.appRef}>
@@ -168,6 +192,9 @@ export default class App extends Component {
           <Form.Item label="摄像头">
             <Switch checked={cameraEnabled} onChange={changeCamera} />
           </Form.Item>
+          <Form.Item label="车灯">
+            <Switch checked={lightEnabled} onChange={changeLight} />
+          </Form.Item>
 
           <Form.Item label="舵机">
             <InputNumber value={action.direction} />
@@ -176,17 +203,23 @@ export default class App extends Component {
             <InputNumber value={action.speed} />
           </Form.Item>
 
-          {/* <Form.Item label="全屏">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<ExpandOutlined />}
-              onClick={() => {
-                const el = this.appRef.current;
-                el.requestFullscreen && el.requestFullscreen();
-              }}
-            ></Button>
-          </Form.Item> */}
+          {document.body.requestFullscreen && (
+            <Form.Item label="全屏">
+              <Button
+                type="primary"
+                shape="circle"
+                icon={isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+                onClick={() => {
+                  if (isFullscreen) {
+                    document.exitFullscreen();
+                  } else {
+                    document.body.requestFullscreen();
+                  }
+                  this.setState({ isFullscreen: !isFullscreen });
+                }}
+              ></Button>
+            </Form.Item>
+          )}
         </Form>
 
         <Router className="app-page">
