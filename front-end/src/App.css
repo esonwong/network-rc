@@ -1,5 +1,9 @@
 @import "~antd/dist/antd.css";
 
+body {
+  background-color: #fff;
+}
+
 .App {
   height: 100%;
   width: 100%;
