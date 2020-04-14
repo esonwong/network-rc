@@ -6,10 +6,10 @@ const server = require("http").Server(app);
 const spawn = require("child_process").spawn;
 const { WebSocketServer } = require("@clusterws/cws");
 const pwm = require("rpio-pwm");
-const rpio = require('rpio');
+const rpio = require("rpio");
 const package = require("./package.json");
 
-console.info("版本",package.version);
+console.info("版本", package.version);
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
@@ -17,37 +17,39 @@ const width = 400,
   height = 300,
   fps = 15;
 
-let speedPin,directionPin,speedCh,directionCh;
+let speedPin,
+  directionPin,
+  speedCh,
+  directionCh,
+  stepNum = 1000;
 
-function initSpeedPin(pin=13, refresh=400, round=60){
-  const cycleTimeUs = 1000 / refresh *1000, 
-  stepTimeUs = cycleTimeUs / 100, 
-  pwmCfg = {
-    cycle_time_us: cycleTimeUs, 
-    step_time_us: stepTimeUs, 
-    delay_hw: 0
-  };
-  speedCh = pwm.create_dma_channel(13, pwmCfg),
-  speedPin = speedCh.create_pwm(pin);
+function initSpeedPin(pin = 13, refresh = 400, round = 60) {
+  const cycleTimeUs = (1000 / refresh) * 1000,
+    stepTimeUs = cycleTimeUs / stepNum,
+    pwmCfg = {
+      cycle_time_us: cycleTimeUs,
+      step_time_us: stepTimeUs,
+      delay_hw: 0,
+    };
+  (speedCh = pwm.create_dma_channel(13, pwmCfg)),
+    (speedPin = speedCh.create_pwm(pin));
 }
 
-function initDirectionPin(pin=12, refresh=50){
-  const cycleTimeUs = 1000 / refresh *1000, 
-  stepTimeUs = cycleTimeUs / 100, 
-  pwmCfg = {
-    cycle_time_us: cycleTimeUs, 
-    step_time_us: stepTimeUs, 
-    delay_hw: 1
-  };
-  directionCh = pwm.create_dma_channel(14, pwmCfg),
-  directionPin = directionCh.create_pwm(pin);
+function initDirectionPin(pin = 12, refresh = 50) {
+  const cycleTimeUs = (1000 / refresh) * 1000,
+    stepTimeUs = cycleTimeUs / stepNum,
+    pwmCfg = {
+      cycle_time_us: cycleTimeUs,
+      step_time_us: stepTimeUs,
+      delay_hw: 1,
+    };
+  (directionCh = pwm.create_dma_channel(14, pwmCfg)),
+    (directionPin = directionCh.create_pwm(pin));
 }
-
 
 function setRound(pin, round) {
-  pin.set_width( round);
+  pin.set_width((round / 100) * stepNum);
 }
-
 
 const changeSpeed = function (v) {
   if (v == 0) {
@@ -65,33 +67,28 @@ const changeDirection = function (v) {
   }
 };
 
-const changeLight = function(enabled) {
-  if(enabled) {
+const changeLight = function (enabled) {
+  if (enabled) {
     rpio.open(8, rpio.INPUT);
-  }else {
+  } else {
     rpio.open(8, rpio.OUTPUT);
   }
-  avcServer.broadcast("light enabled", enabled)
-}
-
-
+  avcServer.broadcast("light enabled", enabled);
+};
 
 const wss = new WebSocketServer({ server });
 const avcServer = new AvcServer(wss, width, height);
-
-
 
 // init
 initSpeedPin();
 initDirectionPin();
 changeSpeed(0);
-changeLight(false)
-
+changeLight(false);
 
 process.on("SIGINT", function () {
   speedCh.shutdown();
   directionCh.shutdown();
-  changeLight(false)
+  changeLight(false);
   console.log("Goodbye!");
   process.exit();
 });
@@ -122,7 +119,6 @@ avcServer.client_events.on("direction rate", (v) => {
   console.log("direction", v);
   changeDirection(v);
 });
-
 
 avcServer.client_events.on("open light", (enabled) => {
   console.log("open light", enabled);
