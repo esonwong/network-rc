@@ -28,7 +28,7 @@ export default class Controller extends Component {
     super(props);
     this.state = {
       zeroOrientation: undefined,
-      directionReverse: store.get("directionReverse") || true,
+      directionReverse: store.get("directionReverse") || false,
       speedReverse: store.get("speedReverse") || false,
       backwardPower: 50,
       forwardPower: 50,
@@ -131,8 +131,8 @@ export default class Controller extends Component {
             max={100}
             included={false}
             onChange={(v) => {
-              store.set("directionFix", v / 100);
               const directionFix = v / 50 - 1;
+              store.set("directionFix", directionFix );
               this.setState({ directionFix }, () => {
                 this.fixedController.direction(0);
               });
