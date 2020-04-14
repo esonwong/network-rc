@@ -21,9 +21,9 @@ let speedPin,
   directionPin,
   speedCh,
   directionCh,
-  stepNum = 1000;
+  stepNum = 500;
 
-function initSpeedPin(pin = 13, refresh = 400, round = 60) {
+function initSpeedPin(pin = 13, refresh = 400) {
   const cycleTimeUs = (1000 / refresh) * 1000,
     stepTimeUs = cycleTimeUs / stepNum,
     pwmCfg = {
@@ -48,14 +48,14 @@ function initDirectionPin(pin = 12, refresh = 50) {
 }
 
 function setRound(pin, round) {
-  pin.set_width((round / 100) * stepNum);
+  pin.set_width(round /100 * stepNum);
 }
 
 const changeSpeed = function (v) {
   if (v == 0) {
     setRound(speedPin, 60);
   } else {
-    setRound(speedPin, Math.round(60 + v * 20));
+    setRound(speedPin, 60 + v * 20);
   }
 };
 
@@ -63,7 +63,7 @@ const changeDirection = function (v) {
   if (v == 0) {
     setRound(directionPin, 7.5);
   } else {
-    setRound(directionPin, Math.round(v * 2.5 + 7.5));
+    setRound(directionPin, v * 2.5 + 7.5);
   }
 };
 
