@@ -3,7 +3,7 @@ import store from "store";
 import { InputNumber, Form, Switch, Dropdown, Button, Popover } from "antd";
 import "./App.css";
 import Ai from "./Ai";
-import { Router, Location } from "@reach/router";
+import { Router, Location, navigate } from "@reach/router";
 import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
@@ -24,6 +24,7 @@ export default class App extends Component {
       setting: {
         speedMax: 20,
         wsAddress: window.location.host,
+        cameraMode: "default",
         ...store.get("setting"),
       },
       wsConnected: false,
@@ -72,6 +73,14 @@ export default class App extends Component {
     const { connect } = this;
     this.wsavc = new WSAvcPlayer({ useWorker: true });
     connect();
+
+    document.body.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement) {
+        this.setState({ isFullscreen: true });
+      } else {
+        this.setState({ isFullscreen: false });
+      }
+    });
   }
 
   connect = () => {
@@ -115,9 +124,14 @@ export default class App extends Component {
     this.wsavc.disconnect();
   };
 
-  changeCamera = (enable) => {
+  changeCamera = (enabled) => {
+    const {
+      state: {
+        setting: { cameraMode },
+      },
+    } = this;
     if (!this.wsavc) return;
-    this.wsavc.send("open camera", enable);
+    this.wsavc.send("open camera", { enabled, cameraMode });
   };
 
   changeLight = (enable) => {
@@ -128,6 +142,8 @@ export default class App extends Component {
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
+    navigate(`${process.env.PUBLIC_URL}/`);
+
     // this.connect();
   };
 
@@ -231,7 +247,6 @@ export default class App extends Component {
                   } else {
                     document.body.requestFullscreen();
                   }
-                  this.setState({ isFullscreen: !isFullscreen });
                 }}
               ></Button>
             </Form.Item>
@@ -239,16 +254,19 @@ export default class App extends Component {
         </Form>
 
         <Router className="app-page">
-          <Controller path="/" controller={controller} />
+          <Controller
+            path={`${process.env.PUBLIC_URL}/`}
+            controller={controller}
+          />
           <Setting
-            path="setting"
+            path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
             wsConnected={wsConnected}
             onDisconnect={disconnect}
             onSubmit={changeSetting}
           />
           <Ai
-            path="ai"
+            path={`${process.env.PUBLIC_URL}/ai`}
             canvasRef={canvasRef}
             action={action}
             controller={controller}
