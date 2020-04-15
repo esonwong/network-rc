@@ -15,7 +15,23 @@ app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
 const width = 400,
   height = 300,
-  fps = 15;
+  cameraModes = {
+  default: {
+    fps: 15,
+    exposure: "auto",
+    width: 400,
+    height: 300
+  },
+  local: {
+    fps: 30,
+    exposure: "sports",
+    width: 800,
+    height: 600
+  }
+};
+
+
+let cameraMode = "default";
 
 let speedPin,
   directionPin,
@@ -99,7 +115,8 @@ avcServer.on("client_connected", () => {
 
 avcServer.client_events.on("open camera", function (v) {
   console.log("open camera", v);
-  if (v) {
+  if (v.enabled) {
+    cameraMode = v.cameraMode
     streamer || startStreamer();
   } else {
     streamer && streamer.kill("SIGTERM");
@@ -141,37 +158,21 @@ let streamer = null;
 
 const startStreamer = () => {
   console.log("starting streamer");
-  //  streamer = spawn("raspivid", [
-  //    "-pf",
-  //    "baseline",
-  //    "-ih",
-  //    "-t",
-  //    "0",
-  //    "-w",
-  //    width,
-  //    "-h",
-  //    height,
-  //    "-hf",
-  //    "-fps",
-  //    "15",
-  //    "-g",
-  //    "30",
-  //    "-o",
-  //    "-",
-  //  ]);
   streamer = spawn("raspivid", [
     "-t",
     "0",
     "-o",
     "-",
     "-w",
-    width,
+    cameraModes[cameraMode].width,
     "-h",
-    height,
+    cameraModes[cameraMode].height,
     "-fps",
-    fps,
+    cameraModes[cameraMode].fps,
     "-pf",
     "baseline",
+    "-ex",
+    cameraModes[cameraMode].exposure,
   ]);
   streamer.on("close", () => {
     streamer = null;
