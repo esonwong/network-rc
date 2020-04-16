@@ -13,6 +13,7 @@ const {
   changeLight,
   changeDirection,
   changeSpeed,
+  closeController
 } = require("./lib/controller.js");
 
 console.info("版本", package.version);
@@ -47,16 +48,15 @@ function sendData(action, payload) {
   this.send(JSON.stringify({ action, payload }));
 }
 
-function sendBinary(frame) {
+function sendBinary(socket,frame) {
   if (socket.buzy) return;
-  const socket = this;
   socket.buzy = true;
-  socket.buzy = false;
 
   socket.send(
     Buffer.concat([NALseparator, frame]),
     { binary: true },
     function ack() {
+
       socket.buzy = false;
     }
   );
@@ -69,18 +69,31 @@ const broadcast = (action, payload) => {
 const broadcastStream = (data) => {
   clients.forEach((socket) => {
     if (socket.enabledCamera) {
-      socket.sendBinary(data);
+      socket.sendBinary(socket,data);
     }
   });
 };
 
 wss.on("connection", function (socket) {
+  console.log("客户端连接！");
+  console.log("设置密码", password ? "是": "否");
+  socket.isLogin = password ? false : true;
   clients.add(socket);
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
   socket.sendData("init", {
     maxSpeed,
   });
+  socket.sendData(
+    'initalize',
+    {
+      width: cameraModes[cameraMode].width,
+      height: cameraModes[cameraMode].height,
+      stream_active: false 
+    },
+  );
+  socket.sendData({ action: 'stream_active', payload: false});
+
   socket.on("close", () => disconnect(socket));
 
   socket.on("message", (m) => {
@@ -92,12 +105,16 @@ wss.on("connection", function (socket) {
         break;
       case "open camera":
         openCamera(socket, payload);
+        break;
       case "open light":
         openLight(socket, payload);
+        break;
       case "speed rate":
         speedRate(socket, payload);
+        break;
       case "dirction rate":
         directionRate(socket, payload);
+        break;
       default:
         console.log("怎么了？");
     }
@@ -116,7 +133,7 @@ const login = (socket, { uid, token }) => {
 };
 
 const check = (socket) => {
-  if (password && socket.isLogin) {
+  if ( socket.isLogin) {
     return true;
   } else {
     console.error("未登录！");
@@ -132,7 +149,7 @@ const openCamera = (socket, v) => {
     cameraMode = v.cameraMode;
     socket.enabledCamera = true;
     streamer || startStreamer();
-    socket.sendData("stream_active", true);
+    // socket.sendData("stream_active", true);
   } else {
     socket.enabledCamera = false;
     socket.sendData("stream_active", false);
@@ -154,11 +171,11 @@ const directionRate = (socket, v) => {
   broadcast("direction", v);
 };
 
-const openLight = (socket, enable) => {
+const openLight = (socket, enabled) => {
   console.log("open light", enabled);
   if (!check(socket)) return;
   changeLight(enabled);
-  broadcast("light enabled", enable);
+  broadcast("light enabled", enabled);
 };
 
 const disconnect = (socket) => {
@@ -176,8 +193,7 @@ changeSpeed(0);
 changeLight(false);
 
 process.on("SIGINT", function () {
-  speedCh.shutdown();
-  directionCh.shutdown();
+  closeController();
   changeLight(false);
   console.log("Goodbye!");
   process.exit();
@@ -205,20 +221,25 @@ const startStreamer = () => {
     cameraModes[cameraMode].exposure,
   ]);
 
-  streamer.pipe(new Splitter(NALseparator));
+  streamer.on('close', () => {
+    streamer = null
+  })
 
-  streamer.on("close", () => {
-    streamer = null;
-  });
 
-  streamer.pipe(new Splitter(NALseparator));
-  streamer.on("data", (binary) => {
-    broadcastStream(binary);
+  const readStream =  streamer.stdout.pipe(new Splitter(NALseparator));
+
+  readStream.on("data", (frame) => {
+    broadcastStream(frame);
   });
+  broadcast('stream_active', true );
+  readStream.on('end', () => broadcast('stream_active', false ))
 };
 
 const endStreamer = () => {
-  if (clients.some((socket) => socket.enabledCamera)) return;
+  let enabledNum = 0;
+  clients.forEach(i => i.enabledCamera && enabledNum++)
+  if (enabledNum) return;
+  console.log("close streamer");
   streamer && streamer.kill("SIGTERM");
 };
 
