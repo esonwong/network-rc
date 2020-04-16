@@ -51,12 +51,12 @@ function sendData(action, payload) {
 function sendBinary(socket,frame) {
   if (socket.buzy) return;
   socket.buzy = true;
+  socket.buzy = false;
 
   socket.send(
     Buffer.concat([NALseparator, frame]),
     { binary: true },
     function ack() {
-
       socket.buzy = false;
     }
   );
