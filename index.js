@@ -92,7 +92,7 @@ wss.on("connection", function (socket) {
       stream_active: false 
     },
   );
-  socket.sendData({ action: 'stream_active', payload: false});
+  socket.sendData('stream_active', false);
 
   socket.on("close", () => disconnect(socket));
 
@@ -149,7 +149,7 @@ const openCamera = (socket, v) => {
     cameraMode = v.cameraMode;
     socket.enabledCamera = true;
     streamer || startStreamer();
-    // socket.sendData("stream_active", true);
+    socket.sendData("stream_active", true);
   } else {
     socket.enabledCamera = false;
     socket.sendData("stream_active", false);
@@ -231,7 +231,7 @@ const startStreamer = () => {
   readStream.on("data", (frame) => {
     broadcastStream(frame);
   });
-  broadcast('stream_active', true );
+  // broadcast('stream_active', true );
   readStream.on('end', () => broadcast('stream_active', false ))
 };
 
