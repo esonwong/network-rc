@@ -1,98 +1,133 @@
-const AvcServer = require("ws-avc-player/lib/server");
 const path = require("path");
 const express = require("express");
+const { WebSocketServer } = require("@clusterws/cws");
 const app = express();
 const server = require("http").Server(app);
 const spawn = require("child_process").spawn;
-const { WebSocketServer } = require("@clusterws/cws");
-const pwm = require("rpio-pwm");
-const rpio = require("rpio");
 const package = require("./package.json");
+const argv = require('yargs').argv;
+const md5 = require("md5");
+const { changeLight, changeDirection, changeSpeed } = require("./lib/controller.js")
 
 console.info("版本", package.version);
+console.info("参数", argv);
+
+const userList = [];
+
+const { password, maxSpeed=30,  } = argv;
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
 const width = 400,
   height = 300,
   cameraModes = {
-  default: {
-    fps: 15,
-    exposure: "auto",
-    width: 400,
-    height: 300
-  },
-  local: {
-    fps: 30,
-    exposure: "sports",
-    width: 800,
-    height: 600
-  }
-};
+    default: {
+      fps: 15,
+      exposure: "auto",
+      width: 400,
+      height: 300
+    },
+    local: {
+      fps: 30,
+      exposure: "sports",
+      width: 800,
+      height: 600
+    }
+  };
 
 
 let cameraMode = "default";
 
-let speedPin,
-  directionPin,
-  speedCh,
-  directionCh,
-  stepNum = 500;
-
-function initSpeedPin(pin = 13, refresh = 400) {
-  const cycleTimeUs = (1000 / refresh) * 1000,
-    stepTimeUs = cycleTimeUs / stepNum,
-    pwmCfg = {
-      cycle_time_us: cycleTimeUs,
-      step_time_us: stepTimeUs,
-      delay_hw: 0,
-    };
-  (speedCh = pwm.create_dma_channel(13, pwmCfg)),
-    (speedPin = speedCh.create_pwm(pin));
-}
-
-function initDirectionPin(pin = 12, refresh = 50) {
-  const cycleTimeUs = (1000 / refresh) * 1000,
-    stepTimeUs = cycleTimeUs / stepNum,
-    pwmCfg = {
-      cycle_time_us: cycleTimeUs,
-      step_time_us: stepTimeUs,
-      delay_hw: 1,
-    };
-  (directionCh = pwm.create_dma_channel(14, pwmCfg)),
-    (directionPin = directionCh.create_pwm(pin));
-}
-
-function setRound(pin, round) {
-  pin.set_width(round /100 * stepNum);
-}
-
-const changeSpeed = function (v) {
-  if (v == 0) {
-    setRound(speedPin, 60);
-  } else {
-    setRound(speedPin, 60 + v * 20);
-  }
-};
-
-const changeDirection = function (v) {
-  if (v == 0) {
-    setRound(directionPin, 7.5);
-  } else {
-    setRound(directionPin, v * 2.5 + 7.5);
-  }
-};
-
-const changeLight = function (enabled) {
-  if (enabled) {
-    rpio.open(8, rpio.INPUT);
-  } else {
-    rpio.open(8, rpio.OUTPUT);
-  }
-  avcServer.broadcast("light enabled", enabled);
-};
 
 const wss = new WebSocketServer({ server });
+const clients = new Set();
+function sendData(action,payload) {
+  this.send(JSON.stringify({ action, payload })))
+}
+
+function sendBinary(binary) {
+  if (socket.buzy)
+    return
+  const socket = this;
+  socket.buzy = true
+  socket.buzy = false
+
+  socket.send(Buffer.concat([ NALseparator, frame ]), { binary: true }, function ack () {
+    socket.buzy = false
+  })
+}
+
+
+wss.on("connection", function(socket){
+  clients.add(socket);
+  socket.sendData = sendData;
+  socket.sendBinary = sendBinary;
+  socket.on('message', m => {
+    const { action, payload } = JSON.parse(m)
+
+    switch(action):
+      case "login":
+        login(socket, payload);
+        break;
+      case "open camera":
+        openCamera(socket, payload);
+      case ""
+      default:
+  });
+}
+
+const login(socket,{ uid, token }){
+  console.log("login", token);
+  if(socket.islogin) {
+    socket.sendData({ status: 1 ,message: '已登陆！'})
+  }
+  if(md5(password + "eson") == token){
+    socket.isLogin = true
+    socket.sendData({ status: 0 ,message: '登录成功！'})
+  } 
+}
+
+const openCamera = (socket, v) => {
+  console.log("open camera", v);
+  if (v.enabled) {
+    cameraMode = v.cameraMode
+    streamer || startStreamer();
+  } else {
+    streamer && streamer.kill("SIGTERM");
+  }
+}
+
+
+
+const speedRate = (socket, v) => {
+  console.log("speed", v);
+  changeSpeed(v);
+});
+
+const directionRate = (socket, v) => {
+  console.log("direction", v);
+  changeDirection(v);
+});
+
+const openLight = (socket, enable) => {
+  console.log("open light", enabled);
+  changeLight(enabled);
+});
+
+
+const disconnect=> ( socket ) => {
+  console.log("client disconnected");
+  changeSpeed(0);
+  if (clients.size < 1) {
+    if (!streamer) {
+      return;
+    }
+    streamer.kill("SIGTERM");
+    changeLight(false);
+  }
+});
+})
+
 const avcServer = new AvcServer(wss, width, height);
 
 // init
@@ -109,50 +144,18 @@ process.on("SIGINT", function () {
   process.exit();
 });
 
-avcServer.on("client_connected", () => {
+avcServer.on("client_connected", (socket) => {
   console.log("client connected");
-});
-
-avcServer.client_events.on("open camera", function (v) {
-  console.log("open camera", v);
-  if (v.enabled) {
-    cameraMode = v.cameraMode
-    streamer || startStreamer();
-  } else {
-    streamer && streamer.kill("SIGTERM");
+  if(password) {
+    socket.emit
   }
+  avcServer.broadcast("config",{
+    maxSpeed,
+    needPassword: password ? true : false
+  });
 });
 
-avcServer.client_events.on("speed zero rate", (rate) => {
-  console.log("speed zero rate", rate);
-});
 
-avcServer.client_events.on("speed rate", (v) => {
-  console.log("speed", v);
-  changeSpeed(v);
-});
-
-avcServer.client_events.on("direction rate", (v) => {
-  console.log("direction", v);
-  changeDirection(v);
-});
-
-avcServer.client_events.on("open light", (enabled) => {
-  console.log("open light", enabled);
-  changeLight(enabled);
-});
-
-avcServer.on("client_disconnected", () => {
-  console.log("client disconnected");
-  changeSpeed(0);
-  if (avcServer.clients.size < 1) {
-    if (!streamer) {
-      return;
-    }
-    streamer.kill("SIGTERM");
-    changeLight(false);
-  }
-});
 
 let streamer = null;
 
