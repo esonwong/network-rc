@@ -5,7 +5,25 @@ const app = express();
 const server = require("http").Server(app);
 const spawn = require("child_process").spawn;
 const package = require("./package.json");
-const argv = require("yargs").argv;
+const argv = require("yargs")
+      .options({
+      's': {
+        alias: 'maxSpeed',
+        default: 30,
+        describe: '最大速度',
+        type: 'number'
+      },
+      'p': {
+        alias: 'password',
+        describe: '密码',
+        type: 'string'
+      },
+      'f': {
+        alias: 'frp',
+        describe: '是否开启网络穿透',
+        type: 'boolean'
+      }
+    }).argv;
 const md5 = require("md5");
 const Splitter = require("stream-split");
 
@@ -16,10 +34,12 @@ const {
   closeController,
 } = require("./lib/controller.js");
 
+
+
 console.info("版本", package.version);
 console.info("参数", argv);
 
-const { password, maxSpeed = 30 } = argv;
+const { password, maxSpeed } = argv;
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
@@ -110,7 +130,7 @@ wss.on("connection", function (socket) {
       case "speed rate":
         speedRate(socket, payload);
         break;
-      case "dirction rate":
+      case "direction rate":
         directionRate(socket, payload);
         break;
       default:
@@ -160,6 +180,9 @@ const openCamera = (socket, v) => {
 const speedRate = (socket, v) => {
   console.log("speed", v);
   if (!check(socket)) return;
+  if(Math.abs(v) *100 > maxSpeed){
+    v = v > 1 ? maxSpeed /100 : -maxSpeed /100;
+  }
   changeSpeed(v);
   broadcast("speed", v);
 };

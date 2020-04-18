@@ -17,7 +17,7 @@
     "md5": "^2.2.1",
     "rpio": "^2.1.1",
     "rpio-pwm": "^1.0.3",
-    "ws-avc-player": "^2.0.2",
+    "stream-split": "^1.1.0",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
