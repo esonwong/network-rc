@@ -13,7 +13,7 @@ const {
   changeLight,
   changeDirection,
   changeSpeed,
-  closeController
+  closeController,
 } = require("./lib/controller.js");
 
 console.info("版本", package.version);
@@ -48,7 +48,7 @@ function sendData(action, payload) {
   this.send(JSON.stringify({ action, payload }));
 }
 
-function sendBinary(socket,frame) {
+function sendBinary(socket, frame) {
   if (socket.buzy) return;
   socket.buzy = true;
   socket.buzy = false;
@@ -69,30 +69,28 @@ const broadcast = (action, payload) => {
 const broadcastStream = (data) => {
   clients.forEach((socket) => {
     if (socket.enabledCamera) {
-      socket.sendBinary(socket,data);
+      socket.sendBinary(socket, data);
     }
   });
 };
 
 wss.on("connection", function (socket) {
   console.log("客户端连接！");
-  console.log("设置密码", password ? "是": "否");
+  console.log("设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
-  socket.sendData("init", {
+  socket.sendData("controller init", {
     maxSpeed,
+    needPassword: password ? true : false,
   });
-  socket.sendData(
-    'initalize',
-    {
-      width: cameraModes[cameraMode].width,
-      height: cameraModes[cameraMode].height,
-      stream_active: false 
-    },
-  );
-  socket.sendData('stream_active', false);
+  socket.sendData("initalize", {
+    width: cameraModes[cameraMode].width,
+    height: cameraModes[cameraMode].height,
+    stream_active: false,
+  });
+  socket.sendData("stream_active", false);
 
   socket.on("close", () => disconnect(socket));
 
@@ -133,7 +131,7 @@ const login = (socket, { uid, token }) => {
 };
 
 const check = (socket) => {
-  if ( socket.isLogin) {
+  if (socket.isLogin) {
     return true;
   } else {
     console.error("未登录！");
@@ -221,23 +219,22 @@ const startStreamer = () => {
     cameraModes[cameraMode].exposure,
   ]);
 
-  streamer.on('close', () => {
-    streamer = null
-  })
+  streamer.on("close", () => {
+    streamer = null;
+  });
 
-
-  const readStream =  streamer.stdout.pipe(new Splitter(NALseparator));
+  const readStream = streamer.stdout.pipe(new Splitter(NALseparator));
 
   readStream.on("data", (frame) => {
     broadcastStream(frame);
   });
   // broadcast('stream_active', true );
-  readStream.on('end', () => broadcast('stream_active', false ))
+  readStream.on("end", () => broadcast("stream_active", false));
 };
 
 const endStreamer = () => {
   let enabledNum = 0;
-  clients.forEach(i => i.enabledCamera && enabledNum++)
+  clients.forEach((i) => i.enabledCamera && enabledNum++);
   if (enabledNum) return;
   console.log("close streamer");
   streamer && streamer.kill("SIGTERM");
