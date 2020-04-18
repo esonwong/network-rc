@@ -127,6 +127,8 @@ const login = (socket, { uid, token }) => {
   if (md5(password + "eson") == token) {
     socket.isLogin = true;
     socket.sendData("login", { status: 0, message: "OMG 你登录啦！" });
+  } else {
+    socket.sendData("error", { status: 1, message: "哎呦喂，密码错了啊！" });
   }
 };
 
