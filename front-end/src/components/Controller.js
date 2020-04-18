@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { Form, Button, Switch, Slider, Popover } from "antd";
 import { SlidersOutlined } from "@ant-design/icons";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import store from "store";
 import Keybord from "../Keyboard";
+import { vibrate } from "../unit";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -33,6 +34,7 @@ export default class Controller extends Component {
       backwardPower: 50,
       forwardPower: 50,
       directionFix: store.get("directionFix") || 0,
+      isShowButton: true,
     };
   }
 
@@ -132,7 +134,7 @@ export default class Controller extends Component {
             included={false}
             onChange={(v) => {
               const directionFix = v / 50 - 1;
-              store.set("directionFix", directionFix );
+              store.set("directionFix", directionFix);
               this.setState({ directionFix }, () => {
                 this.fixedController.direction(0);
               });
@@ -149,7 +151,7 @@ export default class Controller extends Component {
       fixContent,
       fixedController: { speed, direction },
     } = this;
-    const { forwardPower, backwardPower } = this.state;
+    const { forwardPower, backwardPower, isShowButton } = this.state;
     return (
       <div className="controller">
         <Form className="controller-form" size="small" layout="inline">
@@ -158,61 +160,74 @@ export default class Controller extends Component {
               <Button icon={<SlidersOutlined />}>修正</Button>
             </Popover>
           </Form.Item>
-          <Button
-            className="left-button"
-            shape="circle"
-            size="large"
-            type="primary"
-            onTouchStart={() => {
-              direction(1);
-            }}
-            onTouchEnd={() => {
-              direction(0);
-            }}
-            icon={<LeftOutlined />}
-            style={{ display: !isSupportedOrientaion ? undefined : "none" }}
-          ></Button>
-          <Button
-            className="right-button"
-            shape="circle"
-            size="large"
-            type="primary"
-            onTouchStart={() => {
-              direction(-1);
-            }}
-            onTouchEnd={() => {
-              direction(0);
-            }}
-            icon={<RightOutlined />}
-            style={{ display: !isSupportedOrientaion ? undefined : "none" }}
-          ></Button>
-          <Button
-            className="forward-button"
-            shape="circle"
-            size="large"
-            type="primary"
-            onTouchStart={() => {
-              speed(1);
-            }}
-            onTouchEnd={() => {
-              speed(0);
-            }}
-            icon={<UpOutlined />}
-          ></Button>
-          <Button
-            className="backward-button"
-            shape="circle"
-            size="large"
-            type="primary"
-            onTouchStart={() => {
-              speed(-1);
-            }}
-            onTouchEnd={() => {
-              speed(0);
-            }}
-            icon={<DownOutlined />}
-          ></Button>
-
+          {isShowButton && (
+            <Fragment>
+              <Button
+                className="left-button"
+                shape="circle"
+                size="large"
+                type="primary"
+                onTouchStart={() => {
+                  direction(1);
+                  vibrate(50);
+                }}
+                onTouchEnd={() => {
+                  direction(0);
+                }}
+                icon={<LeftOutlined />}
+                style={{ display: !isSupportedOrientaion ? undefined : "none" }}
+              ></Button>
+              <Button
+                className="right-button"
+                shape="circle"
+                size="large"
+                type="primary"
+                onTouchStart={() => {
+                  direction(-1);
+                  vibrate(50);
+                }}
+                onTouchEnd={() => {
+                  direction(0);
+                }}
+                icon={<RightOutlined />}
+                style={{ display: !isSupportedOrientaion ? undefined : "none" }}
+              ></Button>
+              <Button
+                className="forward-button"
+                shape="circle"
+                size="large"
+                type="primary"
+                onTouchStart={() => {
+                  speed(1);
+                  vibrate(300);
+                }}
+                onTouchEnd={() => {
+                  speed(0);
+                }}
+                icon={<UpOutlined />}
+              ></Button>
+              <Button
+                className="backward-button"
+                shape="circle"
+                size="large"
+                type="primary"
+                onTouchStart={() => {
+                  speed(-1);
+                  vibrate([100, 50, 100]);
+                }}
+                onTouchEnd={() => {
+                  speed(0);
+                }}
+                icon={<DownOutlined />}
+              ></Button>
+            </Fragment>
+          )}
+          <Form.Item label="虚拟按钮">
+            <Switch
+              checked={isShowButton}
+              onChange={(isShowButton) => this.setState({ isShowButton })}
+            />
+          </Form.Item>
           <Form.Item label="键盘">wsad</Form.Item>
           <Form.Item label="前进油门">
             <Slider

@@ -2,15 +2,15 @@ import * as tf from "@tensorflow/tfjs";
 
 export const layout = {
   labelCol: {
-    span: 6
+    span: 6,
   },
   wrapperCol: {
-    span: 16
-  }
+    span: 16,
+  },
 };
 
 export const tailLayout = {
-  wrapperCol: { offset: 6, span: 16 }
+  wrapperCol: { offset: 6, span: 16 },
 };
 
 export const marks = {
@@ -18,7 +18,7 @@ export const marks = {
   25: "25%",
   50: "50%",
   75: "75%",
-  100: "100%"
+  100: "100%",
 };
 
 export async function loadTruncatedMobileNet() {
@@ -69,9 +69,13 @@ export class ControllerDataset {
 }
 
 export async function sleep(time) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve();
     }, time);
   });
+}
+
+export function vibrate(v) {
+  navigator.vibrate && navigator.vibrate(v);
 }

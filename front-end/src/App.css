@@ -35,6 +35,14 @@ body {
   padding: 0 1em;
 }
 
+.controller-form .backward-button,
+.controller-form .left-button,
+.controller-form .forward-button,
+.controller-form .right-button {
+  width: 8vw;
+  height: 8vw;
+}
+
 .backward-button {
   position: fixed;
   bottom: 30vh;
