@@ -6,9 +6,21 @@
 - 视屏教程: [4G 网络 RC 遥控车 02 - DIY 网络控制改造教程](https://www.bilibili.com/video/BV1iK4y1r7mD)
 - 图文教程: [WiFi 网络遥控车制作教程](https://blog.esonwong.com/WiFi-4G-5G-%E7%BD%91%E7%BB%9C%E9%81%A5%E6%8E%A7%E8%BD%A6%E5%88%B6%E4%BD%9C%E6%95%99%E7%A8%8B/)
 
+## 使用
+```bash
+# 基本使用
+node index.js
+
+# 设置密码
+node index.js -p password
+
+# 启用网络穿透
+node index.js -f -o 9088
+```
+
 ## ToDo
 - [ ] 支持手柄
-- [ ] 网络穿透
+- [x] 网络穿透
 - [ ] Ai 控制
 - [ ] 支持语音(待定)
 
