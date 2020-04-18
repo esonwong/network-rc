@@ -5,41 +5,54 @@ const app = express();
 const server = require("http").Server(app);
 const spawn = require("child_process").spawn;
 const package = require("./package.json");
-const argv = require("yargs")
-      .options({
-      's': {
-        alias: 'maxSpeed',
-        default: 30,
-        describe: '最大速度',
-        type: 'number'
-      },
-      'p': {
-        alias: 'password',
-        describe: '密码',
-        type: 'string'
-      },
-      'f': {
-        alias: 'frp',
-        describe: '是否开启网络穿透',
-        type: 'boolean'
-      }
-    }).argv;
 const md5 = require("md5");
 const Splitter = require("stream-split");
-
 const {
   changeLight,
   changeDirection,
   changeSpeed,
   closeController,
 } = require("./lib/controller.js");
-
+const argv = require("yargs")
+  .options({
+    's': {
+      alias: 'maxSpeed',
+      default: 30,
+      describe: '最大速度',
+      type: 'number'
+    },
+    'p': {
+      alias: 'password',
+      describe: '密码',
+      type: 'string'
+    },
+    'f': {
+      alias: 'frp',
+      describe: '是否开启网络穿透',
+      type: 'boolean'
+    },
+    'o': {
+      alias: 'frpPort',
+      describe: "frp 远程端口",
+      type: 'number'
+    }
+  }).argv;
 
 
 console.info("版本", package.version);
 console.info("参数", argv);
 
-const { password, maxSpeed } = argv;
+const { password, maxSpeed, frp, frpPort } = argv;
+
+if(frp && !frpPort){
+  console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
+  process.exit();
+}else {
+  process.env.FRP_REMOTE_PORT = frpPort
+}
+if(frp){
+  require("./lib/frp.js")
+}
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
