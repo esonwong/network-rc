@@ -1,6 +1,14 @@
 import React, { Component, createRef } from "react";
 import store from "store";
-import { InputNumber, Form, Switch, Dropdown, Button, Popover } from "antd";
+import {
+  InputNumber,
+  Form,
+  Switch,
+  Dropdown,
+  Button,
+  Popover,
+  message,
+} from "antd";
 import "./App.css";
 import Ai from "./Ai";
 import { Router, Location, navigate } from "@reach/router";
@@ -14,6 +22,10 @@ import {
   CompressOutlined,
   ControlOutlined,
 } from "@ant-design/icons";
+import Login from "./components/Login";
+import md5 from "md5";
+
+const pubilcUrl = process.env.PUBLIC_URL;
 
 export default class App extends Component {
   constructor(props) {
@@ -26,6 +38,9 @@ export default class App extends Component {
         wsAddress: window.location.host,
         cameraMode: "default",
         ...store.get("setting"),
+      },
+      serverSetting: {
+        maxSpeed: 100,
       },
       wsConnected: false,
       cameraEnabled: false,
@@ -72,24 +87,14 @@ export default class App extends Component {
   componentDidMount() {
     const { connect } = this;
     this.wsavc = new WSAvcPlayer({ useWorker: true });
-    connect();
 
-    document.body.addEventListener("fullscreenchange", () => {
-      if (document.fullscreenElement) {
-        this.setState({ isFullscreen: true });
-      } else {
-        this.setState({ isFullscreen: false });
+    this.wsavc.on("controller init", ({ needPassword, maxSpeed }) => {
+      this.setState({ serverSetting: { maxSpeed, needPassword } });
+      if (needPassword) {
+        navigate(`${pubilcUrl}/login`);
       }
     });
-  }
 
-  connect = () => {
-    const { wsAddress } = this.state.setting;
-    this.wsavc.connect(
-      `${
-        window.location.protocol === "https:" ? "wss://" : "ws://"
-      }${wsAddress}`
-    );
     this.wsavc.on("disconnected", () => {
       console.log("WS disconnected");
       this.setState({ wsConnected: false, cameraEnabled: false });
@@ -115,6 +120,34 @@ export default class App extends Component {
     this.wsavc.on("light enabled", (lightEnabled) => {
       this.setState({ lightEnabled });
     });
+
+    this.wsavc.on("login", ({ message: m }) => {
+      message.success(m);
+      navigate(`${pubilcUrl}/`);
+    });
+
+    this.wsavc.on("error", ({ message: m }) => {
+      message.error(m);
+    });
+
+    connect();
+
+    document.body.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement) {
+        this.setState({ isFullscreen: true });
+      } else {
+        this.setState({ isFullscreen: false });
+      }
+    });
+  }
+
+  connect = () => {
+    const { wsAddress } = this.state.setting;
+    this.wsavc.connect(
+      `${
+        window.location.protocol === "https:" ? "wss://" : "ws://"
+      }${wsAddress}`
+    );
   };
 
   disconnect = (e) => {
@@ -122,6 +155,13 @@ export default class App extends Component {
     this.setState({ wsConnected: false });
     if (!this.wsavc) return;
     this.wsavc.disconnect();
+  };
+
+  login = ({ password }) => {
+    if (!this.wsavc) return;
+    this.wsavc.send("login", {
+      token: md5(`${password}eson`),
+    });
   };
 
   changeCamera = (enabled) => {
@@ -142,7 +182,7 @@ export default class App extends Component {
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
-    navigate(`${process.env.PUBLIC_URL}/`);
+    navigate(`${pubilcUrl}/`);
 
     // this.connect();
   };
@@ -188,6 +228,7 @@ export default class App extends Component {
       controller,
       changeSetting,
       switchContent,
+      login,
       state: {
         setting,
         wsConnected,
@@ -195,6 +236,7 @@ export default class App extends Component {
         canvasRef,
         action,
         isFullscreen,
+        serverSetting
       },
     } = this;
     return (
@@ -261,10 +303,12 @@ export default class App extends Component {
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
+            serverSetting={serverSetting}
             wsConnected={wsConnected}
             onDisconnect={disconnect}
             onSubmit={changeSetting}
           />
+          <Login path={`${process.env.PUBLIC_URL}/login`} onSubmit={login} />
           <Ai
             path={`${process.env.PUBLIC_URL}/ai`}
             canvasRef={canvasRef}

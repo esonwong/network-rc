@@ -8,6 +8,7 @@ export default function Setting({
   onDisconnect,
   wsConnected,
   onSubmit,
+  serverSetting,
   ...form
 }) {
   return (
@@ -21,7 +22,7 @@ export default function Setting({
         <Input />
       </Form.Item>
       <Form.Item label="最大速度" name="speedMax">
-        <Slider min={0} max={100} tooltipVisible />
+        <Slider min={0} max={serverSetting.maxSpeed} tooltipVisible />
       </Form.Item>
       <Form.Item label="摄像头模式" name="cameraMode">
         <Select>
