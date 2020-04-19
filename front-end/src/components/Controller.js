@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { Form, Button, Switch, Slider, Popover } from "antd";
+import { Form, Button, Switch, Slider, Popover, message } from "antd";
 import { SlidersOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
@@ -40,7 +40,43 @@ export default class Controller extends Component {
 
   componentDidMount() {
     window.addEventListener("deviceorientation", this.deviceorientation);
+    window.addEventListener("gamepadconnected", function (e) {
+      const {
+        gamepad: { index, id, buttons, axes },
+      } = e;
+      message.success(
+        `控制器已连接于 ${index} 位: ${id}。 ${buttons.length} 个按钮, ${axes.length} 个坐标方向。`
+      );
+    });
+    window.addEventListener("gamepaddisconnected", function (e) {
+      const {
+        gamepad: { index, id },
+      } = e;
+      message.success(`控制器位${id}-${index}已断开。`);
+    });
+    this.gamePadsLoop();
   }
+
+  gamePadsLoop = () => {
+    const { fixedController: { speed, direction }} = this; 
+    this.gamePadsTime = setInterval(() => {
+      var gamepadList = navigator.getGamepads
+        ? navigator.getGamepads()
+        : navigator.webkitGetGamepads
+        ? navigator.webkitGetGamepads
+        : [];
+      if (!gamepadList[0]) {
+        return;
+      }
+      const { axes, buttons, mapping } = gamepadList[0];
+      const [x ,y ] = axes;
+      speed(-y);
+      direction(-x);
+      // message.info(JSON.stringify(axes));
+      // message.info(JSON.stringify(buttons));
+      // message.info(JSON.stringify(mapping));
+    }, 50);
+  };
 
   componentWillUnmount() {
     window.removeEventListener(
