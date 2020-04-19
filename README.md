@@ -16,6 +16,9 @@ node index.js -p password
 
 # 启用网络穿透
 node index.js -f -o 9088
+
+# 自定义网络穿透服务器
+node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerToken xxxxx
 ```
 
 ## ToDo

@@ -7,13 +7,9 @@ const spawn = require("child_process").spawn;
 const package = require("./package.json");
 const md5 = require("md5");
 const Splitter = require("stream-split");
-const {
-  changeLight,
-  changeDirection,
-  changeSpeed,
-  closeController,
-} = require("./lib/controller.js");
 const argv = require("yargs")
+  .usage('Usage: $0 [options]')
+  .example('$0 -f -o 9088', '开启网络穿透')
   .options({
     's': {
       alias: 'maxSpeed',
@@ -33,25 +29,52 @@ const argv = require("yargs")
     },
     'o': {
       alias: 'frpPort',
-      describe: "frp 远程端口",
+      describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
       type: 'number'
+    },
+    'frpServer': {
+      default: "itiwll.synology.me",
+      describe: "frp 服务器, server_addr",
+      type:"string"
+    },
+    'frpServerPort': {
+      default: 6401,
+      describe: "frp 服务器连接端口, server_port",
+      type:"number"
+    },
+    'frpServerToken': {
+      default: "9080",
+      describe: "frp 服务器认证token, token",
+      type:"string"
     }
-  }).argv;
-
+  })
+  .env('NETWORK_RC')
+  .help()
+  .argv;
 
 console.info("版本", package.version);
-console.info("参数", argv);
+console.info("鸣谢：");
+console.info("  Eson Wong - 提供免费的 frp 服务器");
 
-const { password, maxSpeed, frp, frpPort } = argv;
+const {
+  changeLight,
+  changeDirection,
+  changeSpeed,
+  closeController,
+} = require("./lib/controller.js");
+const { password, maxSpeed, frp, frpPort, frpServer, frpServerPort, frpServerToken } = argv;
 
-if(frp && !frpPort){
-  console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
-  process.exit();
-}else {
-  process.env.FRP_REMOTE_PORT = frpPort
-}
 if(frp){
-  require("./lib/frp.js")
+  if(!frpPort){
+    console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
+    process.exit();
+  } else {
+    process.env.FRP_REMOTE_PORT = frpPort
+    process.env.FRP_SERVER = frpServer
+    process.env.FRP_SERVER_PORT = frpServerPort
+    process.env.FRP_SERVER_TOKEN = frpServerToken
+    require("./lib/frp.js")
+  }
 }
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
