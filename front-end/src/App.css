@@ -41,6 +41,7 @@ body {
 .controller-form .right-button {
   width: 8vw;
   height: 8vw;
+  min-width: 8vw;
 }
 
 .backward-button {
