@@ -44,9 +44,8 @@ export default class Controller extends Component {
       const {
         gamepad: { index, id, buttons, axes },
       } = e;
-      message.success(
-        `控制器已连接于 ${index} 位: ${id}。 ${buttons.length} 个按钮, ${axes.length} 个坐标方向。`
-      );
+      message.success(`控制器已连接于 ${index} 位: ${id}。`);
+      message.success(`${buttons.length} 个按钮, ${axes.length} 个坐标方向。`);
     });
     window.addEventListener("gamepaddisconnected", function (e) {
       const {
@@ -58,7 +57,9 @@ export default class Controller extends Component {
   }
 
   gamePadsLoop = () => {
-    const { fixedController: { speed, direction }} = this; 
+    const {
+      fixedController: { speed, direction },
+    } = this;
     this.gamePadsTime = setInterval(() => {
       var gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
@@ -69,7 +70,7 @@ export default class Controller extends Component {
         return;
       }
       const { axes, buttons, mapping } = gamepadList[0];
-      const [x ,y ] = axes;
+      const [x, y] = axes;
       speed(-y);
       direction(-x);
       // message.info(JSON.stringify(axes));
