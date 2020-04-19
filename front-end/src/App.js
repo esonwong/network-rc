@@ -158,7 +158,8 @@ export default class App extends Component {
   };
 
   login = ({ password }) => {
-    if (!this.wsavc) return;
+    const { wsConnected } = this.state;
+    if (!wsConnected) return;
     this.wsavc.send("login", {
       token: md5(`${password}eson`),
     });
@@ -168,14 +169,16 @@ export default class App extends Component {
     const {
       state: {
         setting: { cameraMode },
+        wsConnected,
       },
     } = this;
-    if (!this.wsavc) return;
+    if (!wsConnected) return;
     this.wsavc.send("open camera", { enabled, cameraMode });
   };
 
   changeLight = (enable) => {
-    if (!this.wsavc) return;
+    const { wsConnected } = this.state;
+    if (!wsConnected) return;
     this.wsavc.send("open light", enable);
   };
 
@@ -236,7 +239,8 @@ export default class App extends Component {
         canvasRef,
         action,
         isFullscreen,
-        serverSetting
+        serverSetting,
+        lightEnabled,
       },
     } = this;
     return (
@@ -299,6 +303,15 @@ export default class App extends Component {
           <Controller
             path={`${process.env.PUBLIC_URL}/`}
             controller={controller}
+            onGamePadPress={(index, value) => {
+              if (value === 0) return;
+              if (index === 0) {
+                this.changeLight(!lightEnabled);
+              }
+              if (index === 1) {
+                this.changeCamera(!cameraEnabled);
+              }
+            }}
           />
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
