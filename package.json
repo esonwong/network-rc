@@ -15,9 +15,11 @@
     "@clusterws/cws": "^1.5.0",
     "express": "^4.17.1",
     "md5": "^2.2.1",
+    "qrcode": "^1.4.4",
     "rpio": "^2.1.1",
     "rpio-pwm": "^1.0.3",
     "stream-split": "^1.1.0",
+    "uuidv4": "^6.0.7",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
