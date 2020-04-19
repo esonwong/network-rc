@@ -35,48 +35,90 @@ export default class Controller extends Component {
       forwardPower: 50,
       directionFix: store.get("directionFix") || 0,
       isShowButton: true,
+      gamepadEnabled: false,
     };
   }
 
   componentDidMount() {
     window.addEventListener("deviceorientation", this.deviceorientation);
-    window.addEventListener("gamepadconnected", function (e) {
-      const {
-        gamepad: { index, id, buttons, axes },
-      } = e;
-      message.success(`控制器已连接于 ${index} 位: ${id}。`);
-      message.success(`${buttons.length} 个按钮, ${axes.length} 个坐标方向。`);
-    });
-    window.addEventListener("gamepaddisconnected", function (e) {
-      const {
-        gamepad: { index, id },
-      } = e;
-      message.success(`控制器位${id}-${index}已断开。`);
-    });
+    window.addEventListener("gamepadconnected", this.gamepadConnected);
+    window.addEventListener("gamepaddisconnected", this.gamepadDisconnected);
+    window.addEventListener("gamepadpress", this.gamepadPress);
     this.gamePadsLoop();
   }
+
+  componentWillUnmount() {
+    clearInterval(this.gamePadsTime);
+    window.removeEventListener("deviceorientation", this.deviceorientation);
+    window.removeEventListener("gamepadconnected", this.gamepadConnected);
+    window.removeEventListener("gamepaddisconnected", this.gamepadDisconnected);
+    window.removeEventListener("gamepadpress", this.gamepadPress);
+  }
+
+  gamepadConnected(e) {
+    const {
+      gamepad: { index, id, buttons, axes },
+    } = e;
+    message.success(`控制器已连接于 ${index} 位: ${id}。`);
+    message.success(`${buttons.length} 个按钮, ${axes.length} 个坐标方向。`);
+  }
+  gamepadDisconnected(e) {
+    const {
+      gamepad: { index, id },
+    } = e;
+    message.success(`控制器位${id}-${index}已断开。`);
+  }
+
+  gamepadPress = ({ detail: { index, value } }) => {
+    const { onGamePadPress } = this.props;
+    const {
+      fixedController: { speed, direction },
+    } = this;
+    onGamePadPress(index, value);
+    if (index === 4 || index === 2) {
+      speed(value * -1);
+    }
+    if (index === 5 || index === 3) {
+      speed(value);
+    }
+  };
 
   gamePadsLoop = () => {
     const {
       fixedController: { speed, direction },
     } = this;
+
+    const buttonStatus = [];
+
     this.gamePadsTime = setInterval(() => {
       var gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
         : navigator.webkitGetGamepads
         ? navigator.webkitGetGamepads
         : [];
-      if (!gamepadList[0]) {
+      if (!gamepadList[0] || !gamepadList[0].connected) {
         return;
       }
       const { axes, buttons, mapping } = gamepadList[0];
+      buttons.forEach((status, index) => {
+        if (!buttonStatus[index]) {
+          buttonStatus[index] = status;
+          this.setState({ gamepadEnabled: true });
+          return;
+        }
+        if (buttonStatus[index].value !== status.value) {
+          window.dispatchEvent(
+            new CustomEvent("gamepadpress", {
+              detail: { index, value: status.value },
+            })
+          );
+        }
+        buttonStatus[index] = status;
+      });
       const [x, y] = axes;
-      speed(-y);
+      // speed(-y);
       direction(-x);
-      // message.info(JSON.stringify(axes));
-      // message.info(JSON.stringify(buttons));
-      // message.info(JSON.stringify(mapping));
-    }, 50);
+    }, 100);
   };
 
   componentWillUnmount() {
@@ -188,7 +230,12 @@ export default class Controller extends Component {
       fixContent,
       fixedController: { speed, direction },
     } = this;
-    const { forwardPower, backwardPower, isShowButton } = this.state;
+    const {
+      gamepadEnabled,
+      forwardPower,
+      backwardPower,
+      isShowButton,
+    } = this.state;
     return (
       <div className="controller">
         <Form className="controller-form" size="small" layout="inline">
@@ -266,6 +313,19 @@ export default class Controller extends Component {
             />
           </Form.Item>
           <Form.Item label="键盘">wsad</Form.Item>
+          <Form.Item label="手柄">
+            <Switch
+              checked={gamepadEnabled}
+              onChange={(gamepadEnabled) => {
+                if (gamepadEnabled) {
+                  this.gamePadsLoop();
+                } else {
+                  clearInterval(this.gamePadsTime);
+                }
+                this.setState({ gamepadEnabled });
+              }}
+            />
+          </Form.Item>
           <Form.Item label="前进油门">
             <Slider
               value={forwardPower}
