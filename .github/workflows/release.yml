@@ -13,14 +13,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - run: cd front-end
-      - name: Install front-end
-        uses: borales/actions-yarn@v2.0.0
+      - uses: actions/setup-node@v1
         with:
-          cmd: install
-      - uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: build
+          node-version: '10.x'
+      - name: Build front-end
+        run: | 
+          cd front-end
+          yarn
+          yarnbuild
       - name: Package
         shell: bash
         run: |
