@@ -54,7 +54,11 @@ export default class App extends Component {
       },
     };
 
+    const { changeCamera, changeLight } = this;
+
     this.controller = {
+      changeLight,
+      changeCamera,
       speed: (v) => {
         const {
           changeSpeed,
@@ -303,15 +307,8 @@ export default class App extends Component {
           <Controller
             path={`${process.env.PUBLIC_URL}/`}
             controller={controller}
-            onGamePadPress={(index, value) => {
-              if (value === 0) return;
-              if (index === 0) {
-                this.changeLight(!lightEnabled);
-              }
-              if (index === 1) {
-                this.changeCamera(!cameraEnabled);
-              }
-            }}
+            lightEnabled={lightEnabled}
+            cameraEnabled={cameraEnabled}
           />
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}

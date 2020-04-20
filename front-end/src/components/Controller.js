@@ -44,6 +44,7 @@ export default class Controller extends Component {
     window.addEventListener("gamepadconnected", this.gamepadConnected);
     window.addEventListener("gamepaddisconnected", this.gamepadDisconnected);
     window.addEventListener("gamepadpress", this.gamepadPress);
+    window.addEventListener("gamepadaxis", this.gamepadAxis);
     this.gamePadsLoop();
   }
 
@@ -53,80 +54,130 @@ export default class Controller extends Component {
     window.removeEventListener("gamepadconnected", this.gamepadConnected);
     window.removeEventListener("gamepaddisconnected", this.gamepadDisconnected);
     window.removeEventListener("gamepadpress", this.gamepadPress);
-  }
-
-  gamepadConnected(e) {
-    const {
-      gamepad: { index, id, buttons, axes },
-    } = e;
-    message.success(`控制器已连接于 ${index} 位: ${id}。`);
-    message.success(`${buttons.length} 个按钮, ${axes.length} 个坐标方向。`);
-  }
-  gamepadDisconnected(e) {
-    const {
-      gamepad: { index, id },
-    } = e;
-    message.success(`控制器位${id}-${index}已断开。`);
-  }
-
-  gamepadPress = ({ detail: { index, value } }) => {
-    const { onGamePadPress } = this.props;
-    const {
-      fixedController: { speed, direction },
-    } = this;
-    onGamePadPress(index, value);
-    if (index === 4 || index === 2) {
-      speed(value * -1);
-    }
-    if (index === 5 || index === 3) {
-      speed(value);
-    }
-  };
-
-  gamePadsLoop = () => {
-    const {
-      fixedController: { speed, direction },
-    } = this;
-
-    const buttonStatus = [];
-
-    this.gamePadsTime = setInterval(() => {
-      var gamepadList = navigator.getGamepads
-        ? navigator.getGamepads()
-        : navigator.webkitGetGamepads
-        ? navigator.webkitGetGamepads
-        : [];
-      if (!gamepadList[0] || !gamepadList[0].connected) {
-        return;
-      }
-      const { axes, buttons, mapping } = gamepadList[0];
-      buttons.forEach((status, index) => {
-        if (!buttonStatus[index]) {
-          buttonStatus[index] = status;
-          this.setState({ gamepadEnabled: true });
-          return;
-        }
-        if (buttonStatus[index].value !== status.value) {
-          window.dispatchEvent(
-            new CustomEvent("gamepadpress", {
-              detail: { index, value: status.value },
-            })
-          );
-        }
-        buttonStatus[index] = status;
-      });
-      const [x, y] = axes;
-      // speed(-y);
-      direction(-x);
-    }, 100);
-  };
-
-  componentWillUnmount() {
+    window.removeEventListener("gamepadaxis", this.gamepadAxis);
     window.removeEventListener(
       "deviceorientation",
       this.handleSetZeroOrientation
     );
   }
+
+  gamepadConnected = (e) => {
+    const {
+      gamepad: { index, id },
+    } = e;
+    message.success(`控制器已连接于 ${index} 位: ${id}。`);
+    this.setState({ gamepadEnabled: true });
+  };
+  gamepadDisconnected(e) {
+    const {
+      gamepad: { index, id },
+    } = e;
+    message.error(`控制器位${id}-${index}已断开。`);
+  }
+
+  gamepadPress = ({ detail: { index, value } }) => {
+    const {
+      lightEnabled,
+      cameraEnabled,
+      controller: { changeLight, changeCamera },
+    } = this.props;
+    let { forwardPower } = this.state;
+    const {
+      fixedController: { speed, direction },
+    } = this;
+    if (index === 1 || index === 13 || index === 6) {
+      speed(value * -1);
+    }
+    if (index === 0 || index === 12 || index === 7) {
+      speed(value);
+    }
+    if (index === 14) {
+      direction(value * -1);
+    }
+    if (index === 15) {
+      direction(value);
+    }
+    if (index === 9 && value === 1) {
+      changeLight(!lightEnabled);
+    }
+    if (index === 16 && value === 1) {
+      changeCamera(!cameraEnabled);
+    }
+
+    if ((index === 4 || index === 2) && value === 1) {
+      forwardPower -= 5;
+      this.setState({ forwardPower });
+    }
+    if ((index === 3 || index === 5) && value === 1) {
+      forwardPower += 5;
+      this.setState({ forwardPower });
+    }
+  };
+
+  gamepadAxis = ({ detail: { index, value } }) => {
+    const {
+      fixedController: { speed, direction },
+    } = this;
+    if (index === 0) {
+      direction(-value);
+    }
+    if (index === 3) {
+      speed(-value);
+    }
+  };
+
+  gamePadsLoop = () => {
+    const buttonsStatus = {},
+      axesStatus = {};
+    this.gamePadsTime = setInterval(() => {
+      const gamepadList = navigator.getGamepads
+        ? navigator.getGamepads()
+        : navigator.webkitGetGamepads
+        ? navigator.webkitGetGamepads
+        : [];
+      for (
+        let gamePadIndex = 0;
+        gamePadIndex < gamepadList.length;
+        gamePadIndex++
+      ) {
+        const gamepad = gamepadList[gamePadIndex];
+        if (!gamepad) continue;
+        const { axes, buttons, connected } = gamepad;
+        if (!connected) continue;
+        buttons.forEach((status, index) => {
+          if (!buttonsStatus[`${gamePadIndex}-${index}`]) {
+            buttonsStatus[`${gamePadIndex}-${index}`] = status;
+            return;
+          }
+          if (
+            buttonsStatus[`${gamePadIndex}-${index}`].value !== status.value
+          ) {
+            window.dispatchEvent(
+              new CustomEvent("gamepadpress", {
+                detail: { index, value: status.value },
+              })
+            );
+          }
+          buttonsStatus[`${gamePadIndex}-${index}`] = status;
+        });
+        axes.forEach((value, index) => {
+          if (!axesStatus[`${gamePadIndex}-${index}`]) {
+            axesStatus[`${gamePadIndex}-${index}`] = { value };
+            return;
+          }
+          if (axesStatus[`${gamePadIndex}-${index}`].value !== value) {
+            window.dispatchEvent(
+              new CustomEvent("gamepadaxis", {
+                detail: { index, value },
+              })
+            );
+          }
+          axesStatus[`${gamePadIndex}-${index}`] = { value };
+        });
+      }
+    }, 50);
+  };
+
   deviceorientation = ({ alpha, beta, gamma }) => {
     const {
       props: { controller },
