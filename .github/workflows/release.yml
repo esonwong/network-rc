@@ -14,8 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - run: cd front-end
-      - name: Build front-end
-      - uses: borales/actions-yarn@v2.0.0
+      - name: Install front-end
+        uses: borales/actions-yarn@v2.0.0
         with:
           cmd: install
       - uses: borales/actions-yarn@v2.0.0
