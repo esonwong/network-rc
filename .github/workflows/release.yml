@@ -20,7 +20,7 @@ jobs:
         run: | 
           cd front-end
           yarn
-          yarnbuild
+          yarn build
       - name: Package
         shell: bash
         run: |
