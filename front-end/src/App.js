@@ -1,7 +1,6 @@
 import React, { Component, createRef } from "react";
 import store from "store";
 import {
-  InputNumber,
   Form,
   Switch,
   Dropdown,
@@ -21,7 +20,6 @@ import {
   HomeOutlined,
   ExpandOutlined,
   CompressOutlined,
-  ControlOutlined,
   ApiOutlined,
   DisconnectOutlined,
   VideoCameraOutlined,
