@@ -12,6 +12,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow: hidden;
 }
 
 .app-status {
@@ -32,7 +33,7 @@ body {
 .controller-form {
   position: fixed;
   bottom: 0;
-  padding: 0 1em;
+  padding: 1em;
 }
 
 .controller-form .backward-button,
@@ -77,6 +78,7 @@ body {
   width: 100%;
   height: 100%;
   display: flex;
+  transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
 }
 .player-box canvas {
   flex: 1;

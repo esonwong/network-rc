@@ -7,6 +7,7 @@ import {
   WeiboOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
+import Icon from './Icon'
 
 export default function Nav(props) {
   return (
@@ -26,7 +27,7 @@ export default function Nav(props) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <YoutubeOutlined /> B站 EsonWong
+          <Icon type="icon-bilibili-fill" /> B站 EsonWong
         </a>
       </Menu.Item>
       <Menu.Item>
