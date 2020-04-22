@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
-import { Form, Button, Switch, Slider, Popover, message } from "antd";
-import { SlidersOutlined } from "@ant-design/icons";
+import { Form, Button, Switch, Slider, Popover, message, Tag } from "antd";
+import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
   DownOutlined,
@@ -11,6 +11,7 @@ import {
 import store from "store";
 import Keybord from "../Keyboard";
 import { vibrate } from "../unit";
+import Icon from './Icon'
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -357,14 +358,52 @@ export default class Controller extends Component {
               ></Button>
             </Fragment>
           )}
-          <Form.Item label="虚拟按钮">
+          <Form.Item>
+            <Popover
+              placement="topLeft"
+              content={
+                <Slider
+                  value={forwardPower}
+                  min={0}
+                  max={100}
+                  onChange={(forwardPower) => {
+                    this.setState({ forwardPower });
+                  }}
+                  arrowPointAtCenter
+                  style={{ width: "30vw" }}
+                />
+              }
+            >
+              <Button>前进油门:{forwardPower}</Button>
+            </Popover>
+          </Form.Item>
+          <Form.Item>
+            <Popover
+              placement="topLeft"
+              content={
+                <Slider
+                  value={backwardPower}
+                  min={0}
+                  max={100}
+                  style={{ width: "30vw" }}
+                  onChange={(backwardPower) => {
+                    this.setState({ backwardPower });
+                  }}
+                />
+              }
+            >
+              <Button>倒退油门:{backwardPower}</Button>
+            </Popover>
+          </Form.Item>
+          <Form.Item>
             <Switch
               checked={isShowButton}
               onChange={(isShowButton) => this.setState({ isShowButton })}
+              checkedChildren={<DragOutlined />}
+              unCheckedChildren={<DragOutlined />}
             />
           </Form.Item>
-          <Form.Item label="键盘">wsad</Form.Item>
-          <Form.Item label="手柄">
+          <Form.Item>
             <Switch
               checked={gamepadEnabled}
               onChange={(gamepadEnabled) => {
@@ -375,30 +414,11 @@ export default class Controller extends Component {
                 }
                 this.setState({ gamepadEnabled });
               }}
+              unCheckedChildren={<Icon type="icon-game-" />}
+              checkedChildren={<Icon type="icon-game-" />}
             />
           </Form.Item>
-          <Form.Item label="前进油门">
-            <Slider
-              value={forwardPower}
-              min={0}
-              max={100}
-              onChange={(forwardPower) => {
-                this.setState({ forwardPower });
-              }}
-              style={{ width: "15vw" }}
-            />
-          </Form.Item>
-          <Form.Item label="倒退油门">
-            <Slider
-              value={backwardPower}
-              min={0}
-              max={100}
-              style={{ width: "15vw" }}
-              onChange={(backwardPower) => {
-                this.setState({ backwardPower });
-              }}
-            />
-          </Form.Item>
+          <Form.Item> <Tag>键盘:wsad</Tag></Form.Item>
         </Form>
         <Keybord controller={{ speed, direction }} />
       </div>

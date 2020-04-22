@@ -8,6 +8,7 @@ import {
   Button,
   Popover,
   message,
+  Slider,
 } from "antd";
 import "./App.css";
 import Ai from "./Ai";
@@ -21,9 +22,15 @@ import {
   ExpandOutlined,
   CompressOutlined,
   ControlOutlined,
+  ApiOutlined,
+  DisconnectOutlined,
+  VideoCameraOutlined,
+  BulbOutlined,
+  PlaySquareOutlined,
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
+import debounce from "debounce";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -48,6 +55,7 @@ export default class App extends Component {
       canvasRef: undefined,
       isAiControlling: false,
       isFullscreen: false,
+      videoSize: 50,
       action: {
         speed: 0,
         direction: 0,
@@ -86,6 +94,10 @@ export default class App extends Component {
         this.setState({ action: { ...action } });
       },
     };
+
+    this.changeVideoSize = debounce(() => {
+      this.setState({ unbounceVideoSize: this.state });
+    }, 300);
   }
 
   componentDidMount() {
@@ -210,31 +222,14 @@ export default class App extends Component {
     this.wsavc.send("direction rate", directionRate);
   };
 
-  switchContent = () => {
-    const {
-      changeCamera,
-      changeLight,
-      state: { lightEnabled, cameraEnabled },
-    } = this;
-    return (
-      <Form>
-        <Form.Item label="摄像头">
-          <Switch checked={cameraEnabled} onChange={changeCamera} />
-        </Form.Item>
-        <Form.Item label="车灯">
-          <Switch checked={lightEnabled} onChange={changeLight} />
-        </Form.Item>
-      </Form>
-    );
-  };
-
   render() {
     const {
       disconnect,
       connect,
       controller,
       changeSetting,
-      switchContent,
+      changeLight,
+      changeCamera,
       login,
       state: {
         setting,
@@ -245,6 +240,7 @@ export default class App extends Component {
         isFullscreen,
         serverSetting,
         lightEnabled,
+        videoSize,
       },
     } = this;
     return (
@@ -263,26 +259,57 @@ export default class App extends Component {
               )}
             </Location>
           </Form.Item>
-          <Form.Item label="连接">
+          <Form.Item>
             <Switch
               checked={wsConnected}
               onChange={(v) => {
                 if (v) connect();
                 else disconnect();
               }}
+              unCheckedChildren={<DisconnectOutlined />}
+              checkedChildren={<ApiOutlined />}
             />
           </Form.Item>
           <Form.Item>
-            <Popover content={switchContent} title="开关" trigger="click">
-              <Button icon={<ControlOutlined />}>开关</Button>
+            <Switch
+              checked={cameraEnabled}
+              onChange={changeCamera}
+              checkedChildren={<VideoCameraOutlined />}
+              unCheckedChildren={<VideoCameraOutlined />}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Switch
+              checked={lightEnabled}
+              onChange={changeLight}
+              checkedChildren={<BulbOutlined />}
+              unCheckedChildren={<BulbOutlined />}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button>舵机:{action.direction.toFixed(2)}</Button>
+          </Form.Item>
+          <Form.Item>
+            <Button>电调:{action.speed.toFixed(2)}</Button>
+          </Form.Item>
+          <Form.Item>
+            <Popover
+              placement="bottomRight"
+              content={
+                <Slider
+                  step={0.1}
+                  tipFormatter={(v) => v * 2}
+                  onAfterChange={(videoSize) => this.setState({ videoSize })}
+                  style={{ width: "30vw" }}
+                />
+              }
+            >
+              <Button>
+                <PlaySquareOutlined />
+                {videoSize >= 50 ? undefined : "0"}
+                {(videoSize * 2).toFixed(1)}%
+              </Button>
             </Popover>
-          </Form.Item>
-
-          <Form.Item label="舵机">
-            <InputNumber value={action.direction} />
-          </Form.Item>
-          <Form.Item label="电调">
-            <InputNumber value={action.speed} />
           </Form.Item>
 
           {document.body.requestFullscreen && (
@@ -330,7 +357,10 @@ export default class App extends Component {
         <div
           className="player-box"
           ref={this.playerBoxRef}
-          style={{ display: cameraEnabled ? "flex" : "none" }}
+          style={{
+            display: cameraEnabled ? "flex" : "none",
+            transform: `scale(${videoSize / 50})`,
+          }}
         ></div>
       </div>
     );
