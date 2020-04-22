@@ -217,7 +217,7 @@ const speedRate = (socket, v) => {
   console.log("speed", v);
   if (!check(socket)) return;
   if(Math.abs(v) *100 > maxSpeed){
-    v = v > 1 ? maxSpeed /100 : -maxSpeed /100;
+    v = v > 0 ? maxSpeed /100 : -maxSpeed /100;
   }
   changeSpeed(v);
   broadcast("speed", v);
