@@ -1,14 +1,6 @@
 import React, { Component, createRef } from "react";
 import store from "store";
-import {
-  Form,
-  Switch,
-  Dropdown,
-  Button,
-  Popover,
-  message,
-  Slider,
-} from "antd";
+import { Form, Switch, Dropdown, Button, Popover, message, Slider } from "antd";
 import "./App.css";
 import Ai from "./Ai";
 import { Router, Location, navigate } from "@reach/router";
@@ -249,7 +241,7 @@ export default class App extends Component {
               {({ navigate }) => (
                 <Dropdown.Button
                   overlay={Nav}
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate(`${process.env.PUBLIC_URL}/`)}
                   type="primary"
                 >
                   <HomeOutlined /> 控制
@@ -285,10 +277,14 @@ export default class App extends Component {
             />
           </Form.Item>
           <Form.Item>
-            <Button>舵机:{action.direction.toFixed(2)}</Button>
+            <Button style={{ width: "6em" }}>
+              舵机:{action.direction.toFixed(2)}
+            </Button>
           </Form.Item>
           <Form.Item>
-            <Button>电调:{action.speed.toFixed(2)}</Button>
+            <Button style={{ width: "6em" }}>
+              电调:{action.speed.toFixed(2)}
+            </Button>
           </Form.Item>
           <Form.Item>
             <Popover
