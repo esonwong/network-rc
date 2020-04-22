@@ -107,10 +107,12 @@ export default class Controller extends Component {
 
     if ((index === 4 || index === 2) && value === 1) {
       forwardPower -= 5;
+      if(forwardPower < 0) forwardPower = 0;
       this.setState({ forwardPower });
     }
     if ((index === 3 || index === 5) && value === 1) {
       forwardPower += 5;
+      if(forwardPower > 100) forwardPower = 100;
       this.setState({ forwardPower });
     }
   };
