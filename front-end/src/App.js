@@ -251,7 +251,7 @@ export default class App extends Component {
               {({ navigate }) => (
                 <Dropdown.Button
                   overlay={Nav}
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate(`${process.env.PUBLIC_URL}/`)}
                   type="primary"
                 >
                   <HomeOutlined /> 控制
