@@ -22,12 +22,18 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ```
 
 ## ToDo
-- [ ] 支持手柄
+- [x] 支持手柄
 - [x] 网络穿透
 - [ ] Ai 控制
 - [ ] 支持语音(待定)
 
 ## 更新记录
+
+### 0.5.8
+- 支持游戏手柄
+- 支持视频画面大小调整
+- 支持隐藏虚拟按钮
+- UI 优化
 ### 0.5.0
 - 添加网络穿透
 ### 0.4.0
