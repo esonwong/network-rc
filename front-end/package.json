@@ -12,10 +12,12 @@
     "@testing-library/user-event": "^7.2.1",
     "antd": "^4.1.0",
     "debounce": "^1.2.0",
+    "is-mobile": "^2.2.1",
     "md5": "^2.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
+    "react-wakelock-react16": "^0.0.7",
     "store": "^2.0.12",
     "ws-avc-player": "^2.0.2"
   },

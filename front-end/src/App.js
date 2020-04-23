@@ -1,6 +1,16 @@
 import React, { Component, createRef } from "react";
+import WakeLock from "react-wakelock-react16";
 import store from "store";
-import { Form, Switch, Dropdown, Button, Popover, message, Slider } from "antd";
+import {
+  Form,
+  Switch,
+  Dropdown,
+  Button,
+  Popover,
+  message,
+  Slider,
+  Tag,
+} from "antd";
 import "./App.css";
 import Ai from "./Ai";
 import { Router, Location, navigate } from "@reach/router";
@@ -11,12 +21,11 @@ import WSAvcPlayer from "ws-avc-player";
 import {
   HomeOutlined,
   ExpandOutlined,
-  CompressOutlined,
+  FullscreenOutlined,
   ApiOutlined,
-  DisconnectOutlined,
   VideoCameraOutlined,
   BulbOutlined,
-  PlaySquareOutlined,
+  FullscreenExitOutlined,
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
@@ -46,6 +55,7 @@ export default class App extends Component {
       isAiControlling: false,
       isFullscreen: false,
       videoSize: 50,
+      delay: undefined,
       action: {
         speed: 0,
         direction: 0,
@@ -92,7 +102,12 @@ export default class App extends Component {
 
   componentDidMount() {
     const { connect } = this;
+    let pingTime;
     this.wsavc = new WSAvcPlayer({ useWorker: true });
+
+    this.wsavc.on("pong", ({ sendTime }) => {
+      this.setState({ delay: (new Date().getTime() - sendTime) / 2 });
+    });
 
     this.wsavc.on("controller init", ({ needPassword, maxSpeed }) => {
       this.setState({ serverSetting: { maxSpeed, needPassword } });
@@ -104,10 +119,15 @@ export default class App extends Component {
     this.wsavc.on("disconnected", () => {
       console.log("WS disconnected");
       this.setState({ wsConnected: false, cameraEnabled: false });
+      clearInterval(pingTime);
     });
     this.wsavc.on("connected", () => {
       console.log("WS connected");
       this.setState({ wsConnected: true });
+      pingTime = setInterval(() => {
+        const sendTime = new Date().getTime();
+        this.wsavc.send("ping", { sendTime });
+      }, 1000);
     });
     this.wsavc.on("frame_shift", (fbl) => {
       // console.log("Stream frame shift: ", fbl);
@@ -231,6 +251,7 @@ export default class App extends Component {
         serverSetting,
         lightEnabled,
         videoSize,
+        delay,
       },
     } = this;
     return (
@@ -256,7 +277,7 @@ export default class App extends Component {
                 if (v) connect();
                 else disconnect();
               }}
-              unCheckedChildren={<DisconnectOutlined />}
+              unCheckedChildren={<ApiOutlined />}
               checkedChildren={<ApiOutlined />}
             />
           </Form.Item>
@@ -276,7 +297,8 @@ export default class App extends Component {
               unCheckedChildren={<BulbOutlined />}
             />
           </Form.Item>
-          <Form.Item>
+
+          {/* <Form.Item>
             <Button style={{ width: "6em" }}>
               舵机:{action.direction.toFixed(2)}
             </Button>
@@ -285,33 +307,42 @@ export default class App extends Component {
             <Button style={{ width: "6em" }}>
               电调:{action.speed.toFixed(2)}
             </Button>
-          </Form.Item>
-          <Form.Item>
-            <Popover
-              placement="bottomRight"
-              content={
-                <Slider
-                  step={0.1}
-                  tipFormatter={(v) => v * 2}
-                  onAfterChange={(videoSize) => this.setState({ videoSize })}
-                  style={{ width: "30vw" }}
-                />
-              }
-            >
-              <Button>
-                <PlaySquareOutlined />
-                {videoSize >= 50 ? undefined : "0"}
-                {(videoSize * 2).toFixed(1)}%
-              </Button>
-            </Popover>
-          </Form.Item>
+          </Form.Item> */}
+          {cameraEnabled && (
+            <Form.Item>
+              <Popover
+                placement="bottomRight"
+                content={
+                  <Slider
+                    defaultValue={videoSize}
+                    step={0.1}
+                    tipFormatter={(v) => v * 2}
+                    onAfterChange={(videoSize) => this.setState({ videoSize })}
+                    style={{ width: "30vw" }}
+                    marks={{0:0,50:100,100:200}}
+                  />
+                }
+              >
+                <Button shape="round">
+                  <ExpandOutlined />
+                  {(videoSize * 2).toFixed(1)}%
+                </Button>
+              </Popover>
+            </Form.Item>
+          )}
 
           {document.body.requestFullscreen && (
             <Form.Item>
               <Button
                 type="primary"
                 shape="circle"
-                icon={isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+                icon={
+                  isFullscreen ? (
+                    <FullscreenExitOutlined />
+                  ) : (
+                    <FullscreenOutlined />
+                  )
+                }
                 onClick={() => {
                   if (isFullscreen) {
                     document.exitFullscreen();
@@ -320,6 +351,11 @@ export default class App extends Component {
                   }
                 }}
               ></Button>
+            </Form.Item>
+          )}
+          {wsConnected && delay && (
+            <Form.Item>
+              <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>
             </Form.Item>
           )}
         </Form>
@@ -356,6 +392,7 @@ export default class App extends Component {
             transform: `scale(${videoSize / 50})`,
           }}
         ></div>
+        <WakeLock preventSleep={wsConnected} />
       </div>
     );
   }
