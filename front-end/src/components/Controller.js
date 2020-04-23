@@ -11,7 +11,9 @@ import {
 import store from "store";
 import Keybord from "../Keyboard";
 import { vibrate } from "../unit";
-import Icon from './Icon'
+import Icon from "./Icon";
+import mobile from "is-mobile";
+
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -35,7 +37,7 @@ export default class Controller extends Component {
       backwardPower: 50,
       forwardPower: 50,
       directionFix: store.get("directionFix") || 0,
-      isShowButton: true,
+      isShowButton:  mobile(),
       gamepadEnabled: false,
     };
   }
@@ -107,12 +109,12 @@ export default class Controller extends Component {
 
     if ((index === 4 || index === 2) && value === 1) {
       forwardPower -= 5;
-      if(forwardPower < 0) forwardPower = 0;
+      if (forwardPower < 0) forwardPower = 0;
       this.setState({ forwardPower });
     }
     if ((index === 3 || index === 5) && value === 1) {
       forwardPower += 5;
-      if(forwardPower > 100) forwardPower = 100;
+      if (forwardPower > 100) forwardPower = 100;
       this.setState({ forwardPower });
     }
   };
@@ -301,6 +303,7 @@ export default class Controller extends Component {
           {isShowButton && (
             <Fragment>
               <Button
+                size="small"
                 className="left-button"
                 shape="circle"
                 size="large"
@@ -376,7 +379,7 @@ export default class Controller extends Component {
                 />
               }
             >
-              <Button>前进油门:{forwardPower}</Button>
+              <Button shape="round">前进油门:{forwardPower}</Button>
             </Popover>
           </Form.Item>
           <Form.Item>
@@ -394,7 +397,7 @@ export default class Controller extends Component {
                 />
               }
             >
-              <Button>倒退油门:{backwardPower}</Button>
+              <Button shape="round">倒退油门:{backwardPower}</Button>
             </Popover>
           </Form.Item>
           <Form.Item>
@@ -420,7 +423,10 @@ export default class Controller extends Component {
               checkedChildren={<Icon type="icon-game-" />}
             />
           </Form.Item>
-          <Form.Item> <Tag>键盘:wsad</Tag></Form.Item>
+          <Form.Item>
+            {" "}
+            <Tag>键盘:wsad</Tag>
+          </Form.Item>
         </Form>
         <Keybord controller={{ speed, direction }} />
       </div>
