@@ -81,7 +81,7 @@ app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 
 const cameraModes = {
   default: {
-    fps: 15,
+    fps: 30,
     exposure: "auto",
     width: 400,
     height: 300,
@@ -154,6 +154,9 @@ wss.on("connection", function (socket) {
     const { action, payload } = JSON.parse(m);
 
     switch (action) {
+      case "ping":
+        ping(socket, payload);
+        break;
       case "login":
         login(socket, payload);
         break;
@@ -187,6 +190,10 @@ const login = (socket, { uid, token }) => {
     socket.sendData("error", { status: 1, message: "哎呦喂，密码错了啊！" });
   }
 };
+
+const ping = (socket, { sendTime }) => {
+  socket.sendData("pong", { sendTime })
+}
 
 const check = (socket) => {
   if (socket.isLogin) {
