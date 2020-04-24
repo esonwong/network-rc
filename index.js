@@ -86,11 +86,23 @@ const cameraModes = {
     width: 400,
     height: 300,
   },
-  local: {
+  "480p-15fps": {
     fps: 30,
-    exposure: "sports",
+    exposure: "auto",
+    width: 640,
+    height: 480,
+  },
+  '600p': {
+    fps: 30,
+    exposure: "auto",
     width: 800,
     height: 600,
+  },
+  "1080p": {
+    fps: 30,
+    exposure: "auto",
+    width: 1440,
+    height: 1080,
   },
 };
 
@@ -119,12 +131,12 @@ function sendBinary(socket, frame) {
 }
 
 const broadcast = (action, payload) => {
-  clients.forEach((socket) => socket.sendData(action, payload));
+  clients.forEach((socket) => socket.isLogin && socket.sendData(action, payload));
 };
 
 const broadcastStream = (data) => {
   clients.forEach((socket) => {
-    if (socket.enabledCamera) {
+    if (socket.isLogin) {
       socket.sendBinary(socket, data);
     }
   });
@@ -210,12 +222,12 @@ const openCamera = (socket, v) => {
   if (!check(socket)) return;
   if (v.enabled) {
     cameraMode = v.cameraMode;
-    socket.enabledCamera = true;
+    //socket.enabledCamera = true;
     streamer || startStreamer();
-    socket.sendData("stream_active", true);
+    broadcast("stream_active", true);
   } else {
-    socket.enabledCamera = false;
-    socket.sendData("stream_active", false);
+    //socket.enabledCamera = false;
+    broadcast("stream_active", false);
     endStreamer();
   }
 };
@@ -250,8 +262,8 @@ const disconnect = (socket) => {
   if (clients.size < 1) {
     changeSpeed(0);
     changeLight(false);
+    endStreamer();
   }
-  endStreamer();
 };
 
 // init
