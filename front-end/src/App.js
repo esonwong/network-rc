@@ -289,14 +289,6 @@ export default class App extends Component {
               unCheckedChildren={<VideoCameraOutlined />}
             />
           </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={lightEnabled}
-              onChange={changeLight}
-              checkedChildren={<BulbOutlined />}
-              unCheckedChildren={<BulbOutlined />}
-            />
-          </Form.Item>
 
           {/* <Form.Item>
             <Button style={{ width: "6em" }}>
@@ -319,7 +311,7 @@ export default class App extends Component {
                     tipFormatter={(v) => v * 2}
                     onAfterChange={(videoSize) => this.setState({ videoSize })}
                     style={{ width: "30vw" }}
-                    marks={{0:0,50:100,100:200}}
+                    marks={{ 0: 0, 50: 100, 100: 200 }}
                   />
                 }
               >
@@ -330,6 +322,15 @@ export default class App extends Component {
               </Popover>
             </Form.Item>
           )}
+
+          <Form.Item>
+            <Switch
+              checked={lightEnabled}
+              onChange={changeLight}
+              checkedChildren={<BulbOutlined />}
+              unCheckedChildren={<BulbOutlined />}
+            />
+          </Form.Item>
 
           {document.body.requestFullscreen && (
             <Form.Item>
@@ -388,7 +389,7 @@ export default class App extends Component {
           className="player-box"
           ref={this.playerBoxRef}
           style={{
-            display: cameraEnabled ? "flex" : "none",
+            opacity: cameraEnabled ? 1 : 0,
             transform: `scale(${videoSize / 50})`,
           }}
         ></div>
