@@ -26,8 +26,10 @@ export default function Setting({
       </Form.Item>
       <Form.Item label="摄像头模式" name="cameraMode">
         <Select>
-          <Option value="default">默认(低质量)</Option>
-          <Option value="local">本地网络(高质量)</Option>
+          <Option value="default">300p-30fps(默认)</Option>
+          <Option value="480p-15fps">480p-15fps</Option>
+          <Option value="600p">600p-30fps</Option>
+          {/* <Option value="1080p">1080p-30fps</Option> */}
         </Select>
       </Form.Item>
       <Form.Item {...tailLayout}>

@@ -303,7 +303,6 @@ export default class Controller extends Component {
           {isShowButton && (
             <Fragment>
               <Button
-                size="small"
                 className="left-button"
                 shape="circle"
                 size="large"
