@@ -19,6 +19,11 @@ body {
   padding: 1em;
 }
 
+.app-status .ant-form-item {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
 .app-page {
   overflow-y: auto;
   flex: auto;
@@ -42,7 +47,8 @@ body {
 .controller-form .right-button {
   width: 8vw;
   height: 8vw;
-  min-width: 8vw;
+  min-width: 3em;
+  min-height: 3em;
 }
 
 .backward-button {
@@ -65,7 +71,7 @@ body {
 .right-button {
   position: fixed;
   bottom: 40vh;
-  left: 15vw;
+  left: 20vw;
 }
 
 .player-box {
@@ -83,6 +89,7 @@ body {
 .player-box canvas {
   flex: 1;
   object-fit: contain;
+  max-width: 100%;
 }
 
 .ai-example-list {
