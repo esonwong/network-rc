@@ -6,7 +6,7 @@ Wants=network.target
 [Service]
 User=root
 Type=simple
-ExecStart=node /home/pi/network-rc/index.js
+ExecStart=node /home/pi/git/network-rc/index.js -f -o 9001 -p wadlll22
 Restart= always
 RestartSec=1min
 

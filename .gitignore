@@ -1,4 +1,5 @@
 *.swp
+network-rc.service
 # Created by https://www.gitignore.io/api/node,python
 # Edit at https://www.gitignore.io/?templates=node,python
 
