@@ -28,7 +28,10 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [ ] 支持语音(待定)
 
 ## 更新记录
-
+### 0.6.3
+- 兼容 树莓派4
+- 优化网络穿透
+- 优化 UI
 ### 0.5.8
 - 支持游戏手柄
 - 支持视频画面大小调整
