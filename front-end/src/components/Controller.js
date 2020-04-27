@@ -12,8 +12,9 @@ import store from "store";
 import Keybord from "../Keyboard";
 import { vibrate } from "../unit";
 import Icon from "./Icon";
+import Ai from "./Ai";
 import mobile from "is-mobile";
-
+import { Router, Location, navigate } from "@reach/router";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -37,7 +38,7 @@ export default class Controller extends Component {
       backwardPower: 50,
       forwardPower: 50,
       directionFix: store.get("directionFix") || 0,
-      isShowButton:  mobile(),
+      isShowButton: mobile(),
       gamepadEnabled: false,
     };
   }
@@ -285,12 +286,14 @@ export default class Controller extends Component {
     const {
       fixContent,
       fixedController: { speed, direction },
+      props: { action, cameraEnabled, canvasRef },
     } = this;
     const {
       gamepadEnabled,
       forwardPower,
       backwardPower,
       isShowButton,
+      fixedController,
     } = this.state;
     return (
       <div className="controller">
@@ -423,11 +426,20 @@ export default class Controller extends Component {
             />
           </Form.Item>
           <Form.Item>
-            {" "}
             <Tag>键盘:wsad</Tag>
           </Form.Item>
         </Form>
         <Keybord controller={{ speed, direction }} />
+        <Router>
+          <Ai
+            path="ai/*"
+            canvasRef={canvasRef}
+            cameraEnabled={cameraEnabled}
+            action={action}
+            controller={fixedController}
+            onAi={(isAiControlling) => this.setState({ isAiControlling })}
+          />
+        </Router>
       </div>
     );
   }

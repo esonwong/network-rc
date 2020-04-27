@@ -12,7 +12,6 @@ import {
   Tag,
 } from "antd";
 import "./App.css";
-import Ai from "./Ai";
 import { Router, Location, navigate } from "@reach/router";
 import Nav from "./components/Nav";
 import Controller from "./components/Controller";
@@ -103,7 +102,7 @@ export default class App extends Component {
   componentDidMount() {
     const { connect } = this;
     let pingTime;
-    this.wsavc = new WSAvcPlayer({ useWorker: true });
+    this.wsavc = new WSAvcPlayer({ useWorker: true, workerFile: `${process.env.PUBLIC_URL}/Decoder.js` });
 
     this.wsavc.on("pong", ({ sendTime }) => {
       this.setState({ delay: (new Date().getTime() - sendTime) / 2 });
@@ -362,12 +361,6 @@ export default class App extends Component {
         </Form>
 
         <Router className="app-page">
-          <Controller
-            path={`${process.env.PUBLIC_URL}/`}
-            controller={controller}
-            lightEnabled={lightEnabled}
-            cameraEnabled={cameraEnabled}
-          />
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
@@ -377,13 +370,14 @@ export default class App extends Component {
             onSubmit={changeSetting}
           />
           <Login path={`${process.env.PUBLIC_URL}/login`} onSubmit={login} />
-          <Ai
-            path={`${process.env.PUBLIC_URL}/ai`}
+          <Controller
+            path={`${process.env.PUBLIC_URL}/*`}
+            controller={controller}
+            lightEnabled={lightEnabled}
+            cameraEnabled={cameraEnabled}
             canvasRef={canvasRef}
             action={action}
-            controller={controller}
-            onAi={(isAiControlling) => this.setState({ isAiControlling })}
-          />
+          ></Controller>
         </Router>
         <div
           className="player-box"
