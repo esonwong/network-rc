@@ -13,7 +13,7 @@ const argv = require("yargs")
   .options({
     's': {
       alias: 'maxSpeed',
-      default: 30,
+      default: 60,
       describe: '最大速度',
       type: 'number'
     },
