@@ -6,15 +6,18 @@ import {
   YoutubeOutlined,
   WeiboOutlined,
   SettingOutlined,
+  CarOutlined
 } from "@ant-design/icons";
 import Icon from './Icon'
 
 export default function Nav(props) {
   return (
     <Menu mode="horizontal" {...props}>
-      {/* <Menu.Item> */}
-      {/* <Link to="/">控制</Link> */}
-      {/* </Menu.Item> */}
+      <Menu.Item> 
+        <Link to={`${process.env.PUBLIC_URL}/ai/sample`}>
+        <CarOutlined /> AI
+        </Link>
+      </Menu.Item>
       <Menu.Item>
         <Link to={`${process.env.PUBLIC_URL}/setting`}>
           <SettingOutlined /> 设置

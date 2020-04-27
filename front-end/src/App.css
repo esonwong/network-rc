@@ -74,6 +74,11 @@ body {
   left: 20vw;
 }
 
+.ai {
+  height: 80vh;
+  overflow: auto;
+}
+
 .player-box {
   position: absolute;
   top: 0;
