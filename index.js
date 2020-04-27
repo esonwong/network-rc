@@ -269,10 +269,6 @@ const disconnect = (socket) => {
   }
 };
 
-// init
-changeSpeed(0);
-changeLight(false);
-
 process.on("SIGINT", function () {
   closeController();
   changeLight(false);
