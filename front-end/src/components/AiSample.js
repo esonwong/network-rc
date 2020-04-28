@@ -18,22 +18,27 @@ export const aiAction = {
   left: {
     icon: <ArrowLeftOutlined />,
     name: "左转弯",
+    label: 0,
   },
   right: {
     icon: <ArrowRightOutlined />,
     name: "右转弯",
+    label: 1,
   },
   forward: {
     icon: <ArrowUpOutlined />,
     name: "前进",
+    label: 2,
   },
   back: {
     icon: <ArrowDownOutlined />,
     name: "后退",
+    label: 3,
   },
   stop: {
     icon: <PauseOutlined />,
     name: "停止",
+    label: 4,
   },
 };
 
@@ -46,10 +51,11 @@ export default class AiSample extends Component {
     };
   }
 
-  c;
+  componentDidMount() {
+    this.props.controller.changeCamera(true);
+  }
 
   async add(example) {
-    // ToDo: get image
     const {
       props: { canvasRef },
     } = this;
@@ -80,7 +86,7 @@ export default class AiSample extends Component {
 
   upload = ({ file, onSuccess }) => {
     const reader = new FileReader();
-    reader.onload =  ({ target: { result } }) => {
+    reader.onload = ({ target: { result } }) => {
       const data = JSON.parse(result);
       const { sampleList } = this.state;
       this.setState({
@@ -90,7 +96,7 @@ export default class AiSample extends Component {
     };
     reader.readAsText(file);
     return true;
-  }
+  };
 
   download = () => {
     const { sampleList, exportName } = this.state;
@@ -118,7 +124,11 @@ export default class AiSample extends Component {
             </Form.Item>
           ))}
           <Form.Item>
-            <Upload customRequest={upload} accept="application/json" showUploadList={false}>
+            <Upload
+              customRequest={upload}
+              accept="application/json"
+              showUploadList={false}
+            >
               <Button icon={<ImportOutlined />}>导入</Button>
             </Upload>
           </Form.Item>
