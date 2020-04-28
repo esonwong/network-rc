@@ -79,3 +79,4 @@ export async function sleep(time) {
 export function vibrate(v) {
   navigator.vibrate && navigator.vibrate(v);
 }
+

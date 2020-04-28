@@ -78,6 +78,18 @@ body {
   height: 80vh;
   overflow: auto;
 }
+.ai-sample {
+  padding: 1em;
+}
+
+.ai-example-list {
+  padding: 1em;
+}
+
+.ai-train {
+  padding: 1em;
+}
+
 
 .player-box {
   position: absolute;
@@ -97,7 +109,3 @@ body {
   max-width: 100%;
 }
 
-.ai-example-list {
-  background-color: #fff;
-  padding: 5vw;
-}
