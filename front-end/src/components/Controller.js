@@ -221,6 +221,7 @@ export default class Controller extends Component {
       } = this;
       direction(v * (directionReverse ? -1 : 1) + directionFix);
     },
+    changeCamera: (v) => this.props.controller.changeCamera(v),
   };
 
   fixContent = () => {
@@ -285,7 +286,7 @@ export default class Controller extends Component {
   render() {
     const {
       fixContent,
-      fixedController: { speed, direction },
+      fixedController,
       props: { action, cameraEnabled, canvasRef },
     } = this;
     const {
@@ -293,8 +294,8 @@ export default class Controller extends Component {
       forwardPower,
       backwardPower,
       isShowButton,
-      fixedController,
     } = this.state;
+    const { speed, direction } = fixedController;
     return (
       <div className="controller">
         <Form className="controller-form" size="small" layout="inline">

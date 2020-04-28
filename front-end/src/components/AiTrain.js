@@ -1,8 +1,9 @@
 import React, { Component, createRef } from "react";
 import { Form, Button, Spin, InputNumber, Select } from "antd";
-import { layout, tailLayout } from "../unit";
+import { layout, tailLayout, Ai } from "../unit";
 import { Link } from "@reach/router";
 import { ExportOutlined, ReadOutlined } from "@ant-design/icons";
+import { aiAction } from "./AiSample";
 
 const { Option } = Select;
 export default class AiTrain extends Component {
@@ -16,7 +17,6 @@ export default class AiTrain extends Component {
         hiddenUnits: 100,
       },
       loss: undefined,
-      isTraining: false,
       loading: false,
       model: undefined,
     };
@@ -24,21 +24,37 @@ export default class AiTrain extends Component {
     this.smallCanvasRef = createRef();
   }
 
-  train = () => {
-    // ToDo: 训练模型
-    const model = undefined;
-    this.this.setState({ model });
+  componentDidMount() {
+    this.props.controller.changeCamera(false);
+  }
+
+  train = async () => {
+    const {
+      props: { sampleList },
+      state: { learnArgument }
+    } = this;
+    this.setState({ loading: "加载 MobileNet..." });
+    const ai = await new Ai();
+    this.setState({ loading: "数据处理..." });
+    for (let index = 0; index < sampleList.length; index++) {
+      const { img: url, action } = sampleList[index];
+      await ai.addExample(url, aiAction[action].label);
+    }
+    this.setState({ loading: "训练..." });
+    const model = await ai.train(learnArgument,(loss) => this.setState({ loss }));
+    this.setState({ model });
+    this.setState({ loading: false });
   };
 
   render() {
     const {
-      state: { learnArgument, loss, isTraining, loading, model },
+      state: { learnArgument, loss, loading, model },
       props: { sampleList, onFinish },
       train,
     } = this;
     return (
       <div className="ai-train">
-        <Spin spinning={loading}>
+        <Spin spinning={loading} tip={loading}>
           {/* <canvas className="ai-canvas" ref={this.smallCanvasRef}></canvas> */}
           <Form {...layout} initialValues={learnArgument} onFinish={this.train}>
             <Form.Item label="Learning rate" name="learnRate">
@@ -79,12 +95,12 @@ export default class AiTrain extends Component {
             <Form.Item {...tailLayout}>
               <Button
                 key="fit"
-                loading={isTraining}
+                loading={loading}
                 disabled={!sampleList.length}
                 onClick={train}
                 icon={<ReadOutlined />}
               >
-                学习
+                学习(样本{sampleList.length})
               </Button>
               &nbsp; &nbsp; &nbsp; &nbsp;
               <Button icon={<ExportOutlined />} disabled={!sampleList.length}>
@@ -92,7 +108,7 @@ export default class AiTrain extends Component {
               </Button>
             </Form.Item>
             <Form.Item {...tailLayout}>
-              <Link to="drive">
+              <Link to="../drive">
                 <Button
                   type="primary"
                   onClick={() => onFinish(model)}

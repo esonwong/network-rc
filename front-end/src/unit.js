@@ -44,16 +44,39 @@ export async function getImageUrl(canvas) {
   return smallCanvas.toDataURL();
 }
 
-export class ControllerDataset {
+export async function imageUrlToImg(dataURL) {
+  return await new Promise((resolve) => {
+    const img = new Image();
+    img.addEventListener("load",() => {
+      resolve(tf.browser.fromPixels(img));
+    });
+    img.src = dataURL;
+  });
+}
+
+const NUM_CLASSES = 5;
+export class Ai {
+  constructor() {
+    return (async () => {
+      this.truncatedMobileNet = await loadTruncatedMobileNet();
+      return this;
+    })();
+  }
+
   /**
    * Adds an example to the controller dataset.
    * @param {Tensor} example A tensor representing the example. It can be an image,
    *     an activation, or any other type of Tensor.
    * @param {[number]} action speed and direction.
    */
-  addExample(example, action) {
-    // One-hot encode the label.
-    const y = tf.tidy(() => tf.tensor2d(action, [1, 2]));
+  async addExample(url, lable) {
+    const data = await imageUrlToImg(url);
+    const oImg = tf.tidy(() => data.expandDims(0).toFloat().div(127).sub(1));
+    const example = this.truncatedMobileNet.predict(oImg);
+    oImg.dispose();
+    const y = tf.tidy(() =>
+      tf.oneHot(tf.tensor1d([lable]).toInt(), NUM_CLASSES)
+    );
 
     if (this.xs == null) {
       // For the first example that gets added, keep example and y so that the
@@ -79,6 +102,74 @@ export class ControllerDataset {
     this.ys.dispose();
     this.xs = null;
     this.ys = null;
+  }
+
+  async train(learnArgument, lossCallBack) {
+    console.log("Learnning Argument", learnArgument);
+    if (this.xs == null) {
+      throw new Error("Add some examples before training!");
+    }
+
+    // Creates a 2-layer fully connected model. By creating a separate model,
+    // rather than adding layers to the mobilenet model, we "freeze" the weights
+    // of the mobilenet model, and only train weights from the new model.
+    const model = tf.sequential({
+      layers: [
+        // Flattens the input to a vector so we can use it in a dense layer. While
+        // technically a layer, this only performs a reshape (and has no training
+        // parameters).
+        tf.layers.flatten({
+          inputShape: this.truncatedMobileNet.outputs[0].shape.slice(1),
+        }),
+        // Layer 1.
+        tf.layers.dense({
+          units: learnArgument.hiddenUnits,
+          activation: "relu",
+          kernelInitializer: "varianceScaling",
+          useBias: true,
+        }),
+        // Layer 2. The number of units of the last layer should correspond
+        // to the number of classes we want to predict.
+        tf.layers.dense({
+          units: NUM_CLASSES,
+          kernelInitializer: "varianceScaling",
+          useBias: false,
+          activation: "softmax",
+        }),
+      ],
+    });
+
+    // Creates the optimizers which drives training of the model.
+    const optimizer = tf.train.adam(learnArgument.learnRate);
+    // We use categoricalCrossentropy which is the loss function we use for
+    // categorical classification which measures the error between our predicted
+    // probability distribution over classes (probability that an input is of each
+    // class), versus the label (100% probability in the true class)>
+    model.compile({ optimizer: optimizer, loss: "categoricalCrossentropy" });
+
+    // We parameterize batch size as a fraction of the entire dataset because the
+    // number of examples that are collected depends on how many examples the user
+    // collects. This allows us to have a flexible batch size.
+    const batchSize = Math.floor(this.xs.shape[0] * learnArgument.batchSize);
+    if (!(batchSize > 0)) {
+      throw new Error(
+        `Batch size is 0 or NaN. Please choose a non-zero fraction.`
+      );
+    }
+
+    // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
+    await model.fit(this.xs, this.ys, {
+      batchSize,
+      epochs: learnArgument.epochs,
+      callbacks: {
+        onBatchEnd: async (batch, logs) => {
+          console.log("Loss: " + logs.loss.toFixed(5));
+          lossCallBack(logs.loss.toFixed(5));
+        },
+      },
+    });
+
+    return model;
   }
 }
 
