@@ -1,29 +1,7 @@
-import React, { Component, createRef } from "react";
-import {
-  Form,
-  Button,
-  Spin,
-  InputNumber,
-  List,
-  Card,
-  Select,
-  Menu,
-} from "antd";
+import React, { Component } from "react";
+import { Menu } from "antd";
 import * as tf from "@tensorflow/tfjs";
-import {
-  AppstoreAddOutlined,
-  CloseOutlined,
-  ArrowLeftOutlined,
-  ArrowRightOutlined,
-  ArrowUpOutlined,
-} from "@ant-design/icons";
-import {
-  layout,
-  tailLayout,
-  loadTruncatedMobileNet,
-  ControllerDataset,
-  sleep,
-} from "../unit";
+import { loadTruncatedMobileNet, ControllerDataset, sleep } from "../unit";
 import { Router, Link, Match } from "@reach/router";
 import AiDrive from "./AiDrive";
 import AiSample from "./AiSample";
@@ -31,14 +9,13 @@ import AiTrain from "./AiTrain";
 
 let truncatedMobileNet, model;
 const controllerDataset = new ControllerDataset();
-const { Option } = Select;
 
 let isBuildingExample = false;
 
 const menu = [
-  { key: "sample", name: "样本" },
-  { key: "tarin", name: "训练" },
-  { key: "drive", name: "驾驶" },
+  { key: "sample", name: "采集样本" },
+  { key: "train", name: "学习训练" },
+  { key: "drive", name: "自动驾驶" },
 ];
 
 export default class Ai extends Component {
@@ -47,19 +24,13 @@ export default class Ai extends Component {
     this.state = {
       learnForm: {},
       exampleList: [],
+      sampleList: [],
       loading: false,
       training: false,
       isPredicting: false,
       isRecording: false,
       loss: 0,
-      learnArgument: {
-        learnRate: 0.001,
-        batchSize: 0.4,
-        epochs: 20,
-        hiddenUnits: 100,
-      },
     };
-    this.smallCanvasRef = createRef();
   }
 
   async componentDidMount() {
@@ -242,7 +213,6 @@ export default class Ai extends Component {
       }
     );
   };
-
   record = async () => {
     this.setState(
       {
@@ -257,41 +227,18 @@ export default class Ai extends Component {
     );
   };
 
-  async doAction({ speed, direction }) {
-    const {
-      props: { controller },
-    } = this;
-    controller.direction(direction);
-    // controller.speed(speed);
-  }
-
   menuItem = ({ key, name }) => {
     return (
       <Menu.Item key={key}>
-        <Link
-          to={`./${key}`}
-        >
-          {name}
-        </Link>
+        <Link to={`./${key}`}>{name}</Link>
       </Menu.Item>
     );
   };
 
   render() {
     const {
-      state: {
-        exampleList,
-        loading,
-        isRecording,
-        isTraining,
-        isPredicting,
-        loss,
-        learnArgument,
-      },
-      exampleHandler,
-      exampleCleanHandler,
-      record,
-      predict,
+      state: { sampleList },
+      props: { controller, cameraEnable },
       menuItem,
     } = this;
 
@@ -299,173 +246,29 @@ export default class Ai extends Component {
       <div>
         <Match path=":current">
           {(props) => (
-            <Menu selectedKeys={[props.match && props.match.current]} mode="horizontal">
+            <Menu
+              selectedKeys={[props.match && props.match.current]}
+              mode="horizontal"
+            >
               {menu.map((i) => menuItem(i))}
             </Menu>
           )}
         </Match>
         <Router>
-          <AiSample path="sample" />
-          <AiTrain path="train" />
-          <AiDrive path="drive" />
+          <AiSample
+            path="sample"
+            onFinish={(sampleList) => this.setState({ sampleList })}
+            sampleList={sampleList}
+          />
+          <AiTrain
+            path="train"
+            sampleList={sampleList}
+            onFinish={(model) => this.setState({ model })}
+            cameraEnable={cameraEnable}
+          />
+          <AiDrive path="drive" model={model} controller={controller} />
         </Router>
       </div>
-    );
-
-    return (
-      <Spin spinning={loading}>
-        <div className="ai">
-          <canvas className="ai-canvas" ref={this.smallCanvasRef}></canvas>
-          <Form {...layout} initialValues={learnArgument} onFinish={this.train}>
-            <Form.Item label="Learning rate" name="learnRate">
-              <InputNumber />
-            </Form.Item>
-            <Form.Item label="Batch Size" name="batchSize">
-              <Select>
-                <Option value={0.05}>0.05</Option>
-                <Option value={0.1}>0.1</Option>
-                <Option value={0.4}>0.4</Option>
-                <Option value={1}>1</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item label="Epochs" name="epochs">
-              <Select>
-                <Option value={10}>10</Option>
-                <Option value={20}>20</Option>
-                <Option value={40}>40</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item label="Hidden units" name="hiddenUnits">
-              <Select>
-                <Option value={100}>100</Option>
-                <Option value={200}>200</Option>
-                <Option value={300}>300</Option>
-                <Option value={400}>400</Option>
-                <Option value={500}>500</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item label="loss">
-              <InputNumber value={loss} />
-            </Form.Item>
-            <Form.Item {...tailLayout}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                key="fit"
-                loading={isTraining}
-                disabled={!exampleList.length}
-              >
-                学习
-              </Button>
-            </Form.Item>
-          </Form>
-          <Form
-            {...layout}
-            initialValues={{ speed: 0, direction: 0 }}
-            onFinish={(action) => exampleHandler(action)}
-          >
-            <Form.Item name="speed" label="速度" required>
-              <InputNumber />
-            </Form.Item>
-            <Form.Item name="direction" label="方向" required>
-              <InputNumber />
-            </Form.Item>
-            <Form.Item {...tailLayout} className="form-item-button">
-              <Button
-                key="record-once"
-                htmlType="submit"
-                type="primary"
-                icon={<AppstoreAddOutlined />}
-              />
-              <Button
-                type="primary"
-                icon={<ArrowLeftOutlined />}
-                onClick={() => exampleHandler({ speed: 1, direction: 1 })}
-              />
-              <Button
-                type="primary"
-                icon={<ArrowRightOutlined />}
-                onClick={() => exampleHandler({ speed: 1, direction: -1 })}
-              />
-              <Button
-                type="primary"
-                icon={<ArrowUpOutlined />}
-                onClick={() => exampleHandler({ speed: 1, direction: 0 })}
-              />
-              <Button
-                type="primary"
-                key="record"
-                loading={isRecording}
-                onClick={record}
-              >
-                开始记录
-              </Button>
-              <Button
-                key="stop"
-                onClick={() => {
-                  this.setState({ isRecording: false });
-                }}
-                disabled={!isRecording}
-              >
-                停止记录
-              </Button>
-              <Button
-                type="danger"
-                disabled={!exampleList.length}
-                onClick={exampleCleanHandler}
-              >
-                清除
-              </Button>
-            </Form.Item>
-            <Form.Item {...tailLayout} className="form-item-button">
-              <Button
-                type="danger"
-                key="predic"
-                loading={isPredicting}
-                onClick={predict}
-              >
-                开始 Ai 驾驶
-              </Button>
-              <Button
-                onClick={() => {
-                  this.setState({ isPredicting: false });
-                }}
-                disabled={!isPredicting}
-                key="stop"
-              >
-                停止 Ai 驾驶
-              </Button>
-            </Form.Item>
-          </Form>
-          <List
-            size="small"
-            className="ai-example-list"
-            grid={{ gutter: 16, column: 4 }}
-            itemLayout="vertical"
-            pagination={{
-              pageSize: 12,
-            }}
-            dataSource={exampleList}
-            renderItem={({ img, action: { speed, direction } }) => (
-              <List.Item>
-                <Card
-                  size="small"
-                  title={`速度：${speed}    方向：${direction}`}
-                  actions={[
-                    <Button
-                      size="small"
-                      icon={<CloseOutlined />}
-                      type="danger"
-                    />,
-                  ]}
-                >
-                  <img style={{ maxWidth: "100%" }} src={img} alt="example" />
-                </Card>
-              </List.Item>
-            )}
-          />
-        </div>
-      </Spin>
     );
   }
 }

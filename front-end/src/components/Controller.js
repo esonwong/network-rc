@@ -14,7 +14,7 @@ import { vibrate } from "../unit";
 import Icon from "./Icon";
 import Ai from "./Ai";
 import mobile from "is-mobile";
-import { Router, Location, navigate } from "@reach/router";
+import { Router } from "@reach/router";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
