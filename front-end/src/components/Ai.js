@@ -238,7 +238,7 @@ export default class Ai extends Component {
   render() {
     const {
       state: { sampleList },
-      props: { controller, cameraEnable },
+      props: { controller, cameraEnabled, canvasRef },
       menuItem,
     } = this;
 
@@ -259,14 +259,21 @@ export default class Ai extends Component {
             path="sample"
             onFinish={(sampleList) => this.setState({ sampleList })}
             sampleList={sampleList}
+            canvasRef={canvasRef}
+            cameraEnabled={cameraEnabled}
           />
           <AiTrain
             path="train"
             sampleList={sampleList}
             onFinish={(model) => this.setState({ model })}
-            cameraEnable={cameraEnable}
+            cameraEnabled={cameraEnabled}
           />
-          <AiDrive path="drive" model={model} controller={controller} />
+          <AiDrive
+            path="drive"
+            model={model}
+            controller={controller}
+            canvasRef={canvasRef}
+          />
         </Router>
       </div>
     );

@@ -30,6 +30,20 @@ export async function loadTruncatedMobileNet() {
   return tf.model({ inputs: mobilenet.inputs, outputs: layer.output });
 }
 
+export async function getImageUrl(canvas) {
+  let smallCanvas = document.getElementById("small-canvas");
+  if (!smallCanvas) {
+    smallCanvas = document.createElement("canvas");
+    smallCanvas.id = "small-canvas";
+    smallCanvas.width = 224;
+    smallCanvas.height = 224;
+  }
+  const img = tf.browser.fromPixels(canvas);
+  const smallImg = img.resizeNearestNeighbor([224, 224]);
+  await tf.browser.toPixels(smallImg, smallCanvas);
+  return smallCanvas.toDataURL();
+}
+
 export class ControllerDataset {
   /**
    * Adds an example to the controller dataset.
@@ -79,4 +93,3 @@ export async function sleep(time) {
 export function vibrate(v) {
   navigator.vibrate && navigator.vibrate(v);
 }
-

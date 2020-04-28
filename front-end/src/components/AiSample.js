@@ -9,8 +9,10 @@ import {
   ExportOutlined,
   CloseOutlined,
 } from "@ant-design/icons";
-import { Form, Button, List, Card } from "antd";
+import { Form, Button, List, Card, Upload } from "antd";
 import { Link } from "@reach/router";
+import { getImageUrl } from "../unit";
+import { saveAs } from "file-saver";
 
 export const aiAction = {
   left: {
@@ -40,17 +42,21 @@ export default class AiSample extends Component {
     super(props);
     this.state = {
       sampleList: props.sampleList || [],
+      exportName: "自动驾驶学习样本",
     };
   }
 
   c;
 
-  add(example) {
+  async add(example) {
     // ToDo: get image
+    const {
+      props: { canvasRef },
+    } = this;
     const { sampleList } = this.state;
     sampleList.unshift({
       ...example,
-      img: undefined,
+      img: await getImageUrl(canvasRef),
     });
     this.setState({ sampleList });
   }
@@ -72,14 +78,31 @@ export default class AiSample extends Component {
     this.setState({ sampleList: [] });
   };
 
-  upload() {}
+  upload = ({ file, onSuccess }) => {
+    const reader = new FileReader();
+    reader.onload =  ({ target: { result } }) => {
+      const data = JSON.parse(result);
+      const { sampleList } = this.state;
+      this.setState({
+        sampleList: sampleList.concat(data),
+      });
+      onSuccess();
+    };
+    reader.readAsText(file);
+    return true;
+  }
 
-  download() {}
+  download = () => {
+    const { sampleList, exportName } = this.state;
+    saveAs(new Blob([JSON.stringify(sampleList)]), `${exportName}.json`);
+  };
 
   render() {
     const {
       clear,
-      props: { onFinish, cameraEnable },
+      download,
+      upload,
+      props: { onFinish, cameraEnabled },
     } = this;
     const { sampleList } = this.state;
     return (
@@ -90,15 +113,21 @@ export default class AiSample extends Component {
               <Button
                 icon={aiAction[key].icon}
                 onClick={() => this.add({ action: key })}
-                disabled={!cameraEnable}
+                disabled={!cameraEnabled}
               />
             </Form.Item>
           ))}
           <Form.Item>
-            <Button icon={<ImportOutlined />}>导入</Button>
+            <Upload customRequest={upload} accept="application/json" showUploadList={false}>
+              <Button icon={<ImportOutlined />}>导入</Button>
+            </Upload>
           </Form.Item>
           <Form.Item>
-            <Button icon={<ExportOutlined />} disabled={!sampleList.length}>
+            <Button
+              icon={<ExportOutlined />}
+              disabled={!sampleList.length}
+              onClick={download}
+            >
               导出
             </Button>
           </Form.Item>
@@ -144,7 +173,11 @@ export default class AiSample extends Component {
                   />,
                 ]}
               >
-                <img style={{ maxWidth: "100%" }} src={img} alt="example" />
+                <img
+                  style={{ width: 224, height: "168px" }}
+                  src={img}
+                  alt="example"
+                />
               </Card>
             </List.Item>
           )}
