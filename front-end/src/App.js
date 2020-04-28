@@ -102,7 +102,10 @@ export default class App extends Component {
   componentDidMount() {
     const { connect } = this;
     let pingTime;
-    this.wsavc = new WSAvcPlayer({ useWorker: true, workerFile: `${process.env.PUBLIC_URL}/Decoder.js` });
+    this.wsavc = new WSAvcPlayer({
+      useWorker: true,
+      workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
+    });
 
     this.wsavc.on("pong", ({ sendTime }) => {
       this.setState({ delay: (new Date().getTime() - sendTime) / 2 });
@@ -138,8 +141,13 @@ export default class App extends Component {
       console.log("Stream is ", cameraEnabled ? "active" : "offline");
       if (cameraEnabled) {
         this.playerBoxRef.current.appendChild(this.wsavc.AvcPlayer.canvas);
+        this.setState({
+          cameraEnabled,
+          canvasRef: this.wsavc.AvcPlayer.canvas,
+        });
+      } else {
+        this.setState({ cameraEnabled, canvasRef: undefined });
       }
-      this.setState({ cameraEnabled });
     });
 
     this.wsavc.on("light enabled", (lightEnabled) => {
