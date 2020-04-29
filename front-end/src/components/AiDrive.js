@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Form, Button } from "antd";
+import { Form, Button, Tag, InputNumber, message } from "antd";
 import {
   ImportOutlined,
   CarOutlined,
@@ -7,71 +7,121 @@ import {
   BugOutlined,
 } from "@ant-design/icons";
 import { aiAction } from "./AiSample";
+import { sleep } from "../unit";
+import { layout, tailLayout } from "../unit";
 
 export default class AiDrive extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isPredicting: false,
-      action: "stop",
+      actionKey: "stop",
+      interval: 200,
+      probability: 0,
     };
   }
+
+  componentDidMount() {
+    this.props.controller.changeCamera(true);
+  }
+
+  labelToKey(label) {
+    return Object.keys(aiAction).find((key) => aiAction[key].label === label);
+  }
+
+  predict = (doSometing = () => {}) => {
+    const { ai, onAi = () => {}, canvasRef } = this.props;
+    onAi(true);
+    this.setState({ isPredicting: true }, async () => {
+      while (this.state.isPredicting) {
+        const { label, probability } = await ai.predict(canvasRef);
+        const actionKey = this.labelToKey(label);
+        this.setState({ actionKey, probability });
+        doSometing(actionKey);
+        await sleep(this.state.interval);
+      }
+      onAi(false);
+    });
+  };
+
   test = () => {
-    this.setState({ isPredicting: true });
+    this.predict();
   };
   drive = () => {
-    this.setState({ isPredicting: true });
+    this.predict((actionKey) => {
+      const { speed, direction } = this.props.controller;
+      const action = aiAction[actionKey].action;
+      speed(0);
+      speed(action.speed);
+      direction(action.direction);
+    });
   };
   stop = () => {
     this.setState({ isPredicting: false });
   };
-  loadModel = () => {};
+  loadModel = async () => {
+    await this.props.ai.load("test");
+    message.success("模型已经加载！");
+  };
   downloadModel = () => {};
   render() {
     const {
-      state: { isPredicting, action },
-      props: { cameraEnable },
+      state: { isPredicting, actionKey, probability, interval },
+      props: { cameraEnabled, ai },
       drive,
       stop,
       test,
+      loadModel,
     } = this;
     return (
       <div className="ai-train">
         <Form layout="inline">
-          <Form.Item>
-            <Button
-              icon={<ImportOutlined />}
-              loading={isPredicting}
-              onClick={test}
-            >
-              导入模型
-            </Button>
+          <Form.Item label="操作间隔">
+            <InputNumber
+              value={interval}
+              onChange={(interval) => this.setState({ interval })}
+            />
+          </Form.Item>
+          <Form.Item label="动作">
+            <Tag>
+              {aiAction[actionKey].name} {aiAction[actionKey].icon}{" "}
+              {probability.toFixed(2)}
+            </Tag>
           </Form.Item>
         </Form>
         <br />
         <Form layout="inline">
           <Form.Item>
             <Button
-              icon={<BugOutlined />}
+              icon={<ImportOutlined />}
               loading={isPredicting}
-              onClick={test}
-              disabled={!cameraEnable}
+              onClick={loadModel}
             >
-              测试
+              导入模型
             </Button>
           </Form.Item>
           <Form.Item>
+            <Button
+              icon={<BugOutlined />}
+              loading={isPredicting}
+              onClick={test}
+              disabled={!cameraEnabled || !ai || !ai.model}
+            >
+              测试
+            </Button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
             <Button
               type="danger"
               key="predic"
               loading={isPredicting}
               onClick={drive}
               icon={<CarOutlined />}
-              disabled={!cameraEnable}
+              disabled={!cameraEnabled || !ai || !ai.model}
             >
               开始 Ai 驾驶
             </Button>
           </Form.Item>
+
           <Form.Item>
             <Button
               onClick={stop}
@@ -83,9 +133,6 @@ export default class AiDrive extends Component {
             </Button>
           </Form.Item>
           <br />
-          <Form.Item label="动作">
-            {aiAction[action].name} {aiAction[action].icon}
-          </Form.Item>
         </Form>
       </div>
     );

@@ -1,14 +1,10 @@
 import React, { Component } from "react";
-import { Menu } from "antd";
-import * as tf from "@tensorflow/tfjs";
+import { Menu, Spin } from "antd";
 import { Router, Link, Match } from "@reach/router";
 import AiDrive from "./AiDrive";
 import AiSample from "./AiSample";
 import AiTrain from "./AiTrain";
-
-let truncatedMobileNet, model;
-
-let isBuildingExample = false;
+import { Ai } from "../unit";
 
 const menu = [
   { key: "sample", name: "采集样本" },
@@ -16,7 +12,7 @@ const menu = [
   { key: "drive", name: "自动驾驶" },
 ];
 
-export default class Ai extends Component {
+export default class AiView extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,87 +20,17 @@ export default class Ai extends Component {
       exampleList: [],
       sampleList: [],
       loading: false,
-      training: false,
       isPredicting: false,
-      isRecording: false,
       loss: 0,
     };
   }
 
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevProps.action !== this.props.action &&
-      this.state.isRecording &&
-      !isBuildingExample
-    ) {
-      this.exampleHandler(this.props.action);
-    }
+  async componentDidMount() {
+    this.setState({ loading: "加载 MobileNet..." });
+    const ai = await new Ai();
+    this.setState({ loading: false, ai });
   }
 
-
-
-
-  predict = async () => {
-    const {
-      props: { canvasRef, onAi },
-    } = this;
-    onAi(true);
-    this.setState(
-      {
-        isPredicting: true,
-      },
-      async () => {
-        while (this.state.isPredicting) {
-          const img = tf.tidy(() =>
-            tf.browser
-              .fromPixels(canvasRef)
-              .resizeNearestNeighbor([224, 224])
-              .expandDims(0)
-              .toFloat()
-              .div(127)
-              .sub(1)
-          );
-
-          // Make a prediction through mobilenet, getting the internal activation of
-          // the mobilenet model, i.e., "embeddings" of the input images.
-          const embeddings = truncatedMobileNet.predict(img);
-
-          // Make a prediction through our newly-trained model using the embeddings
-          // from mobilenet as input.
-          const predictions = model.predict(embeddings);
-
-          // Returns the index with the maximum probability. This number corresponds
-          // to the class the model thinks is the most probable given the input.
-
-          const [speed, direction] = await predictions.data();
-
-          const action = {
-            speed,
-            direction,
-          };
-          console.log("Ai 动作：", action);
-          img.dispose();
-
-          this.doAction(action);
-          await tf.nextFrame();
-        }
-        onAi(false);
-      }
-    );
-  };
-  record = async () => {
-    this.setState(
-      {
-        isRecording: true,
-      }
-      // async () => {
-      //   while (this.state.isRecording) {
-      //     await this.exampleHandler();
-      //   }
-      // }
-    );
-  };
 
   menuItem = ({ key, name }) => {
     return (
@@ -116,13 +42,13 @@ export default class Ai extends Component {
 
   render() {
     const {
-      state: { sampleList, model },
+      state: { sampleList, ai, loading },
       props: { controller, cameraEnabled, canvasRef },
       menuItem,
     } = this;
 
     return (
-      <div>
+      <Spin spinning={loading} tip={loading}>
         <Match path=":current">
           {(props) => (
             <Menu
@@ -145,17 +71,18 @@ export default class Ai extends Component {
           <AiTrain
             path="train"
             sampleList={sampleList}
-            onFinish={(model) => this.setState({ model })}
             controller={controller}
+            ai={ai}
           />
           <AiDrive
             path="drive"
-            model={model}
             controller={controller}
             canvasRef={canvasRef}
+            cameraEnabled={cameraEnabled}
+            ai={ai}
           />
         </Router>
-      </div>
+      </Spin>
     );
   }
 }

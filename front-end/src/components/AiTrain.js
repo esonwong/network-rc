@@ -1,6 +1,6 @@
 import React, { Component, createRef } from "react";
-import { Form, Button, Spin, InputNumber, Select } from "antd";
-import { layout, tailLayout, Ai } from "../unit";
+import { Form, Button, Spin, InputNumber, Select, message } from "antd";
+import { layout, tailLayout } from "../unit";
 import { Link } from "@reach/router";
 import { ExportOutlined, ReadOutlined } from "@ant-design/icons";
 import { aiAction } from "./AiSample";
@@ -11,7 +11,7 @@ export default class AiTrain extends Component {
     super(props);
     this.state = {
       learnArgument: {
-        learnRate: 0.001,
+        learnRate: 0.0001,
         batchSize: 0.4,
         epochs: 20,
         hiddenUnits: 100,
@@ -28,35 +28,31 @@ export default class AiTrain extends Component {
     this.props.controller.changeCamera(false);
   }
 
-  train = async () => {
+  train = async (learnArgument) => {
     const {
-      props: { sampleList },
-      state: { learnArgument }
+      props: { sampleList, ai },
     } = this;
-    this.setState({ loading: "加载 MobileNet..." });
-    const ai = await new Ai();
     this.setState({ loading: "数据处理..." });
+    ai.clean();
     for (let index = 0; index < sampleList.length; index++) {
       const { img: url, action } = sampleList[index];
       await ai.addExample(url, aiAction[action].label);
     }
     this.setState({ loading: "训练..." });
-    const model = await ai.train(learnArgument,(loss) => this.setState({ loss }));
-    this.setState({ model });
+    await ai.train(learnArgument, (loss) => this.setState({ loss }));
     this.setState({ loading: false });
   };
 
   render() {
     const {
-      state: { learnArgument, loss, loading, model },
-      props: { sampleList, onFinish },
+      state: { learnArgument, loss, loading },
+      props: { sampleList, ai },
       train,
     } = this;
     return (
       <div className="ai-train">
         <Spin spinning={loading} tip={loading}>
-          {/* <canvas className="ai-canvas" ref={this.smallCanvasRef}></canvas> */}
-          <Form {...layout} initialValues={learnArgument} onFinish={this.train}>
+          <Form {...layout} initialValues={learnArgument} onFinish={train}>
             <Form.Item label="Learning rate" name="learnRate">
               <Select>
                 <Option value={0.00001}>0.00001</Option>
@@ -97,23 +93,28 @@ export default class AiTrain extends Component {
                 key="fit"
                 loading={loading}
                 disabled={!sampleList.length}
-                onClick={train}
                 icon={<ReadOutlined />}
+                htmlType="submit"
               >
                 学习(样本{sampleList.length})
               </Button>
               &nbsp; &nbsp; &nbsp; &nbsp;
-              <Button icon={<ExportOutlined />} disabled={!sampleList.length}>
-                导出
+              <Button
+                onClick={async () => {
+                  await ai.save("test");
+                  message.success("模型已经保存");
+                }}
+                icon={<ExportOutlined />}
+                disabled={!sampleList.length}
+              >
+                导出模型
               </Button>
             </Form.Item>
+          </Form>
+          <Form>
             <Form.Item {...tailLayout}>
               <Link to="../drive">
-                <Button
-                  type="primary"
-                  onClick={() => onFinish(model)}
-                  disabled={!model}
-                >
+                <Button type="primary" disabled={!ai || !ai.model}>
                   下一步
                 </Button>
               </Link>
