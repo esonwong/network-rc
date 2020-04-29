@@ -24,10 +24,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## ToDo
 - [x] 支持手柄
 - [x] 网络穿透
-- [ ] Ai 控制
+- [x] Ai 控制
 - [ ] 支持语音(待定)
 
 ## 更新记录
+### 0.7.0
+- 更新 AI
 ### 0.6.3
 - 兼容 树莓派4
 - 优化网络穿透

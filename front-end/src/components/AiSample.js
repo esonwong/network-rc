@@ -18,25 +18,30 @@ export const aiAction = {
   left: {
     icon: <ArrowLeftOutlined />,
     name: "左转弯",
+    action: { speed: 1, direction: 1 },
     label: 0,
   },
   right: {
     icon: <ArrowRightOutlined />,
     name: "右转弯",
+    action: { speed: 1, direction: -1 },
     label: 1,
   },
   forward: {
     icon: <ArrowUpOutlined />,
     name: "前进",
+    action: { speed: 1, direction: 0 },
     label: 2,
   },
   back: {
     icon: <ArrowDownOutlined />,
+    action: { speed: -1, direction: 0 },
     name: "后退",
     label: 3,
   },
   stop: {
     icon: <PauseOutlined />,
+    action: { speed: 0, direction: 0 },
     name: "停止",
     label: 4,
   },
@@ -113,14 +118,14 @@ export default class AiSample extends Component {
     const { sampleList } = this.state;
     return (
       <div className="ai-sample">
-        <Form layout="inline" className="ai-sample-form" size="small">
+        <Form layout="inline" className="ai-sample-form">
           {Object.keys(aiAction).map((key) => (
             <Form.Item>
               <Button
                 icon={aiAction[key].icon}
                 onClick={() => this.add({ action: key })}
                 disabled={!cameraEnabled}
-              />
+              >{aiAction[key].name}</Button>
             </Form.Item>
           ))}
           <Form.Item>
@@ -184,9 +189,12 @@ export default class AiSample extends Component {
                 ]}
               >
                 <img
-                  style={{ width: 224, height: "168px" }}
+                  style={{ width: "100%" }}
                   src={img}
                   alt="example"
+                  onLoad={function ({ target }) {
+                    target.height = target.width * 0.75;
+                  }}
                 />
               </Card>
             </List.Item>

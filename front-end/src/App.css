@@ -82,6 +82,10 @@ body {
   padding: 1em;
 }
 
+.ai-sample-form {
+  margin-bottom: 50vh;
+}
+
 .ai-example-list {
   padding: 1em;
   text-align: center;

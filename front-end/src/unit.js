@@ -47,7 +47,7 @@ export async function getImageUrl(canvas) {
 export async function imageUrlToImg(dataURL) {
   return await new Promise((resolve) => {
     const img = new Image();
-    img.addEventListener("load",() => {
+    img.addEventListener("load", () => {
       resolve(tf.browser.fromPixels(img));
     });
     img.src = dataURL;
@@ -98,6 +98,7 @@ export class Ai {
     }
   }
   clean() {
+    if (!this.xs) return;
     this.xs.dispose();
     this.ys.dispose();
     this.xs = null;
@@ -169,7 +170,47 @@ export class Ai {
       },
     });
 
+    this.model = model;
+
     return model;
+  }
+
+  async predict(canvas) {
+    const img = tf.tidy(() =>
+      tf.browser
+        .fromPixels(canvas)
+        .resizeNearestNeighbor([224, 224])
+        .expandDims(0)
+        .toFloat()
+        .div(127)
+        .sub(1)
+    );
+
+    // Make a prediction through mobilenet, getting the internal activation of
+    // the mobilenet model, i.e., "embeddings" of the input images.
+    const embeddings = this.truncatedMobileNet.predict(img);
+
+    // Make a prediction through our newly-trained model using the embeddings
+    // from mobilenet as input.
+    const predictions = this.model.predict(embeddings);
+    let probability = await predictions.data();
+
+    // Returns the index with the maximum probability. This number corresponds
+    // to the class the model thinks is the most probable given the input.
+    const predictedClass = predictions.as1D().argMax();
+    const label = (await predictedClass.data())[0];
+    console.log("Ai 预测:", probability);
+    img.dispose();
+    await tf.nextFrame();
+    return { label, probability: probability[label] };
+  }
+
+  async save(name) {
+    await this.model.save(`indexeddb://${name}`);
+  }
+
+  async load(name) {
+    this.model = await tf.loadLayersModel(`indexeddb://${name}`);
   }
 }
 
