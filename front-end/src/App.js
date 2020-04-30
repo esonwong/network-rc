@@ -385,6 +385,7 @@ export default class App extends Component {
             cameraEnabled={cameraEnabled}
             canvasRef={canvasRef}
             action={action}
+            videoSize={videoSize}
           ></Controller>
         </Router>
         <div

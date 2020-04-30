@@ -8,7 +8,6 @@ import {
 } from "@ant-design/icons";
 import { aiAction } from "./AiSample";
 import { sleep } from "../unit";
-import { layout, tailLayout } from "../unit";
 
 export default class AiDrive extends Component {
   constructor(props) {

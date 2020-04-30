@@ -15,6 +15,7 @@ import Icon from "./Icon";
 import Ai from "./Ai";
 import mobile from "is-mobile";
 import { Router } from "@reach/router";
+import ObjectDetection from "./ObjectDetection";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -287,7 +288,7 @@ export default class Controller extends Component {
     const {
       fixContent,
       fixedController,
-      props: { action, cameraEnabled, canvasRef },
+      props: { action, cameraEnabled, canvasRef, videoSize },
     } = this;
     const {
       gamepadEnabled,
@@ -431,14 +432,23 @@ export default class Controller extends Component {
           </Form.Item>
         </Form>
         <Keybord controller={{ speed, direction }} />
-        <Router>
+        <Router className="controller-router">
           <Ai
-            path="ai/*"
+            path="ai/learn/*"
             canvasRef={canvasRef}
             cameraEnabled={cameraEnabled}
             action={action}
             controller={fixedController}
             onAi={(isAiControlling) => this.setState({ isAiControlling })}
+          />
+          <ObjectDetection
+            path="ai/coco-ssd/*"
+            canvasRef={canvasRef}
+            cameraEnabled={cameraEnabled}
+            action={action}
+            controller={fixedController}
+            onAi={(isAiControlling) => this.setState({ isAiControlling })}
+            videoSize={videoSize}
           />
         </Router>
       </div>
