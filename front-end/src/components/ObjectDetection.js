@@ -15,6 +15,7 @@ export default class ObjectDetection extends Component {
       interval: 200,
       driving: false,
       detecting: false,
+      widthThreshold: 100,
     };
     this.canvas = createRef();
   }
@@ -35,10 +36,10 @@ export default class ObjectDetection extends Component {
     const result = await this.cocoSSD.predict(canvasRef);
     let target;
     result.forEach((i) => {
-      if (!detectionList.some((c) => i.class == c)) {
+      if (!detectionList.some((c) => i.class === c)) {
         detectionList.push(i.class);
       }
-      if (targetClass && i.class == targetClass && i.score > threshold) {
+      if (targetClass && i.class === targetClass && i.score > threshold) {
         if (!target) {
           target = i;
         } else {
@@ -87,12 +88,17 @@ export default class ObjectDetection extends Component {
     });
   };
 
+  stopDetect = async () => {
+    this.setState({ detecting: false, driving: false });
+  };
+
   drive = async (target) => {
     const {
       props: {
         canvasRef,
         controller: { speed, direction },
       },
+      state: { widthThreshold },
     } = this;
     const { width, height } = canvasRef;
     if (!target) {
@@ -103,19 +109,13 @@ export default class ObjectDetection extends Component {
       bbox: [x, y, w, h],
     } = target;
     const c = x + w / 2;
-    if (w > 100) {
+    if (w > widthThreshold) {
       speed(-1);
     } else {
       speed(1);
     }
 
-    if (c > 250) {
-      direction(-1);
-    } else if (c < 150) {
-      direction(1);
-    } else {
-      direction(0);
-    }
+    direction(((c / width) * -2 + 1) * 1.5);
   };
 
   start = () => {
@@ -130,11 +130,21 @@ export default class ObjectDetection extends Component {
 
   render() {
     const {
-      state: { loading, threshold, interval, detectionList, targetClass },
+      state: {
+        loading,
+        threshold,
+        interval,
+        detecting,
+        driving,
+        detectionList,
+        targetClass,
+        widthThreshold,
+      },
       props: { videoSize, cameraEnabled },
       startDetect,
       start,
       stop,
+      stopDetect,
     } = this;
     return (
       <div className="ai-object-detection">
@@ -151,10 +161,18 @@ export default class ObjectDetection extends Component {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item label="阀值">
+            <Form.Item label="目标阀值">
               <InputNumber
                 value={threshold}
                 onChange={(threshold) => this.setState({ threshold })}
+                max={1}
+                min={0}
+              />
+            </Form.Item>
+            <Form.Item label="后退阀值">
+              <InputNumber
+                value={widthThreshold}
+                onChange={(widthThreshold) => this.setState({ widthThreshold })}
               />
             </Form.Item>
             <Form.Item label="间隔">
@@ -164,15 +182,31 @@ export default class ObjectDetection extends Component {
               />
             </Form.Item>
             <Form.Item>
-              <Button onClick={startDetect}>开始检测</Button>
+              <Button onClick={startDetect} disabled={detecting}>
+                开始检测
+              </Button>
             </Form.Item>
             <Form.Item>
-              <Button icon={<CarOutlined />} type="danger" onClick={start}>
+              <Button onClick={stopDetect} disabled={!detecting}>
+                停止检测
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                icon={<CarOutlined />}
+                type="danger"
+                onClick={start}
+                disabled={!detecting || driving}
+              >
                 开始驾驶
               </Button>
             </Form.Item>
             <Form.Item>
-              <Button icon={<StopOutlined />} onClick={stop}>
+              <Button
+                icon={<StopOutlined />}
+                onClick={stop}
+                disabled={!driving}
+              >
                 停止驾驶
               </Button>
             </Form.Item>
