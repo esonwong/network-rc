@@ -6,6 +6,7 @@ import AiSample from "./AiSample";
 import AiTrain from "./AiTrain";
 import { Ai } from "../unit";
 
+
 const menu = [
   { key: "sample", name: "采集样本" },
   { key: "train", name: "学习训练" },
