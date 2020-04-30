@@ -28,6 +28,8 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [ ] 支持语音(待定)
 
 ## 更新记录
+### 0.7.1
+- 添加对象跟踪 AI
 ### 0.7.0
 - 更新 AI
 ### 0.6.3
