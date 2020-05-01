@@ -89,6 +89,18 @@ const cameraModes = {
     width: 400,
     height: 300,
   },
+  "300p-15fps": {
+    fps: 30,
+    exposure: "auto",
+    width: 400,
+    height: 300,
+  },
+  "300p-15fps-night": {
+    fps: 30,
+    exposure: "night",
+    width: 400,
+    height: 300,
+  },
   "480p-15fps": {
     fps: 30,
     exposure: "auto",
