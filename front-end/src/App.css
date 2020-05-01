@@ -103,8 +103,7 @@ body {
   height: 100%;
 }
 .ai-object-detection-canvas-container {
-  position: absolute;
-  display: flex;
+  position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
@@ -136,4 +135,10 @@ body {
   flex: 1;
   object-fit: contain;
   max-width: 100%;
+}
+
+
+
+.inline-form .ant-form-item{
+  margin-bottom: 0.5em;
 }

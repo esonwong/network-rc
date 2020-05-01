@@ -1,6 +1,16 @@
 import React, { Component, createRef } from "react";
 import CocoSSD from "../lib/CocoSSD";
-import { Spin, Button, Form, InputNumber, Select } from "antd";
+import {
+  Spin,
+  Button,
+  Form,
+  InputNumber,
+  Slider,
+  Popover,
+  Switch,
+  Radio,
+  Tag,
+} from "antd";
 import { sleep } from "../unit";
 import { CarOutlined, StopOutlined } from "@ant-design/icons";
 
@@ -10,12 +20,12 @@ export default class ObjectDetection extends Component {
     this.state = {
       loading: false,
       targetClass: undefined,
-      threshold: 0.5,
-      detectionList: [],
-      interval: 200,
+      threshold: 50,
+      detectionList: ["person"],
+      interval: 100,
       driving: false,
       detecting: false,
-      widthThreshold: 100,
+      pauseThreshold: 60,
     };
     this.canvas = createRef();
   }
@@ -39,7 +49,7 @@ export default class ObjectDetection extends Component {
       if (!detectionList.some((c) => i.class === c)) {
         detectionList.push(i.class);
       }
-      if (targetClass && i.class === targetClass && i.score > threshold) {
+      if (targetClass && i.class === targetClass && i.score > threshold / 100) {
         if (!target) {
           target = i;
         } else {
@@ -59,8 +69,6 @@ export default class ObjectDetection extends Component {
     // context.drawImage(image, 0, 0);
     context.clearRect(0, 0, canvas.current.width, canvas.current.height);
     context.font = "10px Arial";
-
-    console.log("number of detections: ", result.length);
     for (let i = 0; i < result.length; i++) {
       context.beginPath();
       context.rect(...result[i].bbox);
@@ -97,25 +105,24 @@ export default class ObjectDetection extends Component {
       props: {
         canvasRef,
         controller: { speed, direction },
+        action,
       },
-      state: { widthThreshold },
+      state: { pauseThreshold },
     } = this;
-    const { width, height } = canvasRef;
-    if (!target) {
+    if (!target || !canvasRef) {
+      if (action.speed === 0) return;
+      speed(-0.5);
       speed(0);
       return;
     }
+    const { width, height } = canvasRef;
     const {
       bbox: [x, y, w, h],
     } = target;
-    const c = x + w / 2;
-    if (w > widthThreshold) {
-      speed(-1);
-    } else {
-      speed(1);
-    }
-
-    direction(((c / width) * -2 + 1) * 1.5);
+    const wc = x + w / 2;
+    const s = ((h / height) * -2 + pauseThreshold / 50) * 3;
+    speed(s);
+    direction(((wc / width) * -2 + 1) * 1.5 * (s >= 0 ? 1 : -1));
   };
 
   start = () => {
@@ -138,9 +145,9 @@ export default class ObjectDetection extends Component {
         driving,
         detectionList,
         targetClass,
-        widthThreshold,
+        pauseThreshold,
       },
-      props: { videoSize, cameraEnabled },
+      props: { videoSize, cameraEnabled, action },
       startDetect,
       start,
       stop,
@@ -149,54 +156,98 @@ export default class ObjectDetection extends Component {
     return (
       <div className="ai-object-detection">
         <Spin spinning={loading} tip={loading}>
-          <Form layout="inline" style={{ padding: "1em" }}>
-            <Form.Item label="目标">
-              <Select
-                value={targetClass}
-                onChange={(targetClass) => this.setState({ targetClass })}
-                style={{ width: "10vw" }}
+          <Form
+            className="inline-form"
+            layout="inline"
+            style={{ padding: "1em" }}
+            size="small"
+          >
+            <Form.Item>
+              <Switch
+                onChange={(v) => (v ? startDetect() : stopDetect())}
+                checked={detecting}
+                disabled={!cameraEnabled}
+                checkedChildren="检测"
+                unCheckedChildren="检测"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Popover
+                placement="topLeft"
+                content={
+                  <Radio.Group
+                    onChange={({ target: { value: targetClass } }) =>
+                      this.setState({ targetClass })
+                    }
+                    value={targetClass}
+                  >
+                    {detectionList.map((i) => (
+                      <Radio value={i}>{i}</Radio>
+                    ))}
+                  </Radio.Group>
+                }
               >
-                {detectionList.map((i) => (
-                  <Select.Option value={i}>{i}</Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item label="目标阀值">
-              <InputNumber
-                value={threshold}
-                onChange={(threshold) => this.setState({ threshold })}
-                max={1}
-                min={0}
-              />
-            </Form.Item>
-            <Form.Item label="后退阀值">
-              <InputNumber
-                value={widthThreshold}
-                onChange={(widthThreshold) => this.setState({ widthThreshold })}
-              />
-            </Form.Item>
-            <Form.Item label="间隔">
-              <InputNumber
-                value={interval}
-                onChange={(interval) => this.setState({ interval })}
-              />
+                <Button shape="round">目标:{targetClass || "无"}</Button>
+              </Popover>
             </Form.Item>
             <Form.Item>
-              <Button onClick={startDetect} disabled={detecting}>
-                开始检测
-              </Button>
+              <Popover
+                placement="topLeft"
+                content={
+                  <Slider
+                    min={0}
+                    max={100}
+                    value={threshold}
+                    onChange={(threshold) => this.setState({ threshold })}
+                    arrowPointAtCenter
+                    style={{ width: "30vw" }}
+                  />
+                }
+              >
+                <Button shape="round">目标阀值:{threshold}</Button>
+              </Popover>
             </Form.Item>
             <Form.Item>
-              <Button onClick={stopDetect} disabled={!detecting}>
-                停止检测
-              </Button>
+              <Popover
+                placement="topLeft"
+                content={
+                  <Slider
+                    min={0}
+                    max={100}
+                    value={pauseThreshold}
+                    onChange={(pauseThreshold) =>
+                      this.setState({ pauseThreshold })
+                    }
+                    arrowPointAtCenter
+                    style={{ width: "30vw" }}
+                  />
+                }
+              >
+                <Button shape="round">跟随阀值:{pauseThreshold}</Button>
+              </Popover>
             </Form.Item>
+            <Form.Item>
+              <Popover
+                placement="topLeft"
+                content={
+                  <InputNumber
+                    min={0}
+                    max={1000}
+                    value={interval}
+                    onChange={(interval) => this.setState({ interval })}
+                  />
+                }
+              >
+                <Button shape="round">间隔:{interval} ms</Button>
+              </Popover>
+            </Form.Item>
+
             <Form.Item>
               <Button
                 icon={<CarOutlined />}
                 type="danger"
                 onClick={start}
-                disabled={!detecting || driving}
+                disabled={!detecting || driving || !targetClass}
               >
                 开始驾驶
               </Button>
@@ -209,6 +260,11 @@ export default class ObjectDetection extends Component {
               >
                 停止驾驶
               </Button>
+            </Form.Item>
+
+            <Form.Item>
+              <Tag>方向{action.direction.toFixed(2)}</Tag>
+              <Tag>油门{action.speed.toFixed(2)}</Tag>
             </Form.Item>
           </Form>
         </Spin>
