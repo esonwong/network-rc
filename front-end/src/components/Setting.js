@@ -27,6 +27,8 @@ export default function Setting({
       <Form.Item label="摄像头模式" name="cameraMode">
         <Select>
           <Option value="default">300p-30fps(默认)</Option>
+          <Option value="300p-15fps">300p-15fps</Option>
+          <Option value="300p-15fps-night">300p-15fps 夜间模式</Option>
           <Option value="480p-15fps">480p-15fps</Option>
           <Option value="600p">600p-30fps</Option>
           {/* <Option value="1080p">1080p-30fps</Option> */}

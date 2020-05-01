@@ -19,7 +19,7 @@ export default class ObjectDetection extends Component {
     super(props);
     this.state = {
       loading: false,
-      targetClass: undefined,
+      targetClass: "person",
       threshold: 50,
       detectionList: ["person"],
       interval: 100,
@@ -109,20 +109,30 @@ export default class ObjectDetection extends Component {
       },
       state: { pauseThreshold },
     } = this;
-    if (!target || !canvasRef) {
+    async function stop() {
       if (action.speed === 0) return;
       speed(-0.5);
+      await sleep(50);
       speed(0);
+    }
+    if (!target || !canvasRef) {
+      stop();
       return;
     }
     const { width, height } = canvasRef;
     const {
+      // eslint-disable-next-line
       bbox: [x, y, w, h],
-    } = target;
+    } = target; //
     const wc = x + w / 2;
-    const s = ((h / height) * -2 + pauseThreshold / 50) * 3;
-    speed(s);
-    direction(((wc / width) * -2 + 1) * 1.5 * (s >= 0 ? 1 : -1));
+    const s = h / height;
+    if (Math.abs(s - pauseThreshold / 100) < 0.05) {
+      stop();
+      return;
+    }
+    const v = s > pauseThreshold / 100 ? -1 : 1;
+    speed(v);
+    direction(((wc / width) * -2 + 1) * 1.3 * v);
   };
 
   start = () => {
