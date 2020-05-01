@@ -11,10 +11,10 @@ export default class CocoSSD {
   }
 
   async predict(image) {
-    console.time("predict1");
+    // console.time("predict1");
     const result = await this.model.detect(image);
-    console.timeEnd("predict1");
-    console.log(result);
+    // console.timeEnd("predict1");
+    // console.log(result);
     return result;
   }
 }

@@ -15,10 +15,10 @@ export default function Nav(props) {
     <Menu mode="horizontal" {...props}>
       <Menu.SubMenu key="sub2" icon={<CarOutlined />} title="AI">
         <Menu.Item>
-          <Link to={`${process.env.PUBLIC_URL}/ai/learn/sample`}>机器学习</Link>
+          <Link to={`${process.env.PUBLIC_URL}/ai/coco-ssd`}>目标追踪</Link>
         </Menu.Item>
         <Menu.Item>
-          <Link to={`${process.env.PUBLIC_URL}/ai/coco-ssd`}>目标追踪</Link>
+          <Link to={`${process.env.PUBLIC_URL}/ai/learn/sample`}>机器学习</Link>
         </Menu.Item>
       </Menu.SubMenu>
       <Menu.Item>

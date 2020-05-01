@@ -29,6 +29,8 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 ### 0.7.1
+- 优化对象跟踪逻辑和界面
+### 0.7.1
 - 添加对象跟踪 AI
 ### 0.7.0
 - 更新 AI
