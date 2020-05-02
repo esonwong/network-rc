@@ -7,50 +7,50 @@ const spawn = require("child_process").spawn;
 const package = require("./package.json");
 const md5 = require("md5");
 const Splitter = require("stream-split");
+const stream = require("./lib/stream.js");
 const argv = require("yargs")
-  .usage('Usage: $0 [options]')
-  .example('$0 -f -o 9088', '开启网络穿透')
+  .usage("Usage: $0 [options]")
+  .example("$0 -f -o 9088", "开启网络穿透")
   .options({
-    's': {
-      alias: 'maxSpeed',
+    s: {
+      alias: "maxSpeed",
       default: 60,
-      describe: '最大速度',
-      type: 'number'
+      describe: "最大速度",
+      type: "number",
     },
-    'p': {
-      alias: 'password',
-      describe: '密码',
-      type: 'string'
+    p: {
+      alias: "password",
+      describe: "密码",
+      type: "string",
     },
-    'f': {
-      alias: 'frp',
-      describe: '是否开启网络穿透',
-      type: 'boolean'
+    f: {
+      alias: "frp",
+      describe: "是否开启网络穿透",
+      type: "boolean",
     },
-    'o': {
-      alias: 'frpPort',
+    o: {
+      alias: "frpPort",
       describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
-      type: 'number'
+      type: "number",
     },
-    'frpServer': {
+    frpServer: {
       default: "itiwll.synology.me",
       describe: "frp 服务器, server_addr",
-      type:"string"
+      type: "string",
     },
-    'frpServerPort': {
+    frpServerPort: {
       default: 6401,
       describe: "frp 服务器连接端口, server_port",
-      type:"number"
+      type: "number",
     },
-    'frpServerToken': {
+    frpServerToken: {
       default: "9080",
       describe: "frp 服务器认证token, token",
-      type:"string"
-    }
+      type: "string",
+    },
   })
-  .env('NETWORK_RC')
-  .help()
-  .argv;
+  .env("NETWORK_RC")
+  .help().argv;
 
 console.info("版本", package.version);
 console.info("鸣谢：");
@@ -62,52 +62,33 @@ const {
   changeSpeed,
   closeController,
 } = require("./lib/controller.js");
-const { password, maxSpeed, frp, frpPort, frpServer, frpServerPort, frpServerToken } = argv;
+const {
+  password,
+  maxSpeed,
+  frp,
+  frpPort,
+  frpServer,
+  frpServerPort,
+  frpServerToken,
+} = argv;
 
-if(frp){
-  if(!frpPort){
+if (frp) {
+  if (!frpPort) {
     console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
     process.exit();
   } else {
-    process.env.FRP_REMOTE_PORT = frpPort
-    process.env.FRP_SERVER = frpServer
-    process.env.FRP_SERVER_PORT = frpServerPort
-    process.env.FRP_SERVER_TOKEN = frpServerToken
-    require("./lib/frp.js")
+    process.env.FRP_REMOTE_PORT = frpPort;
+    process.env.FRP_SERVER = frpServer;
+    process.env.FRP_SERVER_PORT = frpServerPort;
+    process.env.FRP_SERVER_TOKEN = frpServerToken;
+    require("./lib/frp.js");
   }
 }
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
-app.get('*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/front-end/build/index.html'));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname + "/front-end/build/index.html"));
 });
-
-const cameraModes = {
-  default: {
-    fps: 30,
-    exposure: "auto",
-    width: 400,
-    height: 300,
-  },
-  "480p-15fps": {
-    fps: 30,
-    exposure: "auto",
-    width: 640,
-    height: 480,
-  },
-  '600p': {
-    fps: 30,
-    exposure: "auto",
-    width: 800,
-    height: 600,
-  },
-  "1080p": {
-    fps: 30,
-    exposure: "auto",
-    width: 1440,
-    height: 1080,
-  },
-};
 
 const NALseparator = Buffer.from([0, 0, 0, 1]);
 
@@ -134,7 +115,9 @@ function sendBinary(socket, frame) {
 }
 
 const broadcast = (action, payload) => {
-  clients.forEach((socket) => socket.isLogin && socket.sendData(action, payload));
+  clients.forEach(
+    (socket) => socket.isLogin && socket.sendData(action, payload)
+  );
 };
 
 const broadcastStream = (data) => {
@@ -207,8 +190,8 @@ const login = (socket, { uid, token }) => {
 };
 
 const ping = (socket, { sendTime }) => {
-  socket.sendData("pong", { sendTime })
-}
+  socket.sendData("pong", { sendTime });
+};
 
 const check = (socket) => {
   if (socket.isLogin) {
@@ -238,8 +221,8 @@ const openCamera = (socket, v) => {
 const speedRate = (socket, v) => {
   console.log("speed", v);
   if (!check(socket)) return;
-  if(Math.abs(v) *100 > maxSpeed){
-    v = v > 0 ? maxSpeed /100 : -maxSpeed /100;
+  if (Math.abs(v) * 100 > maxSpeed) {
+    v = v > 0 ? maxSpeed / 100 : -maxSpeed / 100;
   }
   changeSpeed(v);
   broadcast("speed", v);
@@ -281,23 +264,8 @@ let streamer = null;
 const startStreamer = () => {
   console.log("starting streamer");
   if (streamer) return;
-  streamer = spawn("raspivid", [
-    "-t",
-    "0",
-    "-o",
-    "-",
-    "-w",
-    cameraModes[cameraMode].width,
-    "-h",
-    cameraModes[cameraMode].height,
-    "-fps",
-    cameraModes[cameraMode].fps,
-    "-pf",
-    "baseline",
-    "-ex",
-    cameraModes[cameraMode].exposure,
-  ]);
-
+  // streamer = stream.raspivid(cameraMode);
+  streamer = stream.ffmpeg(cameraMode);
   streamer.on("close", () => {
     streamer = null;
   });
