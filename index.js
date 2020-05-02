@@ -60,6 +60,7 @@ const {
   changeDirection,
   changeSpeed,
   closeController,
+  changePower
 } = require("./lib/controller.js");
 const {
   password,
@@ -167,6 +168,9 @@ wss.on("connection", function (socket) {
       case "open light":
         openLight(socket, payload);
         break;
+      case "open power":
+        openPower(socket, payload);
+        break;
       case "speed rate":
         speedRate(socket, payload);
         break;
@@ -247,6 +251,13 @@ const openLight = (socket, enabled) => {
   if (!check(socket)) return;
   changeLight(enabled);
   broadcast("light enabled", enabled);
+};
+
+const openPower = (socket, enabled) => {
+  console.log("open power", enabled);
+  if (!check(socket)) return;
+  changePower(enabled);
+  broadcast("power enabled", enabled);
 };
 
 const disconnect = (socket) => {
