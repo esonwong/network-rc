@@ -3,7 +3,6 @@ const express = require("express");
 const { WebSocketServer } = require("@clusterws/cws");
 const app = express();
 const server = require("http").Server(app);
-const spawn = require("child_process").spawn;
 const package = require("./package.json");
 const md5 = require("md5");
 const Splitter = require("stream-split");
@@ -140,11 +139,15 @@ wss.on("connection", function (socket) {
     needPassword: password ? true : false,
   });
   socket.sendData("initalize", {
-    width: cameraModes[cameraMode].width,
-    height: cameraModes[cameraMode].height,
-    stream_active: false,
+    width: stream.cameraModes[cameraMode].width,
+    height: stream.cameraModes[cameraMode].height,
   });
-  socket.sendData("stream_active", false);
+  if (streamer) {
+    endStreamer();
+    setTimeout(() => {
+      startStreamer();
+    }, 300)
+  }
 
   socket.on("close", () => disconnect(socket));
 
@@ -209,11 +212,15 @@ const openCamera = (socket, v) => {
   if (v.enabled) {
     cameraMode = v.cameraMode;
     //socket.enabledCamera = true;
-    streamer || startStreamer();
-    broadcast("stream_active", true);
+
+    if (streamer) {
+      endStreamer();
+    }
+    setTimeout(() => {
+      startStreamer();
+    }, 300)
   } else {
     //socket.enabledCamera = false;
-    broadcast("stream_active", false);
     endStreamer();
   }
 };
@@ -261,14 +268,17 @@ process.on("SIGINT", function () {
 
 let streamer = null;
 
-const startStreamer = () => {
+const startStreamer = async () => {
   console.log("starting streamer");
+  broadcast("stream_active", true);
   if (streamer) return;
-  // streamer = stream.raspivid(cameraMode);
-  streamer = stream.ffmpeg(cameraMode);
-  streamer.on("close", () => {
-    streamer = null;
-  });
+  streamer = stream.raspivid(cameraMode);
+  // streamer = await stream.ffmpeg(cameraMode, function({ width, height }){
+  //   broadcast("initalize", {
+  //     width, height,
+  //     stream_active: true,
+  //   });
+  // });
 
   const readStream = streamer.stdout.pipe(new Splitter(NALseparator));
 
@@ -276,15 +286,17 @@ const startStreamer = () => {
     broadcastStream(frame);
   });
   // broadcast('stream_active', true );
-  readStream.on("end", () => broadcast("stream_active", false));
+  readStream.on("end", () => {
+    console.log("steam end");
+    broadcast("stream_active", false);
+  });
 };
 
 const endStreamer = () => {
-  let enabledNum = 0;
-  clients.forEach((i) => i.enabledCamera && enabledNum++);
-  if (enabledNum) return;
   console.log("close streamer");
+  broadcast("stream_active", false);
   streamer && streamer.kill("SIGTERM");
+  streamer = null;
 };
 
 server.listen(8080);
