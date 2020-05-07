@@ -25,6 +25,7 @@ import {
   VideoCameraOutlined,
   BulbOutlined,
   FullscreenExitOutlined,
+  ThunderboltOutlined
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
@@ -50,6 +51,7 @@ export default class App extends Component {
       wsConnected: false,
       cameraEnabled: false,
       lightEnabled: false,
+      powerEnabled: false,
       canvasRef: undefined,
       isAiControlling: false,
       isFullscreen: false,
@@ -154,6 +156,10 @@ export default class App extends Component {
       this.setState({ lightEnabled });
     });
 
+    this.wsavc.on("power enabled", (powerEnabled) => {
+      this.setState({ powerEnabled });
+    });
+
     this.wsavc.on("login", ({ message: m }) => {
       message.success(m);
       navigate(`${pubilcUrl}/`);
@@ -178,7 +184,7 @@ export default class App extends Component {
     const { wsAddress } = this.state.setting;
     this.wsavc.connect(
       `${
-        window.location.protocol === "https:" ? "wss://" : "ws://"
+      window.location.protocol === "https:" ? "wss://" : "ws://"
       }${wsAddress}`
     );
   };
@@ -215,6 +221,12 @@ export default class App extends Component {
     this.wsavc.send("open light", enable);
   };
 
+  changePower = (enable) => {
+    const { wsConnected } = this.state;
+    if (!wsConnected) return;
+    this.wsavc.send("open power", enable);
+  };
+
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
@@ -247,6 +259,7 @@ export default class App extends Component {
       changeSetting,
       changeLight,
       changeCamera,
+      changePower,
       login,
       state: {
         setting,
@@ -259,6 +272,7 @@ export default class App extends Component {
         lightEnabled,
         videoSize,
         delay,
+        powerEnabled,
       },
     } = this;
     return (
@@ -286,6 +300,14 @@ export default class App extends Component {
               }}
               unCheckedChildren={<ApiOutlined />}
               checkedChildren={<ApiOutlined />}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Switch
+              checked={powerEnabled}
+              onChange={changePower}
+              checkedChildren={<ThunderboltOutlined />}
+              unCheckedChildren={<ThunderboltOutlined />}
             />
           </Form.Item>
           <Form.Item>
@@ -339,6 +361,8 @@ export default class App extends Component {
             />
           </Form.Item>
 
+
+
           {document.body.requestFullscreen && (
             <Form.Item>
               <Button
@@ -348,8 +372,8 @@ export default class App extends Component {
                   isFullscreen ? (
                     <FullscreenExitOutlined />
                   ) : (
-                    <FullscreenOutlined />
-                  )
+                      <FullscreenOutlined />
+                    )
                 }
                 onClick={() => {
                   if (isFullscreen) {
