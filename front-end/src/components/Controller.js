@@ -84,7 +84,8 @@ export default class Controller extends Component {
     const {
       lightEnabled,
       cameraEnabled,
-      controller: { changeLight, changeCamera },
+      powerEnabled,
+      controller: { changeLight, changeCamera, changePower },
     } = this.props;
     let { forwardPower } = this.state;
     const {
@@ -102,11 +103,15 @@ export default class Controller extends Component {
     if (index === 15) {
       direction(value);
     }
-    if (index === 9 && value === 1) {
+    if (index === 10 && value === 1) {
       changeLight(!lightEnabled);
     }
-    if (index === 16 && value === 1) {
+    if (index === 9 && value === 1) {
       changeCamera(!cameraEnabled);
+    }
+
+    if (index === 11 && value === 1) {
+      changePower(!powerEnabled);
     }
 
     if ((index === 4 || index === 2) && value === 1) {
