@@ -34,7 +34,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## 更新记录
 ### 0.7.5
 - 添加电调电源控制, GPIO 17(BOARD 11) 控制继电器
-- 添加车灯电源控制, GPIO 17(BOARD 11) 控制继电器
+- 添加车灯电源控制, GPIO 27(BOARD 13) 控制继电器
 ### 0.7.4
 - 优化对象跟踪逻辑和界面
 ### 0.7.1
