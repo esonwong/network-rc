@@ -63,11 +63,12 @@ export default class App extends Component {
       },
     };
 
-    const { changeCamera, changeLight } = this;
+    const { changeCamera, changeLight, changePower } = this;
 
     this.controller = {
       changeLight,
       changeCamera,
+      changePower,
       speed: (v) => {
         const {
           changeSpeed,
@@ -409,6 +410,7 @@ export default class App extends Component {
             cameraEnabled={cameraEnabled}
             canvasRef={canvasRef}
             action={action}
+            powerEnabled={powerEnabled}
             videoSize={videoSize}
           ></Controller>
         </Router>

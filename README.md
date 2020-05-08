@@ -32,6 +32,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [ ] 掉线、大延迟自动处理
 
 ## 更新记录
+### 0.7.6
+- 优化手柄按键
+  - 按下左摇杆开关车灯
+  - 按下右摇杆开关电调电源
+  - 按下 start 开关摄像头
 ### 0.7.5
 - 添加电调电源控制, GPIO 17(BOARD 11) 控制继电器
 - 添加车灯电源控制, GPIO 27(BOARD 13) 控制继电器
