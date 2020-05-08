@@ -217,6 +217,11 @@ const openCamera = (socket, v) => {
     cameraMode = v.cameraMode;
     //socket.enabledCamera = true;
 
+    socket.sendData("initalize", {
+      width: stream.cameraModes[cameraMode].width,
+      height: stream.cameraModes[cameraMode].height,
+    });
+
     if (streamer) {
       endStreamer();
     }
