@@ -3,7 +3,8 @@ export default class CocoSSD {
   constructor() {
     return (async () => {
       this.model = await cocoSsd.load({
-        base: "lite_mobilenet_v2",
+        base: "mobilenet_v2", // mobilenet_v2
+
       });
       console.log("model loaded");
       return this;

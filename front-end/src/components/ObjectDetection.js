@@ -43,7 +43,9 @@ export default class ObjectDetection extends Component {
       draw,
     } = this;
     if (!cameraEnabled) return;
+    console.time("predict");
     const result = await this.cocoSSD.predict(canvasRef);
+    console.timeEnd("predict");
     let target;
     result.forEach((i) => {
       if (!detectionList.some((c) => i.class === c)) {
@@ -141,6 +143,7 @@ export default class ObjectDetection extends Component {
   };
   stop = () => {
     this.setState({ driving: false });
+    this.props.controller.speed(-0.1);
     this.props.controller.speed(0);
     this.props.onAi(false);
   };
@@ -157,7 +160,7 @@ export default class ObjectDetection extends Component {
         targetClass,
         pauseThreshold,
       },
-      props: { videoSize, cameraEnabled, action },
+      props: { videoSize, cameraEnabled, action, canvasRef },
       startDetect,
       start,
       stop,
@@ -285,7 +288,9 @@ export default class ObjectDetection extends Component {
             transform: `scale(${videoSize / 50})`,
           }}
         >
-          <canvas ref={this.canvas} width="400" height="300"></canvas>
+          {canvasRef &&
+            <canvas ref={this.canvas} width={canvasRef.width} height={canvasRef.height}></canvas>
+          }
         </div>
       </div>
     );
