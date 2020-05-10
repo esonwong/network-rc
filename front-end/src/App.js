@@ -17,6 +17,7 @@ import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
 import WSAvcPlayer from "ws-avc-player";
+import WebRTC from './lib/WebRTC'
 import {
   HomeOutlined,
   ExpandOutlined,
@@ -38,6 +39,7 @@ export default class App extends Component {
     super(props);
     this.appRef = createRef();
     this.playerBoxRef = createRef();
+    this.video = createRef();
     this.state = {
       setting: {
         speedMax: 20,
@@ -128,6 +130,7 @@ export default class App extends Component {
     });
     this.wsavc.on("connected", () => {
       console.log("WS connected");
+      this.webrtc = new WebRTC({ socket: this.wsavc.ws, video: this.video.current })
       this.setState({ wsConnected: true });
       pingTime = setInterval(() => {
         const sendTime = new Date().getTime();
@@ -421,7 +424,9 @@ export default class App extends Component {
             opacity: cameraEnabled ? 1 : 0,
             transform: `scale(${videoSize / 50})`,
           }}
-        ></div>
+        >
+          <video ref={this.video} autoPlay controls />
+        </div>
         <WakeLock preventSleep={wsConnected} />
       </div>
     );

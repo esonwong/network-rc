@@ -131,14 +131,13 @@ body {
   display: flex;
   transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
 }
-.player-box canvas {
+.player-box canvas,
+.player-box video {
   flex: 1;
   object-fit: contain;
   max-width: 100%;
 }
 
-
-
-.inline-form .ant-form-item{
+.inline-form .ant-form-item {
   margin-bottom: 0.5em;
 }
