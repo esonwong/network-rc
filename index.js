@@ -130,7 +130,7 @@ const broadcastStream = (data) => {
 
 wss.on("connection", function (socket) {
   console.log("客户端连接！");
-  console.log("设置密码", password ? "是" : "否");
+  console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
   socket.sendData = sendData;
@@ -154,6 +154,13 @@ wss.on("connection", function (socket) {
 
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
+
+    if(action === "webrtc connect"){
+      new WebRTC({ socket });
+    }
+    if(action.indexOf("webrtc") !== -1){
+      return;
+    }
 
     switch (action) {
       case "ping":
