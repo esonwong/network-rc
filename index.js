@@ -7,6 +7,7 @@ const package = require("./package.json");
 const md5 = require("md5");
 const Splitter = require("stream-split");
 const stream = require("./lib/stream.js");
+const WebRTC = require("./lib/WebRTC");
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
@@ -155,10 +156,32 @@ wss.on("connection", function (socket) {
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
 
-    if(action === "webrtc connect"){
-      new WebRTC({ socket });
-    }
-    if(action.indexOf("webrtc") !== -1){
+    if (action.indexOf("webrtc") !== -1) {
+      const type = action.split(" ")[1];
+      switch (type) {
+        case "connect":
+          socket.webrtc = new WebRTC({
+            socket,
+            onOffer(offer) {
+              socket.sendData("webrtc offer", offer)
+            },
+            onCandidate(candidate) {
+              socket.sendData("webrtc candidate", candidate)
+            }
+          });
+          break;
+        case "answer":
+          socket.webrtc.onAnswer(payload);
+          break
+        case "candidate":
+          socket.webrtc.onCandidate(payload);
+          break;
+        case "close":
+          socket.webrtc.close();
+          break;
+        default:
+          break;
+      }
       return;
     }
 
@@ -274,6 +297,7 @@ const openPower = (socket, enabled) => {
 
 const disconnect = (socket) => {
   console.log("client disconnected");
+  if (socket.webrtc) socket.webrtc.close();
   clients.delete(socket);
   if (clients.size < 1) {
     changeSpeed(0);
