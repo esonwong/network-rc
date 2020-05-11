@@ -23,7 +23,11 @@ export default class WebRTC {
     const type = action.split(" ")[1];
     switch (type) {
       case "offer":
-        this.onOffer(payload)
+        this.onOffer(payload);
+        break;
+
+      case "candidate":
+        this.onCandidate(payload);
         break;
       default:
         console.log(action)
@@ -36,6 +40,9 @@ export default class WebRTC {
     const rc = new RTCPeerConnection({
       sdpSemantics: 'unified-plan',
       iceServers: [
+        {
+          urls: "stun:stun.ideasip.com"
+        },
         {
           urls: 'stun:global.stun.twilio.com:3478?transport=udp'
         },
@@ -65,6 +72,10 @@ export default class WebRTC {
     const answer = await rc.createAnswer();
     await rc.setLocalDescription(answer);
     this.socketSend({ type: "answer", payload: answer })
+  }
+
+  onCandidate(candidate) {
+    console.log("remote candidate", candidate);
   }
 
   close() {
