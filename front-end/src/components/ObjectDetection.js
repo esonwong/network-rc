@@ -39,12 +39,12 @@ export default class ObjectDetection extends Component {
   detect = async () => {
     const {
       state: { targetClass, threshold, detectionList },
-      props: { canvasRef, cameraEnabled },
+      props: { videoEl, cameraEnabled },
       draw,
     } = this;
     if (!cameraEnabled) return;
     console.time("predict");
-    const result = await this.cocoSSD.predict(canvasRef);
+    const result = await this.cocoSSD.predict(videoEl);
     console.timeEnd("predict");
     let target;
     result.forEach((i) => {
@@ -105,7 +105,7 @@ export default class ObjectDetection extends Component {
   drive = async (target) => {
     const {
       props: {
-        canvasRef,
+        video,
         controller: { speed, direction },
         action,
       },
@@ -117,11 +117,11 @@ export default class ObjectDetection extends Component {
       await sleep(50);
       speed(0);
     }
-    if (!target || !canvasRef) {
+    if (!target || !video) {
       stop();
       return;
     }
-    const { width, height } = canvasRef;
+    const { width, height } = video;
     const {
       // eslint-disable-next-line
       bbox: [x, y, w, h],
@@ -160,7 +160,7 @@ export default class ObjectDetection extends Component {
         targetClass,
         pauseThreshold,
       },
-      props: { videoSize, cameraEnabled, action, canvasRef },
+      props: { videoSize, cameraEnabled, action, videoEl },
       startDetect,
       start,
       stop,
@@ -288,8 +288,8 @@ export default class ObjectDetection extends Component {
             transform: `scale(${videoSize / 50})`,
           }}
         >
-          {canvasRef &&
-            <canvas ref={this.canvas} width={canvasRef.width} height={canvasRef.height}></canvas>
+          {videoEl &&
+            <canvas ref={this.canvas} width={videoEl.width} height={videoEl.height}></canvas>
           }
         </div>
       </div>

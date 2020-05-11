@@ -130,7 +130,6 @@ export default class App extends Component {
     });
     this.wsavc.on("connected", () => {
       console.log("WS connected");
-      this.webrtc = new WebRTC({ socket: this.wsavc.ws, video: this.video.current })
       this.setState({ wsConnected: true });
       pingTime = setInterval(() => {
         const sendTime = new Date().getTime();
@@ -211,12 +210,20 @@ export default class App extends Component {
   changeCamera = (enabled) => {
     const {
       state: {
-        setting: { cameraMode },
+        setting: { cameraMode, cameraEnabled },
         wsConnected,
       },
     } = this;
     if (!wsConnected) return;
-    this.wsavc.send("open camera", { enabled, cameraMode });
+    if (enabled) {
+      if (cameraEnabled) return;
+      this.webrtc = new WebRTC({ socket: this.wsavc.ws, video: this.video.current })
+    } else {
+      this.webrtc.close();
+      this.webrtc = undefined;
+    }
+    this.setState({ cameraEnabled: enabled })
+    // this.wsavc.send("open camera", { enabled, cameraMode });
   };
 
   changeLight = (enable) => {
@@ -395,7 +402,6 @@ export default class App extends Component {
             </Form.Item>
           )}
         </Form>
-
         <Router className="app-page">
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
@@ -411,21 +417,22 @@ export default class App extends Component {
             controller={controller}
             lightEnabled={lightEnabled}
             cameraEnabled={cameraEnabled}
-            canvasRef={canvasRef}
+            videoEl={this.video.current}
             action={action}
             powerEnabled={powerEnabled}
             videoSize={videoSize}
-          ></Controller>
+            video={<video path="/" ref={this.video} autoPlay controls />}
+          >
+          </Controller>
         </Router>
         <div
           className="player-box"
           ref={this.playerBoxRef}
           style={{
-            opacity: cameraEnabled ? 1 : 0,
+            // opacity: cameraEnabled ? 1 : 0,
             transform: `scale(${videoSize / 50})`,
           }}
         >
-          <video ref={this.video} autoPlay controls />
         </div>
         <WakeLock preventSleep={wsConnected} />
       </div>
