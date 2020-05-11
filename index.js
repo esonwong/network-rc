@@ -8,6 +8,7 @@ const md5 = require("md5");
 const Splitter = require("stream-split");
 const stream = require("./lib/stream.js");
 const WebRTC = require("./lib/WebRTC");
+const { spawn } = require('child_process');
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
@@ -207,6 +208,9 @@ wss.on("connection", function (socket) {
       case "direction rate":
         directionRate(socket, payload);
         break;
+      case "pi power off":
+        piPowerOff();
+        break;
       default:
         console.log("怎么了？");
     }
@@ -305,6 +309,10 @@ const disconnect = (socket) => {
     endStreamer();
   }
 };
+
+const piPowerOff = () => {
+  spawn("halt");
+}
 
 process.on("SIGINT", function () {
   closeController();
