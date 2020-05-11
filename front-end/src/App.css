@@ -33,11 +33,16 @@ body {
   position: relative;
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.controller video {
+  flex: auto;
 }
 
 .controller-form {
-  position: fixed;
-  bottom: 0;
   padding: 1em;
 }
 
@@ -75,7 +80,7 @@ body {
 }
 
 .controller-router {
-  height: 100%;
+  /* height: 100%; */
 }
 
 .ai {
@@ -99,9 +104,6 @@ body {
   padding: 1em;
 }
 
-.ai-object-detection {
-  height: 100%;
-}
 .ai-object-detection-canvas-container {
   position: fixed;
   top: 0;

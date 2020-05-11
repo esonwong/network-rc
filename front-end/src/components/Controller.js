@@ -145,8 +145,8 @@ export default class Controller extends Component {
       const gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
         : navigator.webkitGetGamepads
-        ? navigator.webkitGetGamepads
-        : [];
+          ? navigator.webkitGetGamepads
+          : [];
       for (
         let gamePadIndex = 0;
         gamePadIndex < gamepadList.length;
@@ -214,8 +214,8 @@ export default class Controller extends Component {
       } = this;
       speed(
         v *
-          (speedReverse ? -1 : 1) *
-          ((v > 0 ? forwardPower : backwardPower) / 100)
+        (speedReverse ? -1 : 1) *
+        ((v > 0 ? forwardPower : backwardPower) / 100)
       );
     },
     direction: (v) => {
@@ -293,7 +293,7 @@ export default class Controller extends Component {
     const {
       fixContent,
       fixedController,
-      props: { action, cameraEnabled, canvasRef, videoSize },
+      props: { action, cameraEnabled, video, videoSize, videoEl },
     } = this;
     const {
       gamepadEnabled,
@@ -304,6 +304,26 @@ export default class Controller extends Component {
     const { speed, direction } = fixedController;
     return (
       <div className="controller">
+        <Router className="controller-router">
+          <Ai
+            path="ai/learn/*"
+            canvasRef={videoEl}
+            cameraEnabled={cameraEnabled}
+            action={action}
+            controller={fixedController}
+            onAi={(isAiControlling) => this.setState({ isAiControlling })}
+          />
+          <ObjectDetection
+            path="ai/coco-ssd/*"
+            videoEl={videoEl}
+            cameraEnabled={cameraEnabled}
+            action={action}
+            controller={fixedController}
+            onAi={(isAiControlling) => this.setState({ isAiControlling })}
+            videoSize={videoSize}
+          />
+        </Router>
+        {video}
         <Form className="controller-form" size="small" layout="inline">
           <Form.Item>
             <Popover content={fixContent} title="修正" trigger="click">
@@ -437,25 +457,7 @@ export default class Controller extends Component {
           </Form.Item>
         </Form>
         <Keybord controller={{ speed, direction }} />
-        <Router className="controller-router">
-          <Ai
-            path="ai/learn/*"
-            canvasRef={canvasRef}
-            cameraEnabled={cameraEnabled}
-            action={action}
-            controller={fixedController}
-            onAi={(isAiControlling) => this.setState({ isAiControlling })}
-          />
-          <ObjectDetection
-            path="ai/coco-ssd/*"
-            canvasRef={canvasRef}
-            cameraEnabled={cameraEnabled}
-            action={action}
-            controller={fixedController}
-            onAi={(isAiControlling) => this.setState({ isAiControlling })}
-            videoSize={videoSize}
-          />
-        </Router>
+
       </div>
     );
   }
