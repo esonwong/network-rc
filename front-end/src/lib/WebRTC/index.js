@@ -37,6 +37,9 @@ export default class WebRTC {
       sdpSemantics: 'unified-plan',
       iceServers: [
         {
+          urls: "stun:stun.ideasip.com"
+        },
+        {
           urls: 'stun:global.stun.twilio.com:3478?transport=udp'
         },
         {
