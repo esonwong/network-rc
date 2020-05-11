@@ -10,6 +10,7 @@ import {
   message,
   Slider,
   Tag,
+  Modal,
 } from "antd";
 import "./App.css";
 import { Router, Location, navigate } from "@reach/router";
@@ -26,7 +27,8 @@ import {
   VideoCameraOutlined,
   BulbOutlined,
   FullscreenExitOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  PoweroffOutlined
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
@@ -210,7 +212,8 @@ export default class App extends Component {
   changeCamera = (enabled) => {
     const {
       state: {
-        setting: { cameraMode, cameraEnabled },
+        // setting: { cameraMode, cameraEnabled },
+        setting: { cameraEnabled },
         wsConnected,
       },
     } = this;
@@ -236,6 +239,23 @@ export default class App extends Component {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
     this.wsavc.send("open power", enable);
+  };
+
+  piPowerOff = () => {
+    const { wsConnected } = this.state;
+    if (!wsConnected) return;
+    Modal.confirm({
+      autoFocusButton: "cancel",
+      icon: <PoweroffOutlined />,
+      title: "确定要关闭 Pi 酱系统？",
+      maskClosable: true,
+      onOk: () => {
+        this.wsavc.send("pi power off");
+      },
+      okType:"danger",
+      okText: "树莓派关机",
+      cancelText: "取消"
+    })
   };
 
   changeSetting = (setting) => {
@@ -271,12 +291,13 @@ export default class App extends Component {
       changeLight,
       changeCamera,
       changePower,
+      piPowerOff,
       login,
       state: {
         setting,
         wsConnected,
         cameraEnabled,
-        canvasRef,
+        // canvasRef,
         action,
         isFullscreen,
         serverSetting,
@@ -293,7 +314,7 @@ export default class App extends Component {
             <Location>
               {({ navigate }) => (
                 <Dropdown.Button
-                  overlay={Nav}
+                  overlay={<Nav piPowerOff={piPowerOff} />}
                   onClick={() => navigate(`${process.env.PUBLIC_URL}/`)}
                   type="primary"
                 >
@@ -396,11 +417,22 @@ export default class App extends Component {
               ></Button>
             </Form.Item>
           )}
+          {wsConnected &&
+            <Form.Item>
+              <Button
+                type="danger"
+                shape="circle"
+                icon={
+                  <PoweroffOutlined />
+                }
+                onClick={piPowerOff}
+              ></Button>
+            </Form.Item>}
           {wsConnected && delay && (
             <Form.Item>
               <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>
-            </Form.Item>
-          )}
+            </Form.Item>)}
+
         </Form>
         <Router className="app-page">
           <Setting
