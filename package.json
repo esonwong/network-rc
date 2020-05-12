@@ -15,6 +15,7 @@
     "@clusterws/cws": "^1.5.0",
     "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
+    "fluent-ffmpeg-multistream": "^1.0.0",
     "md5": "^2.2.1",
     "qrcode": "^1.4.4",
     "rpio": "^2.1.1",
