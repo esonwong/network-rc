@@ -573,6 +573,11 @@ find-up@^4.1.0:
     locate-path "^5.0.0"
     path-exists "^4.0.0"
 
+fluent-ffmpeg-multistream@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npm.taobao.org/fluent-ffmpeg-multistream/download/fluent-ffmpeg-multistream-1.0.0.tgz#e4bdae0128337f7274e882e7d0c84f7fe2792ea4"
+  integrity sha1-5L2uASgzf3J06ILn0MhPf+J5LqQ=
+
 fluent-ffmpeg@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npm.taobao.org/fluent-ffmpeg/download/fluent-ffmpeg-2.1.2.tgz#c952de2240f812ebda0aa8006d7776ee2acf7d74"
