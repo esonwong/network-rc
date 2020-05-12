@@ -68,6 +68,13 @@ export default class WebRTC {
     const remoteStream = new MediaStream(rc.getReceivers().map(receiver => receiver.track));
     this.video.srcObject = remoteStream;
 
+    this.localStream = await window.navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false
+    });
+    this.localStream.getTracks().forEach(track => rc.addTrack(track, this.localStream));
+
+
     // # 7 设置客户端本地 description 传递本地回答详情
     const answer = await rc.createAnswer();
     await rc.setLocalDescription(answer);
@@ -79,9 +86,11 @@ export default class WebRTC {
   }
 
   close() {
-    this.socket.removeEventListener("message", this.onSocketMessage)
+    this.socket.removeEventListener("message", this.onSocketMessage);
+    this.localStream.getTracks().forEach(track => track.stop());
     this.rc.close();
     this.rc = undefined;
+    this.video.srcObject = null;
     this.socketSend({ type: "close" });
   }
 }
