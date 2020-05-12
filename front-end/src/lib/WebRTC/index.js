@@ -58,7 +58,12 @@ export default class WebRTC {
       if (!candidate) return;
       this.socketSend({ type: "candidate", payload: candidate })
       console.log("local candidate", candidate);
-    })
+    });
+
+
+    rc.addEventListener("iceconnectionstatechange", function (e) {
+      console.log("iceConnectionState", rc.iceConnectionState)
+    });
 
     // # 5 设置客户端远程 description
     await rc.setRemoteDescription(offer);
@@ -67,6 +72,15 @@ export default class WebRTC {
     console.log("receivers", rc.getReceivers());
     const remoteStream = new MediaStream(rc.getReceivers().map(receiver => receiver.track));
     this.video.srcObject = remoteStream;
+
+
+
+    this.localStream = await window.navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false
+    });
+    this.localStream.getTracks().forEach(track => rc.addTrack(track));
+
 
     // # 7 设置客户端本地 description 传递本地回答详情
     const answer = await rc.createAnswer();
@@ -79,9 +93,11 @@ export default class WebRTC {
   }
 
   close() {
-    this.socket.removeEventListener("message", this.onSocketMessage)
+    this.socket.removeEventListener("message", this.onSocketMessage);
+    this.localStream.getTracks().forEach(track => track.stop());
     this.rc.close();
     this.rc = undefined;
+    this.video.srcObject = null;
     this.socketSend({ type: "close" });
   }
 }
