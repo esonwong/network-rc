@@ -354,4 +354,4 @@ const endStreamer = () => {
   streamer = null;
 };
 
-server.listen(8080);
+server.listen(8080, "0.0.0.0");
