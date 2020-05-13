@@ -9,18 +9,16 @@
   "scripts": {
     "start": "nodemon index.js",
     "server": "node index.js",
-    "build": "cd front-end && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
+    "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
     "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
-    "fluent-ffmpeg-multistream": "^1.0.0",
     "md5": "^2.2.1",
     "qrcode": "^1.4.4",
     "rpio": "^2.1.1",
     "rpio-pwm": "^1.0.3",
-    "speaker": "^0.5.1",
     "stream-split": "^1.1.0",
     "uuidv4": "^6.0.7",
     "wrtc": "^0.4.4",
