@@ -168,6 +168,10 @@ wss.on("connection", function (socket) {
             },
             onCandidate(candidate) {
               socket.sendData("webrtc candidate", candidate)
+            },
+            onClose() {
+              socket.sendData("webrtc close")
+              broadcast("stream_active", false);
             }
           });
           break;
