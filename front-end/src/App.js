@@ -28,7 +28,8 @@ import {
   BulbOutlined,
   FullscreenExitOutlined,
   ThunderboltOutlined,
-  PoweroffOutlined
+  PoweroffOutlined,
+  AudioOutlined
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
@@ -59,6 +60,7 @@ export default class App extends Component {
       canvasRef: undefined,
       isAiControlling: false,
       isFullscreen: false,
+      localMicrphoneEnabled: true,
       videoSize: 50,
       delay: undefined,
       action: {
@@ -122,6 +124,8 @@ export default class App extends Component {
       this.setState({ serverSetting: { maxSpeed, needPassword } });
       if (needPassword) {
         navigate(`${pubilcUrl}/login`);
+      } else {
+        this.onLogin();
       }
     });
 
@@ -167,7 +171,8 @@ export default class App extends Component {
 
     this.wsavc.on("login", ({ message: m }) => {
       message.success(m);
-      navigate(`${pubilcUrl}/`);
+      navigate(`${pubilcUrl}/`, { replace: true });
+      this.onLogin();
     });
 
     this.wsavc.on("error", ({ message: m }) => {
@@ -209,22 +214,44 @@ export default class App extends Component {
     });
   };
 
+  onLogin = () => {
+    const time = setInterval(() => {
+      if (!this.video.current) return;
+      clearInterval(time);
+      this.webrtc = new WebRTC({
+        socket: this.wsavc.ws,
+        video: this.video.current,
+        onError(e) {
+          message.error(e.message)
+        },
+        onSuccess: () => {
+          this.setState({
+            localMicrphoneEnabled: true,
+            cameraEnabled: true
+          })
+        },
+        onClose: () => {
+          this.setState({
+            localMicrphoneEnabled: false,
+            cameraEnabled: false
+          });
+          this.webrtc = undefined;
+        }
+      })
+    }, 100)
+
+  }
+
   changeCamera = (enabled) => {
     const {
       state: {
         // setting: { cameraMode, cameraEnabled },
-        setting: { cameraEnabled },
+        // setting: { cameraEnabled },
         wsConnected,
       },
     } = this;
     if (!wsConnected) return;
-    if (enabled) {
-      if (cameraEnabled) return;
-      this.webrtc = new WebRTC({ socket: this.wsavc.ws, video: this.video.current })
-    } else {
-      this.webrtc.close();
-      this.webrtc = undefined;
-    }
+    this.wsavc.send("webrtc camera", enabled);
     this.setState({ cameraEnabled: enabled })
     // this.wsavc.send("open camera", { enabled, cameraMode });
   };
@@ -252,7 +279,7 @@ export default class App extends Component {
       onOk: () => {
         this.wsavc.send("pi power off");
       },
-      okType:"danger",
+      okType: "danger",
       okText: "树莓派关机",
       cancelText: "取消"
     })
@@ -282,6 +309,13 @@ export default class App extends Component {
     this.wsavc.send("direction rate", directionRate);
   };
 
+  changeLocalMicrphone = (enabled) => {
+    this.webrtc.openMicrophone(enabled);
+    this.setState({
+      localMicrphoneEnabled: enabled
+    })
+  }
+
   render() {
     const {
       disconnect,
@@ -291,6 +325,7 @@ export default class App extends Component {
       changeLight,
       changeCamera,
       changePower,
+      changeLocalMicrphone,
       piPowerOff,
       login,
       state: {
@@ -305,7 +340,9 @@ export default class App extends Component {
         videoSize,
         delay,
         powerEnabled,
+        localMicrphoneEnabled,
       },
+      webrtc
     } = this;
     return (
       <div className="App" ref={this.appRef}>
@@ -393,7 +430,16 @@ export default class App extends Component {
             />
           </Form.Item>
 
-
+          {webrtc && webrtc.localStream &&
+            <Form.Item>
+              <Switch
+                checked={localMicrphoneEnabled}
+                onChange={changeLocalMicrphone}
+                checkedChildren={<AudioOutlined />}
+                unCheckedChildren={<AudioOutlined />}
+              />
+            </Form.Item>
+          }
 
           {document.body.requestFullscreen && (
             <Form.Item>
@@ -402,6 +448,7 @@ export default class App extends Component {
                 shape="circle"
                 icon={
                   isFullscreen ? (
+
                     <FullscreenExitOutlined />
                   ) : (
                       <FullscreenOutlined />
@@ -428,6 +475,7 @@ export default class App extends Component {
                 onClick={piPowerOff}
               ></Button>
             </Form.Item>}
+
           {wsConnected && delay && (
             <Form.Item>
               <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>
