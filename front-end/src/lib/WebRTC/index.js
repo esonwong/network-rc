@@ -1,11 +1,15 @@
 export default class WebRTC {
-  constructor({ video, socket }) {
+  constructor({ video, socket, onError, onSuccess, onClose }) {
     this.video = video;
     this.socket = socket;
+    this.onError = onError;
+    this.onSuccess = onSuccess;
+    this.onClose = onClose;
 
     // #0 请求 webrtc 连接
     this.socketSend({ type: "connect" })
-    this.socket.addEventListener("message", this.onSocketMessage)
+    this.socket.addEventListener("message", this.onSocketMessage);
+
   }
 
   socketSend({ type, payload }) {
@@ -65,6 +69,17 @@ export default class WebRTC {
       console.log("iceConnectionState", rc.iceConnectionState)
     });
 
+
+    rc.addEventListener("connectionstatechange", ({ target }) => {
+      console.log("Connection state change", target.connectionState);
+      if (target.connectionState === "connected") {
+        this.onSuccess();
+      }
+      if (target.connectionState === "disconnected") {
+        this.close();
+      }
+    });
+
     // # 5 设置客户端远程 description
     await rc.setRemoteDescription(offer);
 
@@ -75,11 +90,16 @@ export default class WebRTC {
 
 
 
-    this.localStream = await window.navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false
-    });
-    this.localStream.getTracks().forEach(track => rc.addTrack(track));
+    try {
+      this.localStream = await window.navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false
+      });
+      this.localStream.getTracks().forEach(track => rc.addTrack(track));
+    } catch (error) {
+      this.onError(new Error("控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"));
+    }
+
 
 
     // # 7 设置客户端本地 description 传递本地回答详情
@@ -92,13 +112,20 @@ export default class WebRTC {
     console.log("remote candidate", candidate);
   }
 
+  openMicrophone(enabled) {
+    if (!this.localStream) return;
+    this.localStream.getAudioTracks()[0].enabled = enabled;
+  }
+
+
   close() {
     this.socket.removeEventListener("message", this.onSocketMessage);
-    this.localStream.getTracks().forEach(track => track.stop());
+    this.localStream && this.localStream.getTracks().forEach(track => track.stop());
     this.rc.close();
     this.rc = undefined;
     this.video.srcObject = null;
     this.socketSend({ type: "close" });
+    this.onClose();
   }
 }
 
