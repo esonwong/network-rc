@@ -172,6 +172,9 @@ wss.on("connection", function (socket) {
             onClose() {
               socket.sendData("webrtc close")
               broadcast("stream_active", false);
+            },
+            onError({ message }) {
+              broadcast("error", { status: 1, message })
             }
           });
           break;
@@ -181,10 +184,14 @@ wss.on("connection", function (socket) {
         case "candidate":
           socket.webrtc.onCandidate(payload);
           break;
+        case "camera":
+          socket.webrtc.openCamera(payload);
+          break;
         case "close":
           socket.webrtc.close();
           break;
         default:
+          console.log("怎么了？ webrtc", type);
           break;
       }
       return;
