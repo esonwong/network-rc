@@ -78,8 +78,6 @@ let currentUser
 
 
 
-return;
-
 const {
   changeLight,
   changeDirection,
@@ -150,8 +148,8 @@ if (userList) {
     currentUser,
     onChange(user) {
       console.log("用户更改", user);
+      broadcast("info", { message: `${currentUser ? currentUser.name : ""} 时间到啦，轮到 ${user.name} 啦。` });
       currentUser = user
-      broadcast("user change", { name: user.name });
       password = user.password;
       wss.clients.forEach((ws) => {
         ws.close(0, "时间到了");
@@ -188,6 +186,7 @@ wss.on("connection", function (socket) {
     const { action, payload } = JSON.parse(m);
 
     if (action.indexOf("webrtc") !== -1) {
+      if (!check(socket)) return;
       const type = action.split(" ")[1];
       switch (type) {
         case "connect":
@@ -198,6 +197,15 @@ wss.on("connection", function (socket) {
             },
             onCandidate(candidate) {
               socket.sendData("webrtc candidate", candidate)
+            },
+            onSuccess() {
+            },
+            onClose() {
+              socket.sendData("webrtc close")
+              broadcast("stream_active", false);
+            },
+            onError({ message }) {
+              broadcast("error", { status: 1, message })
             }
           });
           break;
@@ -207,10 +215,14 @@ wss.on("connection", function (socket) {
         case "candidate":
           socket.webrtc.onCandidate(payload);
           break;
+        case "camera":
+          socket.webrtc.openCamera(payload);
+          break;
         case "close":
           socket.webrtc.close();
           break;
         default:
+          console.log("怎么了？ webrtc", type);
           break;
       }
       return;
