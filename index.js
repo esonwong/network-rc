@@ -9,10 +9,17 @@ const Splitter = require("stream-split");
 const stream = require("./lib/stream.js");
 const WebRTC = require("./lib/WebRTC");
 const { spawn } = require('child_process');
+const User = require("./lib/user")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
   .options({
+    u: {
+      alias: "userList",
+      default: false,
+      type: "boolean",
+      describe: "用户列表",
+    },
     s: {
       alias: "maxSpeed",
       default: 60,
@@ -58,21 +65,29 @@ console.info("鸣谢：");
 console.info("  Eson Wong - 提供免费的 frp 服务器");
 
 const {
-  changeLight,
-  changeDirection,
-  changeSpeed,
-  closeController,
-  changePower
-} = require("./lib/controller.js");
-const {
-  password,
   maxSpeed,
   frp,
   frpPort,
   frpServer,
   frpServerPort,
   frpServerToken,
+  userList
 } = argv;
+let { password } = argv;
+let currentUser
+
+
+
+return;
+
+const {
+  changeLight,
+  changeDirection,
+  changeSpeed,
+  closeController,
+  changePower
+} = require("./lib/controller.js");
+
 
 if (frp) {
   if (!frpPort) {
@@ -129,6 +144,20 @@ const broadcastStream = (data) => {
     }
   });
 };
+
+if (userList) {
+  new User({
+    currentUser,
+    onChange(user) {
+      currentUser = user
+      broadcast("user change", { name: user.name });
+      password = user.password;
+      wss.clients.forEach((ws) => {
+        ws.close(0, "时间到了");
+      });
+    }
+  });
+}
 
 wss.on("connection", function (socket) {
   console.log("客户端连接！");
