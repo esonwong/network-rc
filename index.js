@@ -149,6 +149,7 @@ if (userList) {
   new User({
     currentUser,
     onChange(user) {
+      console.log("用户更改", user);
       currentUser = user
       broadcast("user change", { name: user.name });
       password = user.password;

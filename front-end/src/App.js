@@ -131,12 +131,15 @@ export default class App extends Component {
 
     this.wsavc.on("disconnected", () => {
       console.log("WS disconnected");
-      this.setState({ wsConnected: false, cameraEnabled: false });
+      this.setState({ wsConnected: false });
       clearInterval(pingTime);
     });
     this.wsavc.on("connected", () => {
       console.log("WS connected");
       this.setState({ wsConnected: true });
+      if (this.webrtc) {
+        this.webrtc.socket = this.wsavc.ws;
+      }
       pingTime = setInterval(() => {
         const sendTime = new Date().getTime();
         this.wsavc.send("ping", { sendTime });
@@ -178,6 +181,10 @@ export default class App extends Component {
     this.wsavc.on("error", ({ message: m }) => {
       message.error(m);
     });
+
+    this.wsavc.on("info", ({ message: m }) => {
+      message.info(m);
+    })
 
     connect();
 
