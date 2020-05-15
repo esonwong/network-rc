@@ -1,3 +1,4 @@
+users.js
 .DS_Store
 .vscode/
 *.swp
@@ -213,3 +214,4 @@ dmypy.json
 .pyre/
 
 # End of https://www.gitignore.io/api/node,python
+users.js
