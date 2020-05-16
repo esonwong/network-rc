@@ -13,14 +13,14 @@ import Icon from "./Icon";
 export default function Nav(props) {
   return (
     <Menu mode="horizontal" {...props}>
-      <Menu.SubMenu key="sub2" icon={<CarOutlined />} title="AI">
+      {/* <Menu.SubMenu key="sub2" icon={<CarOutlined />} title="AI">
         <Menu.Item>
           <Link to={`${process.env.PUBLIC_URL}/ai/coco-ssd`}>目标追踪</Link>
         </Menu.Item>
         <Menu.Item>
           <Link to={`${process.env.PUBLIC_URL}/ai/learn/sample`}>机器学习</Link>
         </Menu.Item>
-      </Menu.SubMenu>
+      </Menu.SubMenu> */}
       <Menu.Item>
         <Link to={`${process.env.PUBLIC_URL}/setting`}>
           <SettingOutlined /> 设置

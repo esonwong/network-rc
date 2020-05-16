@@ -302,7 +302,7 @@ export default class Controller extends Component {
     const {
       fixContent,
       fixedController,
-      props: { action, cameraEnabled, video, videoSize, videoEl },
+      props: { action, cameraEnabled, videoSize, videoEl },
     } = this;
     const {
       gamepadEnabled,
@@ -333,10 +333,9 @@ export default class Controller extends Component {
             videoSize={videoSize}
           />
         </Router>
-        {video}
         <Form className="controller-form" size="small" layout="inline">
           <Form.Item>
-            <Popover content={fixContent} title="修正" trigger="click">
+            <Popover content={fixContent} title="修正" trigger="click" placement="topLeft">
               <Button icon={<SlidersOutlined />}>修正</Button>
             </Popover>
           </Form.Item>
