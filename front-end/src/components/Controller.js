@@ -22,8 +22,9 @@ let isSupportedOrientaion = false;
 const deviceorientation = (e) => {
   const { alpha, beta, gamma } = e;
   curentOrientation = { alpha, beta, gamma };
-  if (alpha || isSupportedOrientaion) {
+  if (alpha && !isSupportedOrientaion) {
     isSupportedOrientaion = true;
+    message.info("手机横屏点击修正进行校准可开启,重力感应控制方向╰(*°▽°*)╯！");
   }
 };
 
@@ -244,7 +245,15 @@ export default class Controller extends Component {
             }}
             icon={<AimOutlined />}
           >
-            舵机感应校准
+            舵机重力感应校准
+          </Button>
+          &nbsp;
+          <Button
+            onClick={() => {
+              this.setState({ zeroOrientation: undefined });
+            }}
+          >
+            关闭重力感应
           </Button>
         </Form.Item>
         <Form.Item label="舵机反向">
@@ -300,6 +309,7 @@ export default class Controller extends Component {
       forwardPower,
       backwardPower,
       isShowButton,
+      zeroOrientation
     } = this.state;
     const { speed, direction } = fixedController;
     return (
@@ -345,7 +355,7 @@ export default class Controller extends Component {
                   direction(0);
                 }}
                 icon={<LeftOutlined />}
-                style={{ display: !isSupportedOrientaion ? undefined : "none" }}
+                style={{ display: !zeroOrientation ? undefined : "none" }}
               ></Button>
               <Button
                 className="right-button"
@@ -360,7 +370,7 @@ export default class Controller extends Component {
                   direction(0);
                 }}
                 icon={<RightOutlined />}
-                style={{ display: !isSupportedOrientaion ? undefined : "none" }}
+                style={{ display: !zeroOrientation ? undefined : "none" }}
               ></Button>
               <Button
                 className="forward-button"
