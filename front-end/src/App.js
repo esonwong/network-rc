@@ -13,7 +13,7 @@ import {
   Modal,
 } from "antd";
 import "./App.css";
-import { Router, Location, navigate } from "@reach/router";
+import { Router, Location, navigate, useMatch, Match } from "@reach/router";
 import Nav from "./components/Nav";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
@@ -351,6 +351,7 @@ export default class App extends Component {
       },
       webrtc
     } = this;
+
     return (
       <div className="App" ref={this.appRef}>
         <Form layout="inline" className="app-status" size="small">
@@ -489,6 +490,19 @@ export default class App extends Component {
             </Form.Item>)}
 
         </Form>
+        <Match path="/:item">
+          {({ match }) => <div
+            className="player-box"
+            ref={this.playerBoxRef}
+            style={{
+              // opacity: cameraEnabled ? 1 : 0,
+              display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
+              transform: `scale(${videoSize / 50})`,
+            }}
+          >
+            <video ref={this.video} autoPlay controls />
+          </div>}
+        </Match>
         <Router className="app-page">
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
@@ -508,19 +522,9 @@ export default class App extends Component {
             action={action}
             powerEnabled={powerEnabled}
             videoSize={videoSize}
-            video={<video path="/" ref={this.video} autoPlay controls />}
           >
           </Controller>
         </Router>
-        <div
-          className="player-box"
-          ref={this.playerBoxRef}
-          style={{
-            // opacity: cameraEnabled ? 1 : 0,
-            transform: `scale(${videoSize / 50})`,
-          }}
-        >
-        </div>
         <WakeLock preventSleep={wsConnected} />
       </div>
     );

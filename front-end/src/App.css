@@ -16,12 +16,7 @@ body {
 }
 
 .app-status {
-  padding: 1em;
-}
-
-.app-status .ant-form-item {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  padding: 0.5em;
 }
 
 .app-page {
@@ -43,7 +38,7 @@ body {
 }
 
 .controller-form {
-  padding: 1em;
+  padding: 0.5em;
 }
 
 .controller-form .backward-button,
@@ -88,7 +83,7 @@ body {
   overflow: auto;
 }
 .ai-sample {
-  padding: 1em;
+  padding: 0.5em;
 }
 
 .ai-sample-form {
@@ -96,12 +91,12 @@ body {
 }
 
 .ai-example-list {
-  padding: 1em;
+  padding: 0.5em;
   text-align: center;
 }
 
 .ai-train {
-  padding: 1em;
+  padding: 0.5em;
 }
 
 .ai-object-detection-canvas-container {
@@ -122,16 +117,9 @@ body {
 }
 
 .player-box {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
   display: flex;
   transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+  flex: 999;
 }
 .player-box canvas,
 .player-box video {
