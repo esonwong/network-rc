@@ -45,7 +45,7 @@ export default class App extends Component {
     this.video = createRef();
     this.state = {
       setting: {
-        speedMax: 20,
+        speedMax: 30,
         wsAddress: window.location.host,
         cameraMode: "default",
         ...store.get("setting"),
