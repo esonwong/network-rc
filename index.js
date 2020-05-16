@@ -147,7 +147,6 @@ if (userList) {
   new User({
     currentUser,
     onChange(user) {
-      console.log("用户更改", user);
       broadcast("info", { message: `${currentUser ? currentUser.name : ""} 时间到啦，轮到 ${user.name} 啦。` });
       currentUser = user
       password = user.password;
