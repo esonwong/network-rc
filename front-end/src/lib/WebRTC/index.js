@@ -42,17 +42,23 @@ export default class WebRTC {
   onOffer = async (offer) => {
     // # 4 创建客户端 rc
     const rc = new RTCPeerConnection({
+      // iceTransportPolicy: "relay",
       sdpSemantics: 'unified-plan',
       iceServers: [
-        {
-          urls: "stun:stun.ideasip.com"
-        },
         {
           urls: 'stun:global.stun.twilio.com:3478?transport=udp'
         },
         {
+          urls: "turn:us.esonwong.com:3478",
+          username: "eson",
+          credential: "networkrc"
+        },
+        {
           urls: 'stun:stun.l.google.com:19302'
-        }
+        },
+        {
+          urls: "stun:stun.ideasip.com"
+        },
       ],
     });
 
@@ -69,6 +75,9 @@ export default class WebRTC {
       console.log("iceConnectionState", rc.iceConnectionState)
     });
 
+    rc.addEventListener("icecandidateerror", function (e) {
+      console.error("icecandidateerror", e);
+    });
 
     rc.addEventListener("connectionstatechange", ({ target }) => {
       console.log("Connection state change", target.connectionState);
@@ -109,7 +118,7 @@ export default class WebRTC {
   }
 
   onCandidate(candidate) {
-    console.log("remote candidate", candidate);
+    // console.log("remote candidate", candidate);
   }
 
   openMicrophone(enabled) {
