@@ -218,7 +218,7 @@ wss.on("connection", function (socket) {
           socket.webrtc.openCamera(payload);
           break;
         case "close":
-          socket.webrtc.close();
+          socket.webrtc && socket.webrtc.close();
           break;
         default:
           console.log("怎么了？ webrtc", type);
