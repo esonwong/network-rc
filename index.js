@@ -204,7 +204,8 @@ wss.on("connection", function (socket) {
               broadcast("stream_active", false);
             },
             onError({ message }) {
-              broadcast("error", { status: 1, message })
+              socket.sendData("error", { status: 1, message });
+              socket.sendData("switch", { protocol: "websocket" });
             }
           });
           break;
@@ -215,7 +216,7 @@ wss.on("connection", function (socket) {
           socket.webrtc.onCandidate(payload);
           break;
         case "camera":
-          socket.webrtc.openCamera(payload);
+          socket.webrtc && socket.webrtc.openCamera(payload);
           break;
         case "close":
           socket.webrtc && socket.webrtc.close();
@@ -362,13 +363,21 @@ process.on("SIGINT", function () {
   process.exit();
 });
 
+
+
+
+
+
+
+
 let streamer = null;
 
 const startStreamer = async () => {
   console.log("starting streamer");
   broadcast("stream_active", true);
   if (streamer) return;
-  streamer = stream.raspivid(cameraMode);
+  // streamer = stream.raspivid(cameraMode);
+  streamer = stream.ffmpeg(cameraMode);
   // streamer = await stream.ffmpeg(cameraMode, function({ width, height }){
   //   broadcast("initalize", {
   //     width, height,
