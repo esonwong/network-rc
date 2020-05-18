@@ -62,22 +62,7 @@ export default class WebRTC {
       ],
     });
 
-    this.rc = rc;
-
-    rc.addEventListener("icecandidate", ({ candidate }) => {
-      if (!candidate) return;
-      this.socketSend({ type: "candidate", payload: candidate })
-      console.log("local candidate", candidate);
-    });
-
-
-    rc.addEventListener("iceconnectionstatechange", function (e) {
-      console.log("iceConnectionState", rc.iceConnectionState)
-    });
-
-    rc.addEventListener("icecandidateerror", function (e) {
-      console.error("icecandidateerror", e);
-    });
+    
 
     rc.addEventListener("connectionstatechange", ({ target }) => {
       console.log("Connection state change", target.connectionState);
@@ -88,6 +73,20 @@ export default class WebRTC {
         this.close();
       }
     });
+    rc.addEventListener("iceconnectionstatechange", function (e) {
+      console.log("iceConnectionState", rc.iceConnectionState)
+    });
+    rc.addEventListener("icecandidate", ({ candidate }) => {
+      if (!candidate) return;
+      this.socketSend({ type: "candidate", payload: candidate })
+      console.log("local candidate", candidate);
+    });
+    rc.addEventListener("icecandidateerror", function (e) {
+      console.error("icecandidateerror", e);
+    });
+
+    this.rc = rc;
+
 
     // # 5 设置客户端远程 description
     await rc.setRemoteDescription(offer);
