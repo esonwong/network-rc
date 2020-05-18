@@ -2,38 +2,22 @@ import React, { Component, createRef } from "react";
 import WakeLock from "react-wakelock-react16";
 import store from "store";
 import {
-  Form,
-  Switch,
-  Dropdown,
-  Button,
-  Popover,
   message,
-  Slider,
-  Tag,
   Modal,
 } from "antd";
 import "./App.css";
-import { Router, Location, navigate, Match } from "@reach/router";
-import Nav from "./components/Nav";
+import { Router, navigate, Match } from "@reach/router";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
 import WSAvcPlayer from "ws-avc-player";
 import WebRTC from './lib/WebRTC'
 import {
-  HomeOutlined,
-  ExpandOutlined,
-  FullscreenOutlined,
-  ApiOutlined,
-  VideoCameraOutlined,
-  BulbOutlined,
-  FullscreenExitOutlined,
-  ThunderboltOutlined,
   PoweroffOutlined,
-  AudioOutlined
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
+import Status from "./components/Status";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -55,6 +39,8 @@ export default class App extends Component {
       },
       wsConnected: false,
       cameraEnabled: false,
+      cameraLoading: false,
+      protocol: "webrtc",
       lightEnabled: false,
       powerEnabled: false,
       canvasRef: undefined,
@@ -67,6 +53,7 @@ export default class App extends Component {
         speed: 0,
         direction: 0,
       },
+      isLogin: true
     };
 
     const { changeCamera, changeLight, changePower } = this;
@@ -124,6 +111,7 @@ export default class App extends Component {
       this.setState({ serverSetting: { maxSpeed, needPassword } });
       if (needPassword) {
         navigate(`${pubilcUrl}/login`);
+        this.setState({ isLogin: false })
       } else {
         this.onLogin();
       }
@@ -134,6 +122,7 @@ export default class App extends Component {
       this.setState({ wsConnected: false });
       clearInterval(pingTime);
     });
+
     this.wsavc.on("connected", () => {
       console.log("WS connected");
       this.setState({ wsConnected: true });
@@ -144,23 +133,34 @@ export default class App extends Component {
         const sendTime = new Date().getTime();
         this.wsavc.send("ping", { sendTime });
       }, 1000);
+      // this.changeCamera(true);
     });
-    this.wsavc.on("frame_shift", (fbl) => {
-      // console.log("Stream frame shift: ", fbl);
+
+    // this.wsavc.on("frame_shift", (fbl) => {
+    // console.log("Stream frame shift: ", fbl);
+    // });
+    // this.wsavc.on("resized", (payload) => {
+    //   console.log("resized", payload);
+    // });
+
+    this.wsavc.on("switch", ({ protocol }) => {
+      this.switchProtocol(protocol);
     });
-    this.wsavc.on("resized", (payload) => {
-      console.log("resized", payload);
-    });
+
+
+    // websocket player
     this.wsavc.on("stream_active", (cameraEnabled) => {
       console.log("Stream is ", cameraEnabled ? "active" : "offline");
       if (cameraEnabled) {
+        this.wsavc.AvcPlayer.canvas.style.display = "";
         this.playerBoxRef.current.appendChild(this.wsavc.AvcPlayer.canvas);
         this.setState({
           cameraEnabled,
           canvasRef: this.wsavc.AvcPlayer.canvas,
+          cameraLoading: false
         });
       } else {
-        this.setState({ cameraEnabled, canvasRef: undefined });
+        this.setState({ cameraEnabled, canvasRef: undefined, cameraLoading: false });
       }
     });
 
@@ -174,6 +174,7 @@ export default class App extends Component {
 
     this.wsavc.on("login", ({ message: m }) => {
       message.success(m);
+      this.setState({ isLogin: true })
       navigate(`${pubilcUrl}/`, { replace: true });
       this.onLogin();
     });
@@ -221,30 +222,65 @@ export default class App extends Component {
     });
   };
 
+  switchProtocol = (protocol) => {
+    message.info(`切换到${protocol}`);
+    if (protocol === "websocket" && this.webrtc) {
+      this.webrtc.close();
+      this.webrtc = undefined;
+    }
+    if (protocol === "webrtc" && this.state.canvasRef) {
+      // eslint-disable-next-line
+      this.state.canvasRef.style.display = "none";
+      this.websocketMediaConnect(false);
+    }
+    this.setState({ protocol }, () => {
+      this.changeCamera(true);
+    })
+  }
+
+  webrtcMediaConnect = (enabled) => {
+    if (this.webrtc) {
+      this.wsavc.send("webrtc camera", enabled);
+      this.setState({ cameraEnabled: enabled, cameraLoading: false });
+    } else {
+      if (enabled) {
+        this.setState({
+          cameraLoading: false
+        });
+        this.webrtc = new WebRTC({
+          socket: this.wsavc.ws,
+          video: this.video.current,
+          onError(e) {
+            message.error(e.message)
+          },
+          onSuccess: () => {
+            this.setState({
+              localMicrphoneEnabled: true,
+              cameraEnabled: true,
+              cameraLoading: false
+            })
+          },
+          onClose: () => {
+            this.setState({
+              localMicrphoneEnabled: false,
+              cameraEnabled: false
+            });
+            this.webrtc = undefined
+          }
+        })
+      }
+    }
+  }
+
+  websocketMediaConnect = (enabled, { cameraMode = "default" } = {}) => {
+    this.wsavc.send("open camera", { enabled, cameraMode });
+  }
+
   onLogin = () => {
     const time = setInterval(() => {
       if (!this.video.current) return;
       clearInterval(time);
-      this.webrtc = new WebRTC({
-        socket: this.wsavc.ws,
-        video: this.video.current,
-        onError(e) {
-          message.error(e.message)
-        },
-        onSuccess: () => {
-          this.setState({
-            localMicrphoneEnabled: true,
-            cameraEnabled: true
-          })
-        },
-        onClose: () => {
-          this.setState({
-            localMicrphoneEnabled: false,
-            cameraEnabled: false
-          });
-          this.webrtc = undefined;
-        }
-      })
+      this.changeCamera(true);
     }, 100)
 
   }
@@ -252,15 +288,18 @@ export default class App extends Component {
   changeCamera = (enabled) => {
     const {
       state: {
-        // setting: { cameraMode, cameraEnabled },
-        // setting: { cameraEnabled },
+        setting: { cameraMode },
         wsConnected,
+        protocol
       },
     } = this;
     if (!wsConnected) return;
-    this.wsavc.send("webrtc camera", enabled);
-    this.setState({ cameraEnabled: enabled })
-    // this.wsavc.send("open camera", { enabled, cameraMode });
+    this.setState({ cameraLoading: true });
+    if (protocol === "webrtc") {
+      this.webrtcMediaConnect(enabled);
+    } else {
+      this.websocketMediaConnect(enabled, { cameraMode });
+    }
   };
 
   changeLight = (enable) => {
@@ -325,8 +364,8 @@ export default class App extends Component {
 
   render() {
     const {
-      disconnect,
       connect,
+      disconnect,
       controller,
       changeSetting,
       changeLight,
@@ -339,157 +378,50 @@ export default class App extends Component {
         setting,
         wsConnected,
         cameraEnabled,
-        // canvasRef,
         action,
         isFullscreen,
         serverSetting,
         lightEnabled,
         videoSize,
         delay,
+        cameraLoading,
         powerEnabled,
         localMicrphoneEnabled,
+        protocol,
+        isLogin
       },
       webrtc
     } = this;
 
     return (
       <div className="App" ref={this.appRef}>
-        <Form layout="inline" className="app-status" size="small">
-          <Form.Item>
-            <Location>
-              {({ navigate }) => (
-                <Dropdown.Button
-                  overlay={<Nav piPowerOff={piPowerOff} />}
-                  onClick={() => navigate(`${process.env.PUBLIC_URL}/`)}
-                  type="primary"
-                >
-                  <HomeOutlined /> 控制
-                </Dropdown.Button>
-              )}
-            </Location>
-          </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={wsConnected}
-              onChange={(v) => {
-                if (v) connect();
-                else disconnect();
-              }}
-              unCheckedChildren={<ApiOutlined />}
-              checkedChildren={<ApiOutlined />}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={powerEnabled}
-              onChange={changePower}
-              checkedChildren={<ThunderboltOutlined />}
-              unCheckedChildren={<ThunderboltOutlined />}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={cameraEnabled}
-              onChange={changeCamera}
-              checkedChildren={<VideoCameraOutlined />}
-              unCheckedChildren={<VideoCameraOutlined />}
-            />
-          </Form.Item>
-
-          {/* <Form.Item>
-            <Button style={{ width: "6em" }}>
-              舵机:{action.direction.toFixed(2)}
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button style={{ width: "6em" }}>
-              电调:{action.speed.toFixed(2)}
-            </Button>
-          </Form.Item> */}
-          {cameraEnabled && (
-            <Form.Item>
-              <Popover
-                placement="bottomRight"
-                content={
-                  <Slider
-                    defaultValue={videoSize}
-                    step={0.1}
-                    tipFormatter={(v) => v * 2}
-                    onAfterChange={(videoSize) => this.setState({ videoSize })}
-                    style={{ width: "30vw" }}
-                    marks={{ 0: 0, 50: 100, 100: 200 }}
-                  />
-                }
-              >
-                <Button shape="round">
-                  <ExpandOutlined />
-                  {(videoSize * 2).toFixed(1)}%
-                </Button>
-              </Popover>
-            </Form.Item>
-          )}
-
-          <Form.Item>
-            <Switch
-              checked={lightEnabled}
-              onChange={changeLight}
-              checkedChildren={<BulbOutlined />}
-              unCheckedChildren={<BulbOutlined />}
-            />
-          </Form.Item>
-
-          {webrtc && webrtc.localStream &&
-            <Form.Item>
-              <Switch
-                checked={localMicrphoneEnabled}
-                onChange={changeLocalMicrphone}
-                checkedChildren={<AudioOutlined />}
-                unCheckedChildren={<AudioOutlined />}
-              />
-            </Form.Item>
-          }
-
-          {document.body.requestFullscreen && (
-            <Form.Item>
-              <Button
-                type="primary"
-                shape="circle"
-                icon={
-                  isFullscreen ? (
-
-                    <FullscreenExitOutlined />
-                  ) : (
-                      <FullscreenOutlined />
-                    )
-                }
-                onClick={() => {
-                  if (isFullscreen) {
-                    document.exitFullscreen();
-                  } else {
-                    document.body.requestFullscreen();
-                  }
-                }}
-              ></Button>
-            </Form.Item>
-          )}
-          {wsConnected &&
-            <Form.Item>
-              <Button
-                type="danger"
-                shape="circle"
-                icon={
-                  <PoweroffOutlined />
-                }
-                onClick={piPowerOff}
-              ></Button>
-            </Form.Item>}
-
-          {wsConnected && delay && (
-            <Form.Item>
-              <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>
-            </Form.Item>)}
-
-        </Form>
+        <Status
+          {...{
+            wsConnected,
+            cameraEnabled,
+            cameraLoading,
+            isFullscreen,
+            serverSetting,
+            lightEnabled,
+            videoSize,
+            delay,
+            powerEnabled,
+            localMicrphoneEnabled,
+            changePower,
+            changeCamera,
+            changeLight,
+            changeLocalMicrphone,
+            webrtc,
+            piPowerOff,
+            connect,
+            disconnect,
+            protocol
+          }}
+          videoSize={videoSize}
+          onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
+          disabled={!isLogin}
+          onChangeProtocol={protocol => this.switchProtocol(protocol)}
+        />
         <Match path="/:item">
           {({ match }) => <div
             className="player-box"
@@ -500,7 +432,7 @@ export default class App extends Component {
               transform: `scale(${videoSize / 50})`,
             }}
           >
-            <video ref={this.video} autoPlay controls />
+            <video ref={this.video} autoPlay controls style={{ display: protocol === "webrtc" ? undefined : "none" }} />
           </div>}
         </Match>
         <Router className="app-page">

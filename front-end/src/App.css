@@ -17,6 +17,7 @@ body {
 
 .app-status {
   padding: 0.5em;
+  z-index: 1;
 }
 
 .app-page {
