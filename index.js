@@ -204,8 +204,10 @@ wss.on("connection", function (socket) {
               broadcast("stream_active", false);
             },
             onError({ message }) {
-              socket.sendData("error", { status: 1, message });
               socket.sendData("switch", { protocol: "websocket" });
+            },
+            onWarnning({ message }) {
+              socket.sendData("error", { status: 1, message });
             }
           });
           break;
