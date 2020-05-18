@@ -18,11 +18,14 @@ body {
 .app-status {
   padding: 0.5em;
   z-index: 1;
+  flex-grow: 0;
+  flex-shrink: 1;
 }
 
 .app-page {
   overflow-y: auto;
-  flex: auto;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .controller {
@@ -120,7 +123,9 @@ body {
 .player-box {
   display: flex;
   transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
-  flex: 999;
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: auto;
 }
 .player-box canvas,
 .player-box video {
