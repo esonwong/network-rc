@@ -202,7 +202,7 @@ export default class Controller extends Component {
     let bateDegree = beta - baseBeta;
     bateDegree = bateDegree < -30 ? -30 : bateDegree;
     bateDegree = bateDegree > 30 ? 30 : bateDegree;
-    controller.direction((bateDegree / 30) * (directionReverse ? -1 : 1));
+    controller.direction((bateDegree / 30) * (directionReverse ? 1 : -1));
   };
 
   fixedController = {
