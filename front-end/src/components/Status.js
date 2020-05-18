@@ -7,6 +7,7 @@ import {
   Popover,
   Slider,
   Tag,
+  Radio
 } from "antd";
 import {
   HomeOutlined,
@@ -23,7 +24,11 @@ import {
 import { Location } from "@reach/router";
 import Nav from './Nav';
 
-export default function Status({ piPowerOff, wsConnected, connect,
+export default function Status({
+  piPowerOff,
+  wsConnected,
+  connect,
+  protocol,
   disconnect,
   powerEnabled,
   changePower,
@@ -37,7 +42,10 @@ export default function Status({ piPowerOff, wsConnected, connect,
   videoSize,
   delay,
   isFullscreen,
-  changeLocalMicrphone
+  changeLocalMicrphone,
+  cameraLoading,
+  onChangeProtocol,
+  disabled
 }) {
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -71,27 +79,49 @@ export default function Status({ piPowerOff, wsConnected, connect,
           onChange={changePower}
           checkedChildren={<ThunderboltOutlined />}
           unCheckedChildren={<ThunderboltOutlined />}
+          disabled={disabled}
         />
       </Form.Item>
+
+      <Form.Item>
+        <Switch
+          checked={lightEnabled}
+          onChange={changeLight}
+          checkedChildren={<BulbOutlined />}
+          unCheckedChildren={<BulbOutlined />}
+          disabled={disabled}
+        />
+      </Form.Item>
+
       <Form.Item>
         <Switch
           checked={cameraEnabled}
           onChange={changeCamera}
           checkedChildren={<VideoCameraOutlined />}
           unCheckedChildren={<VideoCameraOutlined />}
+          loading={cameraLoading}
+          disabled={disabled}
         />
       </Form.Item>
 
-      {/* <Form.Item>
-            <Button style={{ width: "6em" }}>
-              舵机:{action.direction.toFixed(2)}
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button style={{ width: "6em" }}>
-              电调:{action.speed.toFixed(2)}
-            </Button>
-          </Form.Item> */}
+      <Form.Item>
+        <Popover
+          placement="bottomRight"
+          content={
+            <Radio.Group value={protocol} onChange={({ target: { value } }) => onChangeProtocol(value)}>
+              <Radio.Button value="webrtc">webrtc</Radio.Button>
+              <Radio.Button value="websocket">websocket</Radio.Button>
+            </Radio.Group>
+          }
+        >
+          <Button shape="round"
+            disabled={disabled}
+          >
+            {protocol}
+          </Button>
+        </Popover>
+      </Form.Item>
+
       {cameraEnabled && (
         <Form.Item>
           <Popover
@@ -115,14 +145,18 @@ export default function Status({ piPowerOff, wsConnected, connect,
         </Form.Item>
       )}
 
-      <Form.Item>
-        <Switch
-          checked={lightEnabled}
-          onChange={changeLight}
-          checkedChildren={<BulbOutlined />}
-          unCheckedChildren={<BulbOutlined />}
-        />
-      </Form.Item>
+      {/* <Form.Item>
+            <Button style={{ width: "6em" }}>
+              舵机:{action.direction.toFixed(2)}
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button style={{ width: "6em" }}>
+              电调:{action.speed.toFixed(2)}
+            </Button>
+          </Form.Item> */}
+
+
 
       {webrtc && webrtc.localStream &&
         <Form.Item>
@@ -169,7 +203,6 @@ export default function Status({ piPowerOff, wsConnected, connect,
             onClick={piPowerOff}
           ></Button>
         </Form.Item>}
-
       {wsConnected && delay && (
         <Form.Item>
           <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>

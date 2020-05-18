@@ -40,7 +40,7 @@ export default class App extends Component {
       wsConnected: false,
       cameraEnabled: false,
       cameraLoading: false,
-      cameraType: "webrtc",
+      protocol: "webrtc",
       lightEnabled: false,
       powerEnabled: false,
       canvasRef: undefined,
@@ -53,6 +53,7 @@ export default class App extends Component {
         speed: 0,
         direction: 0,
       },
+      isLogin: true
     };
 
     const { changeCamera, changeLight, changePower } = this;
@@ -110,6 +111,7 @@ export default class App extends Component {
       this.setState({ serverSetting: { maxSpeed, needPassword } });
       if (needPassword) {
         navigate(`${pubilcUrl}/login`);
+        this.setState({ isLogin: false })
       } else {
         this.onLogin();
       }
@@ -120,6 +122,7 @@ export default class App extends Component {
       this.setState({ wsConnected: false });
       clearInterval(pingTime);
     });
+
     this.wsavc.on("connected", () => {
       console.log("WS connected");
       this.setState({ wsConnected: true });
@@ -130,23 +133,34 @@ export default class App extends Component {
         const sendTime = new Date().getTime();
         this.wsavc.send("ping", { sendTime });
       }, 1000);
+      // this.changeCamera(true);
     });
-    this.wsavc.on("frame_shift", (fbl) => {
-      // console.log("Stream frame shift: ", fbl);
+
+    // this.wsavc.on("frame_shift", (fbl) => {
+    // console.log("Stream frame shift: ", fbl);
+    // });
+    // this.wsavc.on("resized", (payload) => {
+    //   console.log("resized", payload);
+    // });
+
+    this.wsavc.on("switch", ({ protocol }) => {
+      this.switchProtocol(protocol);
     });
-    this.wsavc.on("resized", (payload) => {
-      console.log("resized", payload);
-    });
+
+
+    // websocket player
     this.wsavc.on("stream_active", (cameraEnabled) => {
       console.log("Stream is ", cameraEnabled ? "active" : "offline");
       if (cameraEnabled) {
+        this.wsavc.AvcPlayer.canvas.style.display = "";
         this.playerBoxRef.current.appendChild(this.wsavc.AvcPlayer.canvas);
         this.setState({
           cameraEnabled,
           canvasRef: this.wsavc.AvcPlayer.canvas,
+          cameraLoading: false
         });
       } else {
-        this.setState({ cameraEnabled, canvasRef: undefined });
+        this.setState({ cameraEnabled, canvasRef: undefined, cameraLoading: false });
       }
     });
 
@@ -160,6 +174,7 @@ export default class App extends Component {
 
     this.wsavc.on("login", ({ message: m }) => {
       message.success(m);
+      this.setState({ isLogin: true })
       navigate(`${pubilcUrl}/`, { replace: true });
       this.onLogin();
     });
@@ -207,30 +222,65 @@ export default class App extends Component {
     });
   };
 
+  switchProtocol = (protocol) => {
+    message.info(`切换到${protocol}`);
+    if (protocol === "websocket" && this.webrtc) {
+      this.webrtc.close();
+      this.webrtc = undefined;
+    }
+    if (protocol === "webrtc" && this.state.canvasRef) {
+      // eslint-disable-next-line
+      this.state.canvasRef.style.display = "none";
+      this.websocketMediaConnect(false);
+    }
+    this.setState({ protocol }, () => {
+      this.changeCamera(true);
+    })
+  }
+
+  webrtcMediaConnect = (enabled) => {
+    if (this.webrtc) {
+      this.wsavc.send("webrtc camera", enabled);
+      this.setState({ cameraEnabled: enabled, cameraLoading: false });
+    } else {
+      if (enabled) {
+        this.setState({
+          cameraLoading: false
+        });
+        this.webrtc = new WebRTC({
+          socket: this.wsavc.ws,
+          video: this.video.current,
+          onError(e) {
+            message.error(e.message)
+          },
+          onSuccess: () => {
+            this.setState({
+              localMicrphoneEnabled: true,
+              cameraEnabled: true,
+              cameraLoading: false
+            })
+          },
+          onClose: () => {
+            this.setState({
+              localMicrphoneEnabled: false,
+              cameraEnabled: false
+            });
+            this.webrtc = undefined
+          }
+        })
+      }
+    }
+  }
+
+  websocketMediaConnect = (enabled, { cameraMode = "default" } = {}) => {
+    this.wsavc.send("open camera", { enabled, cameraMode });
+  }
+
   onLogin = () => {
     const time = setInterval(() => {
       if (!this.video.current) return;
       clearInterval(time);
-      this.webrtc = new WebRTC({
-        socket: this.wsavc.ws,
-        video: this.video.current,
-        onError(e) {
-          message.error(e.message)
-        },
-        onSuccess: () => {
-          this.setState({
-            localMicrphoneEnabled: true,
-            cameraEnabled: true
-          })
-        },
-        onClose: () => {
-          this.setState({
-            localMicrphoneEnabled: false,
-            cameraEnabled: false
-          });
-          this.webrtc = undefined;
-        }
-      })
+      this.changeCamera(true);
     }, 100)
 
   }
@@ -238,15 +288,18 @@ export default class App extends Component {
   changeCamera = (enabled) => {
     const {
       state: {
-        // setting: { cameraMode, cameraEnabled },
-        // setting: { cameraEnabled },
+        setting: { cameraMode },
         wsConnected,
+        protocol
       },
     } = this;
     if (!wsConnected) return;
-    this.wsavc.send("webrtc camera", enabled);
-    this.setState({ cameraEnabled: enabled })
-    // this.wsavc.send("open camera", { enabled, cameraMode });
+    this.setState({ cameraLoading: true });
+    if (protocol === "webrtc") {
+      this.webrtcMediaConnect(enabled);
+    } else {
+      this.websocketMediaConnect(enabled, { cameraMode });
+    }
   };
 
   changeLight = (enable) => {
@@ -311,6 +364,7 @@ export default class App extends Component {
 
   render() {
     const {
+      connect,
       disconnect,
       controller,
       changeSetting,
@@ -330,8 +384,11 @@ export default class App extends Component {
         lightEnabled,
         videoSize,
         delay,
+        cameraLoading,
         powerEnabled,
         localMicrphoneEnabled,
+        protocol,
+        isLogin
       },
       webrtc
     } = this;
@@ -342,6 +399,7 @@ export default class App extends Component {
           {...{
             wsConnected,
             cameraEnabled,
+            cameraLoading,
             isFullscreen,
             serverSetting,
             lightEnabled,
@@ -354,10 +412,15 @@ export default class App extends Component {
             changeLight,
             changeLocalMicrphone,
             webrtc,
-            piPowerOff
+            piPowerOff,
+            connect,
+            disconnect,
+            protocol
           }}
           videoSize={videoSize}
           onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
+          disabled={!isLogin}
+          onChangeProtocol={protocol => this.switchProtocol(protocol)}
         />
         <Match path="/:item">
           {({ match }) => <div
@@ -369,11 +432,10 @@ export default class App extends Component {
               transform: `scale(${videoSize / 50})`,
             }}
           >
-            <video ref={this.video} autoPlay controls />
+            <video ref={this.video} autoPlay controls style={{ display: protocol === "webrtc" ? undefined : "none" }} />
           </div>}
         </Match>
         <Router className="app-page">
-
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
