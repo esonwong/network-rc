@@ -2,38 +2,22 @@ import React, { Component, createRef } from "react";
 import WakeLock from "react-wakelock-react16";
 import store from "store";
 import {
-  Form,
-  Switch,
-  Dropdown,
-  Button,
-  Popover,
   message,
-  Slider,
-  Tag,
   Modal,
 } from "antd";
 import "./App.css";
-import { Router, Location, navigate, Match } from "@reach/router";
-import Nav from "./components/Nav";
+import { Router, navigate, Match } from "@reach/router";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
 import WSAvcPlayer from "ws-avc-player";
 import WebRTC from './lib/WebRTC'
 import {
-  HomeOutlined,
-  ExpandOutlined,
-  FullscreenOutlined,
-  ApiOutlined,
-  VideoCameraOutlined,
-  BulbOutlined,
-  FullscreenExitOutlined,
-  ThunderboltOutlined,
   PoweroffOutlined,
-  AudioOutlined
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
+import Status from "./components/Status";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -55,6 +39,8 @@ export default class App extends Component {
       },
       wsConnected: false,
       cameraEnabled: false,
+      cameraLoading: false,
+      cameraType: "webrtc",
       lightEnabled: false,
       powerEnabled: false,
       canvasRef: undefined,
@@ -326,7 +312,6 @@ export default class App extends Component {
   render() {
     const {
       disconnect,
-      connect,
       controller,
       changeSetting,
       changeLight,
@@ -339,7 +324,6 @@ export default class App extends Component {
         setting,
         wsConnected,
         cameraEnabled,
-        // canvasRef,
         action,
         isFullscreen,
         serverSetting,
@@ -354,142 +338,27 @@ export default class App extends Component {
 
     return (
       <div className="App" ref={this.appRef}>
-        <Form layout="inline" className="app-status" size="small">
-          <Form.Item>
-            <Location>
-              {({ navigate }) => (
-                <Dropdown.Button
-                  overlay={<Nav piPowerOff={piPowerOff} />}
-                  onClick={() => navigate(`${process.env.PUBLIC_URL}/`)}
-                  type="primary"
-                >
-                  <HomeOutlined /> 控制
-                </Dropdown.Button>
-              )}
-            </Location>
-          </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={wsConnected}
-              onChange={(v) => {
-                if (v) connect();
-                else disconnect();
-              }}
-              unCheckedChildren={<ApiOutlined />}
-              checkedChildren={<ApiOutlined />}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={powerEnabled}
-              onChange={changePower}
-              checkedChildren={<ThunderboltOutlined />}
-              unCheckedChildren={<ThunderboltOutlined />}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Switch
-              checked={cameraEnabled}
-              onChange={changeCamera}
-              checkedChildren={<VideoCameraOutlined />}
-              unCheckedChildren={<VideoCameraOutlined />}
-            />
-          </Form.Item>
-
-          {/* <Form.Item>
-            <Button style={{ width: "6em" }}>
-              舵机:{action.direction.toFixed(2)}
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button style={{ width: "6em" }}>
-              电调:{action.speed.toFixed(2)}
-            </Button>
-          </Form.Item> */}
-          {cameraEnabled && (
-            <Form.Item>
-              <Popover
-                placement="bottomRight"
-                content={
-                  <Slider
-                    defaultValue={videoSize}
-                    step={0.1}
-                    tipFormatter={(v) => v * 2}
-                    onAfterChange={(videoSize) => this.setState({ videoSize })}
-                    style={{ width: "30vw" }}
-                    marks={{ 0: 0, 50: 100, 100: 200 }}
-                  />
-                }
-              >
-                <Button shape="round">
-                  <ExpandOutlined />
-                  {(videoSize * 2).toFixed(1)}%
-                </Button>
-              </Popover>
-            </Form.Item>
-          )}
-
-          <Form.Item>
-            <Switch
-              checked={lightEnabled}
-              onChange={changeLight}
-              checkedChildren={<BulbOutlined />}
-              unCheckedChildren={<BulbOutlined />}
-            />
-          </Form.Item>
-
-          {webrtc && webrtc.localStream &&
-            <Form.Item>
-              <Switch
-                checked={localMicrphoneEnabled}
-                onChange={changeLocalMicrphone}
-                checkedChildren={<AudioOutlined />}
-                unCheckedChildren={<AudioOutlined />}
-              />
-            </Form.Item>
-          }
-
-          {document.body.requestFullscreen && (
-            <Form.Item>
-              <Button
-                type="primary"
-                shape="circle"
-                icon={
-                  isFullscreen ? (
-
-                    <FullscreenExitOutlined />
-                  ) : (
-                      <FullscreenOutlined />
-                    )
-                }
-                onClick={() => {
-                  if (isFullscreen) {
-                    document.exitFullscreen();
-                  } else {
-                    document.body.requestFullscreen();
-                  }
-                }}
-              ></Button>
-            </Form.Item>
-          )}
-          {wsConnected &&
-            <Form.Item>
-              <Button
-                type="danger"
-                shape="circle"
-                icon={
-                  <PoweroffOutlined />
-                }
-                onClick={piPowerOff}
-              ></Button>
-            </Form.Item>}
-
-          {wsConnected && delay && (
-            <Form.Item>
-              <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>
-            </Form.Item>)}
-
-        </Form>
+        <Status
+          {...{
+            wsConnected,
+            cameraEnabled,
+            isFullscreen,
+            serverSetting,
+            lightEnabled,
+            videoSize,
+            delay,
+            powerEnabled,
+            localMicrphoneEnabled,
+            changePower,
+            changeCamera,
+            changeLight,
+            changeLocalMicrphone,
+            webrtc,
+            piPowerOff
+          }}
+          videoSize={videoSize}
+          onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
+        />
         <Match path="/:item">
           {({ match }) => <div
             className="player-box"
@@ -504,6 +373,7 @@ export default class App extends Component {
           </div>}
         </Match>
         <Router className="app-page">
+
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
