@@ -65,12 +65,18 @@ body {
   opacity: 0.3;
   border-radius: 4vh;
 }
+.speed-slider .ant-slider-handle {
+  margin-left: -1vh;
+}
 
 .direction-slider .ant-slider-rail {
   height: 8vh;
   opacity: 0.3;
   border-radius: 4vh;
 }
+.direction-slider .ant-slider-handle {
+  margin-top: -1vh;
+ }
 
 
 .speed-slider .ant-slider-handle,
