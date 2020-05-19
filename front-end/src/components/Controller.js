@@ -229,6 +229,7 @@ export default class Controller extends Component {
       direction(v * (directionReverse ? -1 : 1) + directionFix);
     },
     changeCamera: (v) => this.props.controller.changeCamera(v),
+    steering: (index, v) => this.props.controller.changeSteering(index, v),
   };
 
   fixContent = () => {
@@ -465,7 +466,7 @@ export default class Controller extends Component {
             <Tag>键盘:wsad</Tag>
           </Form.Item>
         </Form>
-        <Keybord controller={{ speed, direction }} />
+        <Keybord controller={fixedController} />
 
       </div>
     );

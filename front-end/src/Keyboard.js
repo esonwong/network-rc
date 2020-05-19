@@ -19,7 +19,7 @@ export default class Keybord extends Component {
   handleKeyDown = (event) => {
     const {
       props: {
-        controller: { speed, direction },
+        controller: { speed, direction, steering },
         onControl,
       },
     } = this;
@@ -36,13 +36,26 @@ export default class Keybord extends Component {
     if (keyName === "d") {
       direction(-1);
     }
+
+    if (keyName === "j") {
+      steering(0, 1);
+    }
+    if (keyName === "l") {
+      steering(0, -1);
+    }
+    if (keyName === "i") {
+      steering(1, -1);
+    }
+    if (keyName === "k") {
+      steering(1, 1);
+    }
     onControl && onControl();
   };
 
   handleKeyUp = (event) => {
     const {
       props: {
-        controller: { speed, direction },
+        controller: { speed, direction, steering },
         onControl,
       },
     } = this;
@@ -59,6 +72,19 @@ export default class Keybord extends Component {
     if (keyName === "d") {
       direction(0);
     }
+    if (keyName === "j") {
+      steering(0, 0);
+    }
+    if (keyName === "l") {
+      steering(0, 0);
+    }
+    if (keyName === "i") {
+      steering(1, 0);
+    }
+    if (keyName === "k") {
+      steering(1, 0);
+    }
+
     onControl && onControl();
   };
 
