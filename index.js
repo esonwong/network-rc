@@ -253,6 +253,9 @@ wss.on("connection", function (socket) {
       case "direction rate":
         directionRate(socket, payload);
         break;
+      case "steering rate":
+        steeringRate(socket, payload);
+        break;
       case "pi power off":
         piPowerOff();
         break;
@@ -330,11 +333,11 @@ const directionRate = (socket, v) => {
   broadcast("direction", v);
 };
 
-const steeringRate = (socket, index, v) => {
-  console.log(`steering index ${index} ${v}`);
+const steeringRate = (socket, { index, rate }) => {
+  console.log(`steering index: ${index}, rate: ${rate}`);
   if (!check(socket)) return;
-  changeSteering(index, v);
-  broadcast("steering", { rate: v, index });
+  changeSteering(index, rate);
+  broadcast("steering", { rate, index });
 }
 
 const openLight = (socket, enabled) => {
