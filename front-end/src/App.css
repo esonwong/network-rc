@@ -45,6 +45,41 @@ body {
   padding: 0.5em;
 }
 
+.direction-slider {
+  position: fixed;
+  width: 50vh;
+  bottom: 48vh;
+  right: 4vw;
+}
+
+.speed-slider {
+  position: fixed;
+  height: 50vh;
+  bottom: 25vh;
+  left: 10vw;
+  width: 10vh;
+}
+
+.speed-slider .ant-slider-rail {
+  width: 8vh;
+  opacity: 0.3;
+  border-radius: 4vh;
+}
+
+.direction-slider .ant-slider-rail {
+  height: 8vh;
+  opacity: 0.3;
+  border-radius: 4vh;
+}
+
+
+.speed-slider .ant-slider-handle,
+.direction-slider .ant-slider-handle {
+  width: 10vh;
+  height: 10vh;
+  /* transition: all 0.036s cubic-bezier(0.78, 0.14, 0.15, 0.86); */
+}
+
 .controller-form .backward-button,
 .controller-form .left-button,
 .controller-form .forward-button,
@@ -137,3 +172,7 @@ body {
 .inline-form .ant-form-item {
   margin-bottom: 0.5em;
 }
+/* 
+.transition-animation {
+  transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+} */
