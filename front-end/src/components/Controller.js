@@ -135,7 +135,7 @@ export default class Controller extends Component {
     const {
       fixedController: { direction, steering },
     } = this;
-    if (index === 1) {
+    if (index === 0) {
       direction(-value);
     }
     if (index === 2) {
