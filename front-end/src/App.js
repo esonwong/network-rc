@@ -56,12 +56,13 @@ export default class App extends Component {
       isLogin: true
     };
 
-    const { changeCamera, changeLight, changePower } = this;
+    const { changeCamera, changeLight, changePower, changeSteering } = this;
 
     this.controller = {
       changeLight,
       changeCamera,
       changePower,
+      changeSteering,
       speed: (v) => {
         const {
           changeSpeed,
@@ -314,6 +315,7 @@ export default class App extends Component {
     this.wsavc.send("open power", enable);
   };
 
+
   piPowerOff = () => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
@@ -354,6 +356,12 @@ export default class App extends Component {
     if (!this.state.wsConnected) return;
     this.wsavc.send("direction rate", directionRate);
   };
+
+
+  changeSteering = (index, rate) => {
+    if (!this.state.wsConnected) return;
+    this.wsavc.send("steering rate", { index, rate });
+  }
 
   changeLocalMicrphone = (enabled) => {
     this.webrtc.openMicrophone(enabled);
