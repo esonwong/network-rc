@@ -42,6 +42,10 @@ export default class Controller extends Component {
       directionFix: store.get("directionFix") || 0,
       isShowButton: mobile(),
       gamepadEnabled: false,
+      fixedAction: {
+        direction: 0,
+        speed: 0
+      }
     };
   }
 
@@ -129,13 +133,16 @@ export default class Controller extends Component {
 
   gamepadAxis = ({ detail: { index, value } }) => {
     const {
-      fixedController: { speed, direction },
+      fixedController: { direction, steering },
     } = this;
-    if (index === 0) {
+    if (index === 1) {
       direction(-value);
     }
+    if (index === 2) {
+      steering(0, -value);
+    }
     if (index === 3) {
-      speed(-value);
+      steering(1, value);
     }
   };
 
@@ -211,8 +218,9 @@ export default class Controller extends Component {
         props: {
           controller: { speed },
         },
-        state: { forwardPower, backwardPower, speedReverse },
+        state: { forwardPower, backwardPower, speedReverse, fixedAction },
       } = this;
+      this.setState({ fixedAction: { ...fixedAction, speed: v } })
       speed(
         v *
         (speedReverse ? -1 : 1) *
@@ -224,10 +232,12 @@ export default class Controller extends Component {
         props: {
           controller: { direction },
         },
-        state: { directionReverse, directionFix },
+        state: { directionReverse, directionFix, fixedAction },
       } = this;
+      this.setState({ fixedAction: { ...fixedAction, direction: v } })
       direction(v * (directionReverse ? -1 : 1) + directionFix);
     },
+
     changeCamera: (v) => this.props.controller.changeCamera(v),
     steering: (index, v) => this.props.controller.changeSteering(index, v),
   };
@@ -310,7 +320,8 @@ export default class Controller extends Component {
       forwardPower,
       backwardPower,
       isShowButton,
-      zeroOrientation
+      zeroOrientation,
+      fixedAction
     } = this.state;
     const { speed, direction } = fixedController;
     return (
@@ -336,13 +347,35 @@ export default class Controller extends Component {
         </Router>
         <Form className="controller-form" size="small" layout="inline">
           <Form.Item>
-            <Popover content={fixContent} title="修正" trigger="click" placement="topLeft">
+            <Popover
+              content={fixContent}
+              title="修正"
+              trigger="click"
+              placement="topLeft"
+            >
               <Button icon={<SlidersOutlined />}>修正</Button>
             </Popover>
           </Form.Item>
           {isShowButton && (
             <Fragment>
-              <Button
+              <Slider
+                included={false}
+                value={(fixedAction.direction * -1 + 1) * 50}
+                onChange={(v) => direction(-1 * (v / 50 - 1))}
+                tooltipVisible={false}
+                className="direction-slider transition-animation"
+                onAfterChange={() => direction(0)}
+              />
+              <Slider
+                included={false}
+                value={(fixedAction.speed + 1) * 50}
+                onChange={(v) => speed(v / 50 - 1)}
+                className="speed-slider transition-animation"
+                vertical
+                tooltipVisible={false}
+                onAfterChange={() => speed(0)}
+              />
+              {/* <Button
                 className="left-button"
                 shape="circle"
                 size="large"
@@ -399,7 +432,7 @@ export default class Controller extends Component {
                   speed(0);
                 }}
                 icon={<DownOutlined />}
-              ></Button>
+              ></Button> */}
             </Fragment>
           )}
           <Form.Item>
@@ -463,11 +496,11 @@ export default class Controller extends Component {
             />
           </Form.Item>
           <Form.Item>
-            <Tag>键盘:wsad</Tag>
+            <Tag>移动:wsad</Tag>
+            <Tag>云台:ikjl</Tag>
           </Form.Item>
         </Form>
         <Keybord controller={fixedController} />
-
       </div>
     );
   }
