@@ -139,7 +139,7 @@ export default function Status({
           >
             <Button shape="round">
               <ExpandOutlined />
-              {(videoSize * 2).toFixed(1)}%
+              {/* {(videoSize * 2).toFixed(1)}% */}
                 </Button>
           </Popover>
         </Form.Item>
@@ -205,7 +205,7 @@ export default function Status({
         </Form.Item>}
       {wsConnected && delay && (
         <Form.Item>
-          <Tag color={delay > 80 ? "red" : "green"}>ping:{delay}</Tag>
+          <Tag color={delay > 80 ? "red" : "green"}>ping:{delay.toFixed(0)}</Tag>
         </Form.Item>)}
 
     </Form>
