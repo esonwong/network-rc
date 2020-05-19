@@ -83,7 +83,8 @@ const {
   changeDirection,
   changeSpeed,
   closeController,
-  changePower
+  changePower,
+  changeSteering
 } = require("./lib/controller.js");
 
 
@@ -328,6 +329,13 @@ const directionRate = (socket, v) => {
   changeDirection(v);
   broadcast("direction", v);
 };
+
+const steeringRate = (socket, index, v) => {
+  console.log(`steering index ${index} ${v}`);
+  if (!check(socket)) return;
+  changeSteering(index, v);
+  broadcast("steering", { rate: v, index });
+}
 
 const openLight = (socket, enabled) => {
   console.log("open light", enabled);
