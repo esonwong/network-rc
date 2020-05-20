@@ -300,8 +300,9 @@ const login = (socket, { uid, token }) => {
 };
 
 const timeout = (socket) => setTimeout(() => {
+  console.log("等待 Ping 超时!");
   disconnect(socket);
-}, 2000);
+}, 3000);
 
 const ping = (socket, { sendTime }) => {
   clearTimeout(socket.timeout);
