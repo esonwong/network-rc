@@ -107,6 +107,7 @@ app.get("*", (req, res) => {
 
 
 let cameraMode = "default";
+let powerEnabled = false, lightEnabled = false;
 
 const wss = new WebSocketServer({ server });
 const clients = new Set();
@@ -189,6 +190,9 @@ wss.on("connection", function (socket) {
     maxSpeed,
     needPassword: password ? true : false,
   });
+
+  socket.sendData("light enabled", lightEnabled)
+  socket.sendData("power enabled", powerEnabled)
   // startWebsocketMedia();
 
   socket.on("close", () => {
@@ -203,6 +207,7 @@ wss.on("connection", function (socket) {
       const type = action.split(" ")[1];
       switch (type) {
         case "connect":
+          stopWebsocketMedia();
           socket.webrtc = new WebRTC({
             socket,
             onOffer(offer) {
@@ -341,15 +346,17 @@ const steeringRate = (socket, { index, rate }) => {
 }
 
 const openLight = (socket, enabled) => {
-  console.log("open light", enabled);
   if (!check(socket)) return;
+  console.log("open light", enabled);
+  lightEnabled = enabled;
   changeLight(enabled);
   broadcast("light enabled", enabled);
 };
 
 const openPower = (socket, enabled) => {
-  console.log("open power", enabled);
   if (!check(socket)) return;
+  console.log("open power", enabled);
+  powerEnabled = enabled;
   changePower(enabled);
   broadcast("power enabled", enabled);
 };
@@ -361,6 +368,9 @@ const disconnect = (socket) => {
   if (clients.size < 1) {
     changeSpeed(0);
     changeLight(false);
+    changePower(false);
+    lightEnabled = false;
+    powerEnabled = false;
     stopWebsocketMedia();
   }
 };
