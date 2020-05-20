@@ -189,9 +189,11 @@ wss.on("connection", function (socket) {
     maxSpeed,
     needPassword: password ? true : false,
   });
-  startWebsocketMedia();
+  // startWebsocketMedia();
 
-  socket.on("close", () => disconnect(socket));
+  socket.on("close", () => {
+    disconnect(socket);
+  });
 
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
@@ -311,7 +313,6 @@ const openCamera = (socket, v) => {
     startWebsocketMedia();
   } else {
     stopWebsocketMedia();
-
   }
 };
 
@@ -360,7 +361,7 @@ const disconnect = (socket) => {
   if (clients.size < 1) {
     changeSpeed(0);
     changeLight(false);
-    endStreamer();
+    stopWebsocketMedia();
   }
 };
 
@@ -375,24 +376,5 @@ process.on("SIGINT", function () {
   process.exit();
 });
 
-
-
-
-
-
-
-
-let streamer = null;
-
-const startStreamer = async () => {
-
-};
-
-const endStreamer = () => {
-  console.log("close streamer");
-  broadcast("stream_active", false);
-  streamer && streamer.kill("SIGHUP");
-  streamer = null;
-};
 
 server.listen(8080, "0.0.0.0");
