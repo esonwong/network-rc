@@ -179,11 +179,14 @@ if (userList) {
   });
 }
 
+
+
 wss.on("connection", function (socket) {
   console.log("客户端连接！");
   console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
+  socket.timeout = timeout(socket);
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
   socket.sendData("controller init", {
@@ -296,7 +299,13 @@ const login = (socket, { uid, token }) => {
   }
 };
 
+const timeout = (socket) => setTimeout(() => {
+  disconnect(socket);
+}, 2000);
+
 const ping = (socket, { sendTime }) => {
+  clearTimeout(socket.timeout);
+  socket.timeout = timeout(socket);
   socket.sendData("pong", { sendTime });
 };
 
