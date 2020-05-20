@@ -3,19 +3,20 @@ import { Form, Button, Switch, Slider, Popover, message, Tag } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
-  DownOutlined,
-  UpOutlined,
-  LeftOutlined,
-  RightOutlined,
+  // DownOutlined,
+  // UpOutlined,
+  // LeftOutlined,
+  // RightOutlined,
 } from "@ant-design/icons";
 import store from "store";
 import Keybord from "../Keyboard";
-import { vibrate } from "../unit";
+// import { vibrate } from "../unit";
 import Icon from "./Icon";
 import Ai from "./Ai";
 import mobile from "is-mobile";
 import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
+import NSlider from "./Slider";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -44,8 +45,8 @@ export default class Controller extends Component {
       gamepadEnabled: false,
       fixedAction: {
         direction: 0,
-        speed: 0
-      }
+        speed: 0,
+      },
     };
   }
 
@@ -153,8 +154,8 @@ export default class Controller extends Component {
       const gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
         : navigator.webkitGetGamepads
-          ? navigator.webkitGetGamepads
-          : [];
+        ? navigator.webkitGetGamepads
+        : [];
       for (
         let gamePadIndex = 0;
         gamePadIndex < gamepadList.length;
@@ -220,11 +221,11 @@ export default class Controller extends Component {
         },
         state: { forwardPower, backwardPower, speedReverse, fixedAction },
       } = this;
-      this.setState({ fixedAction: { ...fixedAction, speed: v } })
+      this.setState({ fixedAction: { ...fixedAction, speed: v } });
       speed(
         v *
-        (speedReverse ? -1 : 1) *
-        ((v > 0 ? forwardPower : backwardPower) / 100)
+          (speedReverse ? -1 : 1) *
+          ((v > 0 ? forwardPower : backwardPower) / 100)
       );
     },
     direction: (v) => {
@@ -234,7 +235,7 @@ export default class Controller extends Component {
         },
         state: { directionReverse, directionFix, fixedAction },
       } = this;
-      this.setState({ fixedAction: { ...fixedAction, direction: v } })
+      this.setState({ fixedAction: { ...fixedAction, direction: v } });
       direction(v * (directionReverse ? -1 : 1) + directionFix);
     },
 
@@ -321,7 +322,7 @@ export default class Controller extends Component {
       backwardPower,
       isShowButton,
       zeroOrientation,
-      fixedAction
+      fixedAction,
     } = this.state;
     const { speed, direction } = fixedController;
     return (
@@ -358,15 +359,29 @@ export default class Controller extends Component {
           </Form.Item>
           {isShowButton && (
             <Fragment>
-              <Slider
+              <NSlider
+                value={fixedAction.direction}
+                onChange={(v) => direction(v)}
+                className="direction-slider"
+                style={{ display: !zeroOrientation ? undefined : "none" }}
+              />
+              <NSlider
+                vertical
+                value={fixedAction.speed}
+                onChange={(v) => speed(v)}
+                className="speed-slider"
+                // style={{ display: !zeroOrientation ? undefined : "none" }}
+              />
+              {/* <Slider
                 included={false}
                 value={(fixedAction.direction * -1 + 1) * 50}
                 onChange={(v) => direction(-1 * (v / 50 - 1))}
                 tooltipVisible={false}
                 className="direction-slider transition-animation"
                 onAfterChange={() => direction(0)}
-              />
-              <Slider
+                style={{ display: !zeroOrientation ? undefined : "none" }}
+              /> */}
+              {/* <Slider
                 included={false}
                 value={(fixedAction.speed + 1) * 50}
                 onChange={(v) => speed(v / 50 - 1)}
@@ -374,7 +389,7 @@ export default class Controller extends Component {
                 vertical
                 tooltipVisible={false}
                 onAfterChange={() => speed(0)}
-              />
+              /> */}
               {/* <Button
                 className="left-button"
                 shape="circle"
