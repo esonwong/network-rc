@@ -1,9 +1,10 @@
-import React, { Component, createRef } from "react";
+import React, { Component, createRef, Fragment } from "react";
 import WakeLock from "react-wakelock-react16";
 import store from "store";
 import {
   message,
   Modal,
+  Button,
 } from "antd";
 import "./App.css";
 import { Router, navigate, Match } from "@reach/router";
@@ -13,6 +14,7 @@ import WSAvcPlayer from "ws-avc-player";
 import WebRTC from './lib/WebRTC'
 import {
   PoweroffOutlined,
+  ReloadOutlined
 } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
@@ -319,17 +321,23 @@ export default class App extends Component {
   piPowerOff = () => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
-    Modal.confirm({
+    const modal = Modal.warning({
       autoFocusButton: "cancel",
       icon: <PoweroffOutlined />,
       title: "确定要关闭 Pi 酱系统？",
+      content: <Fragment>
+        <Button type="danger"
+          icon={<PoweroffOutlined />}
+          onClick={() => { this.wsavc.send("pi power off"); modal.destroy() }}
+        >关机</Button>
+        &nbsp;
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={() => { this.wsavc.send("pi reboot"); modal.destroy() }}
+        >重启</Button>
+      </Fragment>,
       maskClosable: true,
-      onOk: () => {
-        this.wsavc.send("pi power off");
-      },
-      okType: "danger",
-      okText: "树莓派关机",
-      cancelText: "取消"
+      okText: "取消",
     })
   };
 
