@@ -278,8 +278,12 @@ wss.on("connection", function (socket) {
         steeringRate(socket, payload);
         break;
       case "pi power off":
+        if (!check(socket)) break;
         piPowerOff();
         break;
+      case "pi reboot":
+        if (!check(socket)) break;
+        piReboot();
       default:
         console.log("怎么了？");
     }
