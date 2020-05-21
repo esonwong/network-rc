@@ -372,13 +372,17 @@ const openPower = (socket, enabled) => {
 };
 
 const disconnect = (socket) => {
-  console.log("client disconnected");
+  console.log("客户端断开连接！");
   if (socket.webrtc) socket.webrtc.close();
+  clearTimeout(socket.timeout);
   clients.delete(socket);
-  if (clients.size < 1) {
-    changeSpeed(0);
-    changeLight(false);
-    changePower(false);
+  let num = 0;
+  clients.forEach(({ isLogin }) => {
+    if (isLogin) num++;
+  })
+  console.log("已连接客户端", num);
+  if (num < 1) {
+    closeController();
     lightEnabled = false;
     powerEnabled = false;
     stopWebsocketMedia();
@@ -387,6 +391,9 @@ const disconnect = (socket) => {
 
 const piPowerOff = () => {
   spawn("halt");
+}
+const piReboot = () => {
+  spawn("reboot");
 }
 
 process.on("SIGINT", function () {
