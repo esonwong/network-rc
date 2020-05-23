@@ -1,0 +1,99 @@
+commands:
+  # - time: 00:00:000
+  # - time: 00:19:170
+  #   actions:
+  #     - type: changeSteering
+  #       index: 0
+  #       # value: 0.5
+  #       value: 0
+  #     - type: changeSteering
+  #       index: 1
+  #       # value: 0
+  #       value: 0.5
+  # - time: 00:19:270
+  #   actions:
+  #     - type: changeSteering
+  #       index: 1
+  #       value: 0
+  # - time: 00:21:220
+  #   actions:
+  #     - type: changeSteering
+  #       index: 1
+  #       value: 0.5
+  # - time: 00:21:320
+  #   actions:
+  #     - type: changeSteering
+  #       index: 1
+  #       value: 0
+  # - time: 00:23:070
+  #   actions:
+  #     - type: changeSteering
+  #       index: 1
+  #       value: 0.5
+  # - time: 00:23:170
+  #   actions:
+  #     - type: changeSteering
+  #       index: 1
+  #       value: 0
+
+  - time: 00:19:170
+    nodeName: a
+    t: 3
+
+nodes:
+  a:
+    - time: 00:19:170
+      nodeName: beat
+      t: 10
+
+    - time: 00:23:390
+      nodeName: shake
+      t: 3
+
+    - time: 00:24:580
+      actions:
+        - type: changeSteering
+          index: 0
+          value: 0
+        - type: changeSteering
+          index: 1
+          value: 0
+
+    - time: 00:25:020
+      nodeName: beat
+
+    - time: 00:25:400
+      nodeName: shake
+      t: 3
+
+  beat:
+    - time: 00:19:170
+      actions:
+        - type: changeSteering
+          index: 0
+          value: 0
+        - type: changeSteering
+          index: 1
+          value: 0.5
+    - time: 00:19:250
+      keep: 415
+      actions:
+        - type: changeSteering
+          index: 1
+          value: 0
+
+  shake:
+    - time: 00:23:390
+      actions:
+        - type: changeSteering
+          index: 1
+          value: -1
+        - type: changeSteering
+          index: 0
+          value: 1
+    - time: 00:23:490
+      keep: 180
+      actions:
+        - type: changeSteering
+          index: 0
+          value: -1

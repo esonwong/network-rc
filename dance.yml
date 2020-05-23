@@ -1,0 +1,213 @@
+commands:
+  - time: 00:00:000
+    actions:
+      - type: changeSteering
+        index: 0
+        # value: 0.5
+        value: 0
+      - type: changeSteering
+        index: 1
+        # value: 0
+        value: 1
+  - time: 00:02:150
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+      - type: changeSteering
+        index: 1
+        value: 0
+  - time: 00:02:480
+    actions:
+      - type: changeSteering
+        index: 1
+        value: -0.5
+  - time: 00:04:000
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 0.7
+      - type: changeSteering
+        index: 0
+        value: -0.7
+  - time: 00:04:470
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.7
+  - time: 00:05:560
+    actions:
+      - type: changeSteering
+        index: 0
+        value: -0.7
+  - time: 00:06:280
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.7
+  - time: 00:07:050
+    actions:
+      - type: changeSteering
+        index: 0
+        value: -0.7
+  - time: 00:07:440
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.7
+  - time: 00:08:490
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.5
+      - type: changeSteering
+        index: 1
+        value: -0.5
+  - time: 00:10:080
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.5
+      - type: changeSteering
+        index: 1
+        value: 0
+  - time: 00:10:260
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+      - type: changeSteering
+        index: 1
+        value: 0.5
+  - time: 00:10:420
+    actions:
+      - type: changeSteering
+        index: 0
+        value: -0.5
+      - type: changeSteering
+        index: 1
+        value: 0
+  - time: 00:11:020
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+      - type: changeSteering
+        index: 1
+        value: -0.5
+  - time: 00:11:190
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.5
+      - type: changeSteering
+        index: 1
+        value: -0.5
+  - time: 00:12:490
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+      - type: changeSteering
+        index: 1
+        value: -1
+  - time: 00:13:440
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 1
+      - type: changeSteering
+        index: 1
+        value: 0
+  - time: 00:14:200
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+  - time: 00:14:550
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 1
+  - time: 00:15:300
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+      - type: changeSteering
+        index: 1
+        value: 0.3
+  - time: 00:16:170
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.4
+      - type: changeSteering
+        index: 1
+        value: 0.5
+  - time: 00:16:500
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+      - type: changeSteering
+        index: 1
+        value: 0
+  - time: 00:17:180
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0.4
+      - type: changeSteering
+        index: 1
+        value: 0.5
+  - time: 00:18:310
+    actions:
+      - type: changeSteering
+        index: 0
+        value: -0.4
+  - time: 00:19:130
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+  - time: 00:19:480
+    actions:
+      - type: changeSteering
+        index: 0
+        value: -0.4
+  - time: 00:20:540
+    actions:
+      - type: changeSteering
+        index: 0
+        value: 0
+  - time: 00:21:160
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 1
+  - time: 00:21:350
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 0.5
+  - time: 00:21:420
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 1
+  - time: 00:21:500
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 0.5
+  - time: 00:21:570
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 1
+  - time: 00:22:080
+    actions:
+      - type: changeSteering
+        index: 1
+        value: 0
