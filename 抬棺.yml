@@ -1,5 +1,5 @@
 commands:
-  # - time: 00:00:000
+  - time: 00:15:000
   # - time: 00:19:170
   #   actions:
   #     - type: changeSteering
@@ -38,7 +38,7 @@ commands:
 
   - time: 00:19:170
     nodeName: a
-    t: 3
+    t: 2
 
 nodes:
   a:
@@ -65,6 +65,20 @@ nodes:
     - time: 00:25:400
       nodeName: shake
       t: 3
+
+    # - time: 00:26:600
+    #   actions:
+    #     - type: changeSteering
+    #       index: 0
+    #       value: 0
+    #     - type: changeSteering
+    #       index: 1
+    #       value: 0
+
+    # - time: 00:27:040
+    #   nodeName: beat
+
+
 
   beat:
     - time: 00:19:170
