@@ -1,5 +1,9 @@
 # 树莓派网络遥控车
 
+## 依赖
+- ffmpeg: 运行前请确保树莓派上安装了 ffmpeg，安装方法 `sudo apt install ffmpeg -y`
+
+
 ## 使用教程
 - 改装 RC 遥控车
   - 视频教程: [4G 网络 RC 遥控车 02 - DIY 网络控制改造教程](https://www.bilibili.com/video/BV1iK4y1r7mD)
@@ -27,11 +31,21 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [x] 支持手柄
 - [x] 网络穿透
 - [x] Ai 控制
-- [ ] 支持语音
-- [ ] 使用 webrtc 点对点音视频控制信号传输
-- [ ] 掉线、大延迟自动处理
+- [x] 支持语音
+- [x] 使用 webrtc 点对点音视频控制信号传输
+- [x] 掉线、大延迟自动处理
 
 ## 更新记录
+### 0.9.0
+- 支持 webrtc 视频传输和语音对讲
+- 支持 USB 摄像头和麦克风
+- 支持 双轴云台
+- 增加树莓派关机和重启功能
+- 更新 操控 UI
+  - 虚拟按钮改为滑杆
+- 更新 手柄控制
+  - 右摇杆改为云台控制
+- 暂时移除 AI 自动驾驶
 ### 0.7.6
 - 优化手柄按键
   - 按下左摇杆开关车灯
