@@ -18,6 +18,7 @@ export default function Slider({
     if (vertical === false) {
       const railLeft = silder.current.offsetLeft + rail.current.offsetLeft;
       v = ((x - railLeft) / rail.current.clientWidth) * 2 - 1;
+      v = -v;
     } else {
       const railTop = silder.current.offsetTop + rail.current.offsetTop;
       v = ((y - railTop) / rail.current.clientHeight) * 2 - 1;
@@ -53,9 +54,9 @@ export default function Slider({
         tabindex="0"
         className="ant-slider-handle"
         style={{
-          [`${vertical === false ? "left" : "bottom"}`]: `${(value + 1) * 50}%`,
-          [`${vertical === false ? "right" : "top"}`]: "auto",
-          transform: `translate${vertical === false ? "X(-" : "Y("}50%)`,
+          [`${vertical === false ? "right" : "bottom"}`]: `${(value + 1) * 50}%`,
+          [`${vertical === false ? "left" : "top"}`]: "auto",
+          transform: `translate${vertical === false ? "X(" : "Y("}50%)`,
         }}
       ></div>
     </div>
