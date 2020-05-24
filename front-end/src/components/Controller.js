@@ -46,6 +46,7 @@ export default class Controller extends Component {
       fixedAction: {
         direction: 0,
         speed: 0,
+        steering: []
       },
     };
   }
@@ -56,6 +57,7 @@ export default class Controller extends Component {
     window.addEventListener("gamepaddisconnected", this.gamepadDisconnected);
     window.addEventListener("gamepadpress", this.gamepadPress);
     window.addEventListener("gamepadaxis", this.gamepadAxis);
+    window.addEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
     this.gamePadsLoop();
   }
 
@@ -66,6 +68,7 @@ export default class Controller extends Component {
     window.removeEventListener("gamepaddisconnected", this.gamepadDisconnected);
     window.removeEventListener("gamepadpress", this.gamepadPress);
     window.removeEventListener("gamepadaxis", this.gamepadAxis);
+    window.removeEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
     window.removeEventListener(
       "deviceorientation",
       this.handleSetZeroOrientation
@@ -93,14 +96,20 @@ export default class Controller extends Component {
       powerEnabled,
       controller: { changeLight, changeCamera, changePower },
     } = this.props;
-    let { forwardPower } = this.state;
+    let { forwardPower, zeroOrientation } = this.state;
     const {
-      fixedController: { speed, direction },
+      fixedController: { speed, direction, steering },
     } = this;
-    if (index === 1 || index === 13 || index === 6) {
+    if (index === 0 && value === 1) {
+      changePower(!powerEnabled);
+    }
+    if (index === 1 && value === 1) {
+      changeLight(!lightEnabled);
+    }
+    if (index === 13 || index === 6) {
       speed(value * -1);
     }
-    if (index === 0 || index === 12 || index === 7) {
+    if (index === 12 || index === 7) {
       speed(value);
     }
     if (index === 14) {
@@ -110,14 +119,16 @@ export default class Controller extends Component {
       direction(value);
     }
     if (index === 10 && value === 1) {
-      changeLight(!lightEnabled);
+      message[!zeroOrientation ? "success" : "info"](zeroOrientation ? "关闭重力感应控制!" : "重力感应已校准!");
+      this.setState({ zeroOrientation: zeroOrientation ? undefined : { ...curentOrientation } })
     }
     if (index === 9 && value === 1) {
       changeCamera(!cameraEnabled);
     }
 
     if (index === 11 && value === 1) {
-      changePower(!powerEnabled);
+      steering(0, 0);
+      steering(1, 0)
     }
 
     if ((index === 4 || index === 2) && value === 1) {
@@ -132,18 +143,29 @@ export default class Controller extends Component {
     }
   };
 
+  gamepadaxisLoop = ({ detail: { index, value } }) => {
+    const {
+      fixedController: { steering },
+      state: {
+        fixedAction: {
+          steering: [s0 = 0, s1 = 0]
+        }
+      }
+    } = this;
+    if (index === 2 && Math.abs(value) > 0.1) {
+      steering(0, s0 - value / 5);
+    }
+    if (index === 3 && Math.abs(value) > 0.1) {
+      steering(1, s1 + value / 5);
+    }
+  }
+
   gamepadAxis = ({ detail: { index, value } }) => {
     const {
-      fixedController: { direction, steering },
+      fixedController: { direction },
     } = this;
     if (index === 0) {
       direction(-value);
-    }
-    if (index === 2) {
-      steering(0, -value);
-    }
-    if (index === 3) {
-      steering(1, value);
     }
   };
 
@@ -154,8 +176,8 @@ export default class Controller extends Component {
       const gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
         : navigator.webkitGetGamepads
-        ? navigator.webkitGetGamepads
-        : [];
+          ? navigator.webkitGetGamepads
+          : [];
       for (
         let gamePadIndex = 0;
         gamePadIndex < gamepadList.length;
@@ -193,6 +215,11 @@ export default class Controller extends Component {
               })
             );
           }
+          window.dispatchEvent(
+            new CustomEvent("gamepadaxisLoop", {
+              detail: { index, value },
+            })
+          );
           axesStatus[`${gamePadIndex}-${index}`] = { value };
         });
       }
@@ -224,8 +251,8 @@ export default class Controller extends Component {
       this.setState({ fixedAction: { ...fixedAction, speed: v } });
       speed(
         v *
-          (speedReverse ? -1 : 1) *
-          ((v > 0 ? forwardPower : backwardPower) / 100)
+        (speedReverse ? -1 : 1) *
+        ((v > 0 ? forwardPower : backwardPower) / 100)
       );
     },
     direction: (v) => {
@@ -240,7 +267,14 @@ export default class Controller extends Component {
     },
 
     changeCamera: (v) => this.props.controller.changeCamera(v),
-    steering: (index, v) => this.props.controller.changeSteering(index, v),
+    steering: (index, v) => {
+      const { fixedAction } = this.state;
+      if (v > 2) v = 2;
+      if (v < -2) v = -2;
+      fixedAction.steering[index] = v;
+      this.setState({ fixedAction });
+      this.props.controller.changeSteering(index, v)
+    },
   };
 
   fixContent = () => {
@@ -370,7 +404,7 @@ export default class Controller extends Component {
                 value={fixedAction.speed}
                 onChange={(v) => speed(v)}
                 className="speed-slider"
-                // style={{ display: !zeroOrientation ? undefined : "none" }}
+              // style={{ display: !zeroOrientation ? undefined : "none" }}
               />
               {/* <Slider
                 included={false}
