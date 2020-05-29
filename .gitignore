@@ -217,4 +217,4 @@ dmypy.json
 users.js
 network-rc.service
 users.yml
-lib/tts/test.pcm
+lib/tts/*.pcm
