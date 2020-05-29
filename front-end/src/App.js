@@ -385,6 +385,7 @@ export default class App extends Component {
 
   tts = (text) => {
     if (!this.state.wsConnected) return;
+    this.setState({ ttsPlaying: true });
     this.wsavc.send("tts", { text });
   }
 
