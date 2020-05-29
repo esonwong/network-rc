@@ -171,6 +171,7 @@ if (userList) {
 
 wss.on("connection", function (socket) {
   console.log("客户端连接！");
+  TTS("已建立神经连接，同步率百分之九十");
   console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
@@ -368,6 +369,7 @@ const openPower = (socket, enabled) => {
 
 const disconnect = (socket) => {
   console.log("客户端断开连接！");
+  TTS("神经连接已断开")
   if (socket.webrtc) socket.webrtc.close();
   clearTimeout(socket.timeout);
   clients.delete(socket);
@@ -384,8 +386,11 @@ const disconnect = (socket) => {
   }
 };
 
-const speak = (socket, payload) => {
-  TTS(payload.text, payload);
+const speak = async (socket, payload) => {
+  if (!check(socket)) return;
+  if(socket.webrtc) socket.webrtc.closeAudioPlayer();
+  await TTS(payload.text, payload);
+  if(socket.webrtc) socket.webrtc.openAudioPlayer();
 }
 
 const piPowerOff = () => {
@@ -395,10 +400,11 @@ const piReboot = () => {
   spawn("reboot");
 }
 
-process.on("SIGINT", function () {
+process.on("SIGINT", async function () {
   closeController();
   changeLight(false);
   console.log("Goodbye!");
+  await TTS("系统关闭");
   process.exit();
 });
 
