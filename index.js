@@ -388,9 +388,11 @@ const disconnect = (socket) => {
 
 const speak = async (socket, payload) => {
   if (!check(socket)) return;
-  if(socket.webrtc) socket.webrtc.closeAudioPlayer();
+  socket.sendData("tts playing", true)
+  if (socket.webrtc) socket.webrtc.closeAudioPlayer();
   await TTS(payload.text, payload);
-  if(socket.webrtc) socket.webrtc.openAudioPlayer();
+  if (socket.webrtc) socket.webrtc.openAudioPlayer();
+  socket.sendData("tts playing", false)
 }
 
 const piPowerOff = () => {
