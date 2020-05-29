@@ -9,6 +9,7 @@ const { startMediaStream, stopMediaStream, cameraModes, NALseparator } = require
 const WebRTC = require("./lib/WebRTC");
 const { spawn } = require('child_process');
 const User = require("./lib/user")
+const TTS = require("./lib/tts")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
@@ -86,19 +87,6 @@ const {
   changeSteering
 } = require("./lib/controller.js");
 
-
-if (frp) {
-  if (!frpPort) {
-    console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
-    process.exit();
-  } else {
-    process.env.FRP_REMOTE_PORT = frpPort;
-    process.env.FRP_SERVER = frpServer;
-    process.env.FRP_SERVER_PORT = frpServerPort;
-    process.env.FRP_SERVER_TOKEN = frpServerToken;
-    require("./lib/frp.js");
-  }
-}
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 app.get("*", (req, res) => {
@@ -277,6 +265,9 @@ wss.on("connection", function (socket) {
       case "steering rate":
         steeringRate(socket, payload);
         break;
+      case "tts":
+        speak(socket, payload);
+        break;
       case "pi power off":
         if (!check(socket)) break;
         piPowerOff();
@@ -393,6 +384,10 @@ const disconnect = (socket) => {
   }
 };
 
+const speak = (socket, payload) => {
+  TTS(payload.text, payload);
+}
+
 const piPowerOff = () => {
   spawn("halt");
 }
@@ -408,4 +403,36 @@ process.on("SIGINT", function () {
 });
 
 
-server.listen(8080, "0.0.0.0");
+server.listen(8080, "0.0.0.0", async (e) => {
+  console.log("server", server.address());
+  await TTS(`系统初始化完成!本地网络访问地址${getIPAdress()}冒号8080`);
+
+  if (frp) {
+    if (!frpPort) {
+      console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
+      process.exit();
+    } else {
+      process.env.FRP_REMOTE_PORT = frpPort;
+      process.env.FRP_SERVER = frpServer;
+      process.env.FRP_SERVER_PORT = frpServerPort;
+      process.env.FRP_SERVER_TOKEN = frpServerToken;
+      require("./lib/frp.js");
+    }
+  }
+});
+
+
+
+//获取本机ip地址
+function getIPAdress() {
+  var interfaces = require('os').networkInterfaces();
+  for (var devName in interfaces) {
+    var iface = interfaces[devName];
+    for (var i = 0; i < iface.length; i++) {
+      var alias = iface[i];
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+}
