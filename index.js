@@ -10,6 +10,7 @@ const WebRTC = require("./lib/WebRTC");
 const { spawn } = require('child_process');
 const User = require("./lib/user")
 const TTS = require("./lib/tts")
+const { sleep } = require("./lib/unit")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
@@ -392,7 +393,8 @@ const speak = async (socket, payload) => {
   if (socket.webrtc) socket.webrtc.closeAudioPlayer();
   await TTS(payload.text, payload);
   if (socket.webrtc) socket.webrtc.openAudioPlayer();
-  socket.sendData("tts playing", false)
+  await sleep(3000);
+  socket.sendData("tts playing", false);
 }
 
 const piPowerOff = () => {
