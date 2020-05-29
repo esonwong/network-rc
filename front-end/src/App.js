@@ -55,6 +55,7 @@ export default class App extends Component {
         speed: 0,
         direction: 0,
       },
+      ttsPlaying: false,
       isLogin: true
     };
 
@@ -173,6 +174,10 @@ export default class App extends Component {
 
     this.wsavc.on("power enabled", (powerEnabled) => {
       this.setState({ powerEnabled });
+    });
+
+    this.wsavc.on("tts playing", ttsPlaying => {
+      this.setState({ ttsPlaying })
     });
 
     this.wsavc.on("login", ({ message: m }) => {
@@ -378,6 +383,11 @@ export default class App extends Component {
     })
   }
 
+  tts = (text) => {
+    if (!this.state.wsConnected) return;
+    this.wsavc.send("tts", { text });
+  }
+
   render() {
     const {
       connect,
@@ -404,9 +414,11 @@ export default class App extends Component {
         powerEnabled,
         localMicrphoneEnabled,
         protocol,
-        isLogin
+        isLogin,
+        ttsPlaying
       },
-      webrtc
+      webrtc,
+      tts
     } = this;
 
     return (
@@ -470,6 +482,8 @@ export default class App extends Component {
             action={action}
             powerEnabled={powerEnabled}
             videoSize={videoSize}
+            onTTS={tts}
+            ttsPlaying={ttsPlaying}
           >
           </Controller>
         </Router>
