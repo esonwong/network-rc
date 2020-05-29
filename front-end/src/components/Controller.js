@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { Form, Button, Switch, Slider, Popover, message, Tag } from "antd";
+import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
@@ -7,6 +7,7 @@ import {
   // UpOutlined,
   // LeftOutlined,
   // RightOutlined,
+  NotificationOutlined
 } from "@ant-design/icons";
 import store from "store";
 import Keybord from "../Keyboard";
@@ -17,6 +18,7 @@ import mobile from "is-mobile";
 import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
 import NSlider from "./Slider";
+import { createRef } from "react";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -34,6 +36,7 @@ window.addEventListener("deviceorientation", deviceorientation);
 export default class Controller extends Component {
   constructor(props) {
     super(props);
+    this.ttsInput = createRef();
     this.state = {
       zeroOrientation: undefined,
       directionReverse: store.get("directionReverse") || false,
@@ -348,7 +351,8 @@ export default class Controller extends Component {
     const {
       fixContent,
       fixedController,
-      props: { action, cameraEnabled, videoSize, videoEl },
+      ttsInput,
+      props: { action, cameraEnabled, videoSize, videoEl, onTTS, ttsPlaying },
     } = this;
     const {
       gamepadEnabled,
@@ -406,82 +410,6 @@ export default class Controller extends Component {
                 className="speed-slider"
               // style={{ display: !zeroOrientation ? undefined : "none" }}
               />
-              {/* <Slider
-                included={false}
-                value={(fixedAction.direction * -1 + 1) * 50}
-                onChange={(v) => direction(-1 * (v / 50 - 1))}
-                tooltipVisible={false}
-                className="direction-slider transition-animation"
-                onAfterChange={() => direction(0)}
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              /> */}
-              {/* <Slider
-                included={false}
-                value={(fixedAction.speed + 1) * 50}
-                onChange={(v) => speed(v / 50 - 1)}
-                className="speed-slider transition-animation"
-                vertical
-                tooltipVisible={false}
-                onAfterChange={() => speed(0)}
-              /> */}
-              {/* <Button
-                className="left-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  direction(1);
-                  vibrate(50);
-                }}
-                onTouchEnd={() => {
-                  direction(0);
-                }}
-                icon={<LeftOutlined />}
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              ></Button>
-              <Button
-                className="right-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  direction(-1);
-                  vibrate(50);
-                }}
-                onTouchEnd={() => {
-                  direction(0);
-                }}
-                icon={<RightOutlined />}
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              ></Button>
-              <Button
-                className="forward-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  speed(1);
-                  vibrate(300);
-                }}
-                onTouchEnd={() => {
-                  speed(0);
-                }}
-                icon={<UpOutlined />}
-              ></Button>
-              <Button
-                className="backward-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  speed(-1);
-                  vibrate([100, 50, 100]);
-                }}
-                onTouchEnd={() => {
-                  speed(0);
-                }}
-                icon={<DownOutlined />}
-              ></Button> */}
             </Fragment>
           )}
           <Form.Item>
@@ -545,8 +473,39 @@ export default class Controller extends Component {
             />
           </Form.Item>
           <Form.Item>
-            <Tag>移动:wsad</Tag>
-            <Tag>云台:ikjl</Tag>
+            <Popover
+              placement="topLeft"
+              content={
+                <p>移动：wsad <br /> 云台：ikjl,p</p>
+              }
+            >
+              <Button shape="round">键盘</Button>
+            </Popover>
+          </Form.Item>
+          <Form.Item>
+            <Popover
+              placement="topRight"
+              onVisibleChange={v => {
+                v && ttsInput.current.focus();
+              }}
+              content={
+                <form>
+                  <Input.Search
+                    ref={ttsInput}
+                    name="tts"
+                    style={{ width: "80vw" }}
+                    placeholder="发送语音"
+                    enterButton="发送"
+                    onSearch={onTTS}
+                    loading={ttsPlaying}
+                  />
+                </form>
+              }
+            >
+              <Button shape="round">
+                <NotificationOutlined />
+              </Button>
+            </Popover>
           </Form.Item>
         </Form>
         <Keybord controller={fixedController} />
