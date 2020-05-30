@@ -46,6 +46,7 @@ export default class Controller extends Component {
       directionFix: store.get("directionFix") || 0,
       isShowButton: mobile(),
       gamepadEnabled: false,
+      ttsInputVisible: false,
       fixedAction: {
         direction: 0,
         speed: 0,
@@ -361,6 +362,7 @@ export default class Controller extends Component {
       isShowButton,
       zeroOrientation,
       fixedAction,
+      ttsInputVisible
     } = this.state;
     const { speed, direction } = fixedController;
     return (
@@ -484,20 +486,31 @@ export default class Controller extends Component {
           </Form.Item>
           <Form.Item>
             <Popover
+              arrowPointAtCenter
+              trigger="click"
               placement="topRight"
-              onVisibleChange={v => {
-                v && ttsInput.current.focus();
+              visible={ttsInputVisible}
+              onVisibleChange={ttsInputVisible => {
+                this.setState({ ttsInputVisible });
+                setTimeout(() => {
+                  ttsInput.current && ttsInput.current.focus();
+                }, 200)
               }}
               content={
                 <form>
                   <Input.Search
                     ref={ttsInput}
                     name="tts"
-                    style={{ width: "80vw" }}
+                    style={{ width: "60vw" }}
                     placeholder="发送语音"
                     enterButton="发送"
                     onSearch={onTTS}
                     loading={ttsPlaying}
+                    onKeyDown={({ key }) => {
+                      if (key === "Escape") {
+                        this.setState({ ttsInputVisible: false })
+                      }
+                    }}
                   />
                 </form>
               }
@@ -508,7 +521,12 @@ export default class Controller extends Component {
             </Popover>
           </Form.Item>
         </Form>
-        <Keybord controller={fixedController} />
+        <Keybord controller={fixedController} onEnter={() => {
+          this.setState({ ttsInputVisible: true })
+          setTimeout(() => {
+            ttsInput.current && ttsInput.current.focus();
+          }, 200)
+        }} />
       </div>
     );
   }
