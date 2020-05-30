@@ -191,6 +191,10 @@ export default class App extends Component {
       message.error(m);
     });
 
+    this.wsavc.on("warn", ({ message: m }) => {
+      message.warn(m);
+    });
+
     this.wsavc.on("info", ({ message: m }) => {
       message.info(m);
     })
@@ -259,7 +263,7 @@ export default class App extends Component {
           socket: this.wsavc.ws,
           video: this.video.current,
           onError(e) {
-            message.error(e.message)
+            message.warn(e.message)
           },
           onSuccess: () => {
             this.setState({
