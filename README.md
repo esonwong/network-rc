@@ -34,8 +34,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [x] 支持语音
 - [x] 使用 webrtc 点对点音视频控制信号传输
 - [x] 掉线、大延迟自动处理
+- [ ] 支持双摄像头
 
 ## 更新记录
+### 0.9.3
+- 支持语音播报
+- 支持发送文字语音
 ### 0.9.1
 - 手柄功能布局
   - 右摇杆云台控制改为增量

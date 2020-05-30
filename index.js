@@ -219,7 +219,7 @@ wss.on("connection", function (socket) {
               socket.sendData("switch", { protocol: "websocket" });
             },
             onWarnning({ message }) {
-              socket.sendData("error", { status: 1, message });
+              socket.sendData("warn", { status: 1, message });
             }
           });
           break;
