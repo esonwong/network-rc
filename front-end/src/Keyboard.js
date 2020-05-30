@@ -17,6 +17,7 @@ export default class Keybord extends Component {
   }
 
   handleKeyDown = (event) => {
+    if(event.target.tagName === "INPUT") return;
     const {
       props: {
         controller: { speed, direction, steering },
@@ -53,6 +54,7 @@ export default class Keybord extends Component {
   };
 
   handleKeyUp = (event) => {
+    if(event.target.tagName === "INPUT") return;
     const {
       props: {
         controller: { speed, direction, steering },

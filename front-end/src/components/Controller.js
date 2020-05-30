@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { Form, Button, Switch, Slider, Popover, message, Tag } from "antd";
+import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
@@ -7,6 +7,7 @@ import {
   // UpOutlined,
   // LeftOutlined,
   // RightOutlined,
+  NotificationOutlined
 } from "@ant-design/icons";
 import store from "store";
 import Keybord from "../Keyboard";
@@ -17,6 +18,7 @@ import mobile from "is-mobile";
 import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
 import NSlider from "./Slider";
+import { createRef } from "react";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -34,6 +36,7 @@ window.addEventListener("deviceorientation", deviceorientation);
 export default class Controller extends Component {
   constructor(props) {
     super(props);
+    this.ttsInput = createRef();
     this.state = {
       zeroOrientation: undefined,
       directionReverse: store.get("directionReverse") || false,
@@ -46,6 +49,7 @@ export default class Controller extends Component {
       fixedAction: {
         direction: 0,
         speed: 0,
+        steering: []
       },
     };
   }
@@ -56,6 +60,7 @@ export default class Controller extends Component {
     window.addEventListener("gamepaddisconnected", this.gamepadDisconnected);
     window.addEventListener("gamepadpress", this.gamepadPress);
     window.addEventListener("gamepadaxis", this.gamepadAxis);
+    window.addEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
     this.gamePadsLoop();
   }
 
@@ -66,6 +71,7 @@ export default class Controller extends Component {
     window.removeEventListener("gamepaddisconnected", this.gamepadDisconnected);
     window.removeEventListener("gamepadpress", this.gamepadPress);
     window.removeEventListener("gamepadaxis", this.gamepadAxis);
+    window.removeEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
     window.removeEventListener(
       "deviceorientation",
       this.handleSetZeroOrientation
@@ -93,14 +99,20 @@ export default class Controller extends Component {
       powerEnabled,
       controller: { changeLight, changeCamera, changePower },
     } = this.props;
-    let { forwardPower } = this.state;
+    let { forwardPower, zeroOrientation } = this.state;
     const {
-      fixedController: { speed, direction },
+      fixedController: { speed, direction, steering },
     } = this;
-    if (index === 1 || index === 13 || index === 6) {
+    if (index === 0 && value === 1) {
+      changePower(!powerEnabled);
+    }
+    if (index === 1 && value === 1) {
+      changeLight(!lightEnabled);
+    }
+    if (index === 13 || index === 6) {
       speed(value * -1);
     }
-    if (index === 0 || index === 12 || index === 7) {
+    if (index === 12 || index === 7) {
       speed(value);
     }
     if (index === 14) {
@@ -110,14 +122,16 @@ export default class Controller extends Component {
       direction(value);
     }
     if (index === 10 && value === 1) {
-      changeLight(!lightEnabled);
+      message[!zeroOrientation ? "success" : "info"](zeroOrientation ? "关闭重力感应控制!" : "重力感应已校准!");
+      this.setState({ zeroOrientation: zeroOrientation ? undefined : { ...curentOrientation } })
     }
     if (index === 9 && value === 1) {
       changeCamera(!cameraEnabled);
     }
 
     if (index === 11 && value === 1) {
-      changePower(!powerEnabled);
+      steering(0, 0);
+      steering(1, 0)
     }
 
     if ((index === 4 || index === 2) && value === 1) {
@@ -132,18 +146,29 @@ export default class Controller extends Component {
     }
   };
 
+  gamepadaxisLoop = ({ detail: { index, value } }) => {
+    const {
+      fixedController: { steering },
+      state: {
+        fixedAction: {
+          steering: [s0 = 0, s1 = 0]
+        }
+      }
+    } = this;
+    if (index === 2 && Math.abs(value) > 0.1) {
+      steering(0, s0 - value / 5);
+    }
+    if (index === 3 && Math.abs(value) > 0.1) {
+      steering(1, s1 + value / 5);
+    }
+  }
+
   gamepadAxis = ({ detail: { index, value } }) => {
     const {
-      fixedController: { direction, steering },
+      fixedController: { direction },
     } = this;
     if (index === 0) {
       direction(-value);
-    }
-    if (index === 2) {
-      steering(0, -value);
-    }
-    if (index === 3) {
-      steering(1, value);
     }
   };
 
@@ -154,8 +179,8 @@ export default class Controller extends Component {
       const gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
         : navigator.webkitGetGamepads
-        ? navigator.webkitGetGamepads
-        : [];
+          ? navigator.webkitGetGamepads
+          : [];
       for (
         let gamePadIndex = 0;
         gamePadIndex < gamepadList.length;
@@ -193,6 +218,11 @@ export default class Controller extends Component {
               })
             );
           }
+          window.dispatchEvent(
+            new CustomEvent("gamepadaxisLoop", {
+              detail: { index, value },
+            })
+          );
           axesStatus[`${gamePadIndex}-${index}`] = { value };
         });
       }
@@ -224,8 +254,8 @@ export default class Controller extends Component {
       this.setState({ fixedAction: { ...fixedAction, speed: v } });
       speed(
         v *
-          (speedReverse ? -1 : 1) *
-          ((v > 0 ? forwardPower : backwardPower) / 100)
+        (speedReverse ? -1 : 1) *
+        ((v > 0 ? forwardPower : backwardPower) / 100)
       );
     },
     direction: (v) => {
@@ -240,7 +270,14 @@ export default class Controller extends Component {
     },
 
     changeCamera: (v) => this.props.controller.changeCamera(v),
-    steering: (index, v) => this.props.controller.changeSteering(index, v),
+    steering: (index, v) => {
+      const { fixedAction } = this.state;
+      if (v > 2) v = 2;
+      if (v < -2) v = -2;
+      fixedAction.steering[index] = v;
+      this.setState({ fixedAction });
+      this.props.controller.changeSteering(index, v)
+    },
   };
 
   fixContent = () => {
@@ -314,7 +351,8 @@ export default class Controller extends Component {
     const {
       fixContent,
       fixedController,
-      props: { action, cameraEnabled, videoSize, videoEl },
+      ttsInput,
+      props: { action, cameraEnabled, videoSize, videoEl, onTTS, ttsPlaying },
     } = this;
     const {
       gamepadEnabled,
@@ -370,84 +408,8 @@ export default class Controller extends Component {
                 value={fixedAction.speed}
                 onChange={(v) => speed(v)}
                 className="speed-slider"
-                // style={{ display: !zeroOrientation ? undefined : "none" }}
+              // style={{ display: !zeroOrientation ? undefined : "none" }}
               />
-              {/* <Slider
-                included={false}
-                value={(fixedAction.direction * -1 + 1) * 50}
-                onChange={(v) => direction(-1 * (v / 50 - 1))}
-                tooltipVisible={false}
-                className="direction-slider transition-animation"
-                onAfterChange={() => direction(0)}
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              /> */}
-              {/* <Slider
-                included={false}
-                value={(fixedAction.speed + 1) * 50}
-                onChange={(v) => speed(v / 50 - 1)}
-                className="speed-slider transition-animation"
-                vertical
-                tooltipVisible={false}
-                onAfterChange={() => speed(0)}
-              /> */}
-              {/* <Button
-                className="left-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  direction(1);
-                  vibrate(50);
-                }}
-                onTouchEnd={() => {
-                  direction(0);
-                }}
-                icon={<LeftOutlined />}
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              ></Button>
-              <Button
-                className="right-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  direction(-1);
-                  vibrate(50);
-                }}
-                onTouchEnd={() => {
-                  direction(0);
-                }}
-                icon={<RightOutlined />}
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              ></Button>
-              <Button
-                className="forward-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  speed(1);
-                  vibrate(300);
-                }}
-                onTouchEnd={() => {
-                  speed(0);
-                }}
-                icon={<UpOutlined />}
-              ></Button>
-              <Button
-                className="backward-button"
-                shape="circle"
-                size="large"
-                type="primary"
-                onTouchStart={() => {
-                  speed(-1);
-                  vibrate([100, 50, 100]);
-                }}
-                onTouchEnd={() => {
-                  speed(0);
-                }}
-                icon={<DownOutlined />}
-              ></Button> */}
             </Fragment>
           )}
           <Form.Item>
@@ -511,8 +473,39 @@ export default class Controller extends Component {
             />
           </Form.Item>
           <Form.Item>
-            <Tag>移动:wsad</Tag>
-            <Tag>云台:ikjl</Tag>
+            <Popover
+              placement="topLeft"
+              content={
+                <p>移动：wsad <br /> 云台：ikjl,p</p>
+              }
+            >
+              <Button shape="round">键盘</Button>
+            </Popover>
+          </Form.Item>
+          <Form.Item>
+            <Popover
+              placement="topRight"
+              onVisibleChange={v => {
+                v && ttsInput.current.focus();
+              }}
+              content={
+                <form>
+                  <Input.Search
+                    ref={ttsInput}
+                    name="tts"
+                    style={{ width: "80vw" }}
+                    placeholder="发送语音"
+                    enterButton="发送"
+                    onSearch={onTTS}
+                    loading={ttsPlaying}
+                  />
+                </form>
+              }
+            >
+              <Button shape="round">
+                <NotificationOutlined />
+              </Button>
+            </Popover>
           </Form.Item>
         </Form>
         <Keybord controller={fixedController} />

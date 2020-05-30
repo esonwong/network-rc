@@ -9,6 +9,8 @@ const { startMediaStream, stopMediaStream, cameraModes, NALseparator } = require
 const WebRTC = require("./lib/WebRTC");
 const { spawn } = require('child_process');
 const User = require("./lib/user")
+const TTS = require("./lib/tts")
+const { sleep } = require("./lib/unit")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
@@ -86,19 +88,6 @@ const {
   changeSteering
 } = require("./lib/controller.js");
 
-
-if (frp) {
-  if (!frpPort) {
-    console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
-    process.exit();
-  } else {
-    process.env.FRP_REMOTE_PORT = frpPort;
-    process.env.FRP_SERVER = frpServer;
-    process.env.FRP_SERVER_PORT = frpServerPort;
-    process.env.FRP_SERVER_TOKEN = frpServerToken;
-    require("./lib/frp.js");
-  }
-}
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 app.get("*", (req, res) => {
@@ -183,6 +172,7 @@ if (userList) {
 
 wss.on("connection", function (socket) {
   console.log("客户端连接！");
+  TTS("已建立神经连接，同步率百分之九十");
   console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
@@ -229,7 +219,7 @@ wss.on("connection", function (socket) {
               socket.sendData("switch", { protocol: "websocket" });
             },
             onWarnning({ message }) {
-              socket.sendData("error", { status: 1, message });
+              socket.sendData("warn", { status: 1, message });
             }
           });
           break;
@@ -276,6 +266,9 @@ wss.on("connection", function (socket) {
         break;
       case "steering rate":
         steeringRate(socket, payload);
+        break;
+      case "tts":
+        speak(socket, payload);
         break;
       case "pi power off":
         if (!check(socket)) break;
@@ -377,6 +370,7 @@ const openPower = (socket, enabled) => {
 
 const disconnect = (socket) => {
   console.log("客户端断开连接！");
+  TTS("神经连接已断开")
   if (socket.webrtc) socket.webrtc.close();
   clearTimeout(socket.timeout);
   clients.delete(socket);
@@ -393,6 +387,16 @@ const disconnect = (socket) => {
   }
 };
 
+const speak = async (socket, payload) => {
+  if (!check(socket)) return;
+  socket.sendData("tts playing", true)
+  if (socket.webrtc) socket.webrtc.closeAudioPlayer();
+  await TTS(payload.text, payload);
+  if (socket.webrtc) socket.webrtc.openAudioPlayer();
+  await sleep(3000);
+  socket.sendData("tts playing", false);
+}
+
 const piPowerOff = () => {
   spawn("halt");
 }
@@ -400,12 +404,45 @@ const piReboot = () => {
   spawn("reboot");
 }
 
-process.on("SIGINT", function () {
+process.on("SIGINT", async function () {
   closeController();
   changeLight(false);
   console.log("Goodbye!");
+  await TTS("系统关闭");
   process.exit();
 });
 
 
-server.listen(8080, "0.0.0.0");
+server.listen(8080, "0.0.0.0", async (e) => {
+  console.log("server", server.address());
+  await TTS(`系统初始化完成!本地网络访问地址${getIPAdress()}冒号8080`);
+
+  if (frp) {
+    if (!frpPort) {
+      console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
+      process.exit();
+    } else {
+      process.env.FRP_REMOTE_PORT = frpPort;
+      process.env.FRP_SERVER = frpServer;
+      process.env.FRP_SERVER_PORT = frpServerPort;
+      process.env.FRP_SERVER_TOKEN = frpServerToken;
+      require("./lib/frp.js");
+    }
+  }
+});
+
+
+
+//获取本机ip地址
+function getIPAdress() {
+  var interfaces = require('os').networkInterfaces();
+  for (var devName in interfaces) {
+    var iface = interfaces[devName];
+    for (var i = 0; i < iface.length; i++) {
+      var alias = iface[i];
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+}
