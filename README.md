@@ -34,8 +34,19 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [x] 支持语音
 - [x] 使用 webrtc 点对点音视频控制信号传输
 - [x] 掉线、大延迟自动处理
+- [ ] 支持双摄像头
 
 ## 更新记录
+### 0.9.3
+- 支持语音播报
+- 支持发送文字语音
+### 0.9.1
+- 手柄功能布局
+  - 右摇杆云台控制改为增量
+  - 左摇杆按下改为校准重力感应
+  - 0 号按钮切换电调电源
+  - 1 号按钮切换车灯
+> 按键布局： https://w3c.github.io/gamepad/#fig-visual-representation-of-a-standard-gamepad-layout
 ### 0.9.0
 - 支持 webrtc 视频传输和语音对讲
 - 支持 USB 摄像头和麦克风
