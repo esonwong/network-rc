@@ -22,9 +22,13 @@ export default class Keybord extends Component {
       props: {
         controller: { speed, direction, steering },
         onControl,
+        onEnter
       },
     } = this;
     const keyName = event.key;
+    if(keyName === "Enter") {
+      onEnter && onEnter();
+    }
     if (keyName === "w") {
       speed(1);
     }

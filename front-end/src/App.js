@@ -387,7 +387,7 @@ export default class App extends Component {
     })
   }
 
-  tts = (text) => {
+  tts = (text="一起玩网络遥控车") => {
     if (!this.state.wsConnected) return;
     this.setState({ ttsPlaying: true });
     this.wsavc.send("tts", { text });
