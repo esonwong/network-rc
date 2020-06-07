@@ -166,19 +166,49 @@ body {
   transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
   flex-grow: 1;
   flex-shrink: 1;
-  overflow: auto;
 }
-.player-box canvas,
-.player-box video {
-  flex: 1;
+.camera-rnd {
+  border: 1px solid #000;
+  overflow: hidden;
+}
+
+.camera-rnd .button-box {
+  position: absolute;
+  right: 38px;
+  top: -100px;
+  z-index: 99;
+  opacity: 0;
+}
+.camera-rnd:focus .button-box {
+  opacity: 1;
+  top: 38px;
+}
+
+.camera-rnd .button-box button{
+  margin-right: 0.5em;
+}
+
+
+.camera-box {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+}
+.camera-box canvas {
   object-fit: contain;
   max-width: 100%;
+  /* max-height: 100%; */
+  flex-grow: 1;
+  flex-shrink: 1;
 }
+
 
 .inline-form .ant-form-item {
   margin-bottom: 0.5em;
 }
-/* 
+
 .transition-animation {
   transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
-} */
+}
