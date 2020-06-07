@@ -10,8 +10,6 @@ import "./App.css";
 import { Router, navigate, Match } from "@reach/router";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
-import WSAvcPlayer from "ws-avc-player";
-import WebRTC from './lib/WebRTC'
 import {
   PoweroffOutlined,
   ReloadOutlined
@@ -20,6 +18,7 @@ import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
 import Status from "./components/Status";
+import Camera from "./components/Camera";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -42,7 +41,7 @@ export default class App extends Component {
       wsConnected: false,
       cameraEnabled: false,
       cameraLoading: false,
-      protocol: "webrtc",
+      protocol: "websocket",
       lightEnabled: false,
       powerEnabled: false,
       canvasRef: undefined,
@@ -74,11 +73,6 @@ export default class App extends Component {
             action,
           },
         } = this;
-        // let vAbs = Math.abs(v);
-        // if (vAbs > speedMax / 100) {
-        //   vAbs = speedMax / 100;
-        // }
-        // action.speed = v > 0 ? vAbs : -vAbs;
         action.speed = (v * speedMax) / 100;
         this.setState({ action: { ...action } });
         changeSpeed(action.speed);
@@ -101,105 +95,8 @@ export default class App extends Component {
 
   componentDidMount() {
     const { connect } = this;
-    let pingTime;
-    this.wsavc = new WSAvcPlayer({
-      useWorker: true,
-      workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
-    });
-
-    this.wsavc.on("pong", ({ sendTime }) => {
-      this.setState({ delay: (new Date().getTime() - sendTime) / 2 });
-    });
-
-    this.wsavc.on("controller init", ({ needPassword, maxSpeed }) => {
-      this.setState({ serverSetting: { maxSpeed, needPassword } });
-      if (needPassword) {
-        navigate(`${pubilcUrl}/login`);
-        this.setState({ isLogin: false })
-      } else {
-        this.onLogin();
-      }
-    });
-
-    this.wsavc.on("disconnected", () => {
-      console.log("WS disconnected");
-      this.setState({ wsConnected: false });
-      clearInterval(pingTime);
-    });
-
-    this.wsavc.on("connected", () => {
-      console.log("WS connected");
-      this.setState({ wsConnected: true });
-      if (this.webrtc) {
-        this.webrtc.socket = this.wsavc.ws;
-      }
-      pingTime = setInterval(() => {
-        const sendTime = new Date().getTime();
-        this.wsavc.send("ping", { sendTime });
-      }, 1000);
-      // this.changeCamera(true);
-    });
-
-    // this.wsavc.on("frame_shift", (fbl) => {
-    // console.log("Stream frame shift: ", fbl);
-    // });
-    // this.wsavc.on("resized", (payload) => {
-    //   console.log("resized", payload);
-    // });
-
-    this.wsavc.on("switch", ({ protocol }) => {
-      this.switchProtocol(protocol);
-    });
-
-
-    // websocket player
-    this.wsavc.on("stream_active", (cameraEnabled) => {
-      console.log("Stream is ", cameraEnabled ? "active" : "offline");
-      if (cameraEnabled) {
-        this.wsavc.AvcPlayer.canvas.style.display = "";
-        this.playerBoxRef.current.appendChild(this.wsavc.AvcPlayer.canvas);
-        this.setState({
-          cameraEnabled,
-          canvasRef: this.wsavc.AvcPlayer.canvas,
-          cameraLoading: false
-        });
-      } else {
-        this.setState({ cameraEnabled, canvasRef: undefined, cameraLoading: false });
-      }
-    });
-
-    this.wsavc.on("light enabled", (lightEnabled) => {
-      this.setState({ lightEnabled });
-    });
-
-    this.wsavc.on("power enabled", (powerEnabled) => {
-      this.setState({ powerEnabled });
-    });
-
-    this.wsavc.on("tts playing", ttsPlaying => {
-      this.setState({ ttsPlaying })
-    });
-
-    this.wsavc.on("login", ({ message: m }) => {
-      message.success(m);
-      this.setState({ isLogin: true })
-      navigate(`${pubilcUrl}/`, { replace: true });
-      this.onLogin();
-    });
-
-    this.wsavc.on("error", ({ message: m }) => {
-      message.error(m);
-    });
-
-    this.wsavc.on("warn", ({ message: m }) => {
-      message.warn(m);
-    });
-
-    this.wsavc.on("info", ({ message: m }) => {
-      message.info(m);
-    })
-
     connect();
+
 
     document.body.addEventListener("fullscreenchange", () => {
       if (document.fullscreenElement) {
@@ -212,118 +109,220 @@ export default class App extends Component {
 
   connect = () => {
     const { wsAddress } = this.state.setting;
-    this.wsavc.connect(
+    let pingTime;
+    const socket = this.socket = new WebSocket(
       `${
       window.location.protocol === "https:" ? "wss://" : "ws://"
-      }${wsAddress}`
+      }${wsAddress}/control`
     );
+    socket.binaryType = "arraybuffer"
+
+    socket.addEventListener("open", () => {
+      this.setState({ wsConnected: true });
+      socket.sendData = (action, payload) => {
+        socket.send(JSON.stringify({ action, payload }));
+      }
+      pingTime = setInterval(() => {
+        const sendTime = new Date().getTime();
+        socket.sendData("ping", { sendTime });
+      }, 1000)
+    });
+
+    socket.addEventListener("message", async ({ data }) => {
+      if (typeof data === "string") {
+        const { action, payload } = JSON.parse(data);
+        switch (action) {
+          case "controller init":
+            this.onInit(payload);
+            break;
+          case "login":
+            this.onLogin(payload);
+            break;
+          case "light enabled":
+            this.setState({ lightEnabled: payload });
+            break;
+          case "power enabled":
+            this.setState({ powerEnabled: payload });
+            break;
+          case "tts playing":
+            this.setState({ ttsPlaying: payload });
+            break;
+          case "pong":
+            this.setState({ delay: (new Date().getTime() - payload.sendTime) / 2 });
+            break;
+          case "info":
+            message.info(payload);
+            break;
+          case "warn":
+            message.warn(payload);
+            break;
+          case "error":
+            message.error(payload);
+            break;
+          default:
+            // message.info(`action: ${action}`)
+            break;
+        }
+      }
+    });
+
+    socket.addEventListener("close", () => {
+      clearInterval(pingTime);
+      this.setState({ wsConnected: false });
+    })
   };
+
+  sendData(action, payload) {
+    if (this.socket) {
+      this.socket.sendData(action, payload)
+    } else {
+      console.error("未连接！");
+    }
+  }
+
+  onInit({ needPassword, maxSpeed }) {
+    this.setState({ serverSetting: { maxSpeed, needPassword } });
+    if (needPassword) {
+      navigate(`${pubilcUrl}/login`);
+      this.setState({ isLogin: false })
+    } else {
+      this.onLogin();
+    }
+  }
+
+  onLogin = ({ message: m = "无密码" } = {}) => {
+    message.success(m);
+    this.setState({ isLogin: true })
+    navigate(`${pubilcUrl}/`, { replace: true });
+    // const time = setInterval(() => {
+    //   if (!this.video.current) return;
+    //   clearInterval(time);
+    //   this.mediaSource1 = new MediaSource();
+    //   const mediaSource = this.mediaSource1;
+    //   mediaSource.addEventListener('sourceopen', function (e) { console.log('sourceopen: ' + mediaSource.readyState); });
+    //   mediaSource.addEventListener('sourceended', function (e) { console.log('sourceended: ' + mediaSource.readyState); });
+    //   mediaSource.addEventListener('sourceclose', function (e) { console.log('sourceclose: ' + mediaSource.readyState); });
+    //   mediaSource.addEventListener('error', function (e) { console.log('error: ' + mediaSource.readyState); });
+    //   this.video.current.src = window.URL.createObjectURL(this.mediaSource1);
+    //   this.mediaSource1.addEventListener("sourceopen", () => {
+    //     this.queue1 = [];
+    //     // this.sourceBuffer1 = this.mediaSource1.addSourceBuffer('video/mp4; codecs="avc1.640028"');
+    //     this.sourceBuffer1 = this.mediaSource1.addSourceBuffer('video/mp4; codecs="mp4a.40.2, avc1.640028"');
+
+    //     // this.video.current.play();
+    //     this.sourceBuffer1.addEventListener("updateend", () => {
+    //       this.loadPacket();
+    //     });
+    //     this.changeCamera(true);
+    //   })
+    // }, 100)
+  }
+
+  // loadPacket = (data) => {
+  //   if (this.sourceBuffer1.updating) {
+  //     data && this.queue1.push(data);
+  //     return;
+  //   }
+  //   if (this.queue1.length) {
+  //     console.log("queue", this.queue1.length);
+  //     const bufferData = this.queue1.shift(); // pop from the beginning
+  //     this.sourceBuffer1.appendBuffer(bufferData);
+  //     data && this.queue1.push(data);
+  //   } else {
+  //     data && this.sourceBuffer1.appendBuffer(data);
+  //   }
+  // }
+
 
   disconnect = (e) => {
     e && e.preventDefault();
     this.setState({ wsConnected: false });
-    if (!this.wsavc) return;
-    this.wsavc.disconnect();
+    if (!this.socket) return;
+    this.socket.close();
   };
 
   login = ({ password }) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
-    this.wsavc.send("login", {
+    this.socket.sendData("login", {
       token: md5(`${password}eson`),
     });
   };
 
-  switchProtocol = (protocol) => {
-    message.info(`切换到${protocol}`);
-    if (protocol === "websocket" && this.webrtc) {
-      this.webrtc.close();
-      this.webrtc = undefined;
-    }
-    if (protocol === "webrtc" && this.state.canvasRef) {
-      // eslint-disable-next-line
-      this.state.canvasRef.style.display = "none";
-      this.websocketMediaConnect(false);
-    }
-    this.setState({ protocol }, () => {
-      this.changeCamera(true);
-    })
-  }
+  // switchProtocol = (protocol) => {
+  //   message.info(`切换到${protocol}`);
+  //   if (protocol === "websocket" && this.webrtc) {
+  //     this.webrtc.close();
+  //     this.webrtc = undefined;
+  //   }
+  //   if (protocol === "webrtc" && this.state.canvasRef) {
+  //     // eslint-disable-next-line
+  //     this.state.canvasRef.style.display = "none";
+  //     this.websocketMediaConnect(false);
+  //   }
+  //   this.setState({ protocol }, () => {
+  //     this.changeCamera(true);
+  //   })
+  // }
 
-  webrtcMediaConnect = (enabled) => {
-    if (this.webrtc) {
-      this.wsavc.send("webrtc camera", enabled);
-      this.setState({ cameraEnabled: enabled, cameraLoading: false });
-    } else {
-      if (enabled) {
-        this.setState({
-          cameraLoading: false
-        });
-        this.webrtc = new WebRTC({
-          socket: this.wsavc.ws,
-          video: this.video.current,
-          onError(e) {
-            message.warn(e.message)
-          },
-          onSuccess: () => {
-            this.setState({
-              localMicrphoneEnabled: true,
-              cameraEnabled: true,
-              cameraLoading: false
-            })
-          },
-          onClose: () => {
-            this.setState({
-              localMicrphoneEnabled: false,
-              cameraEnabled: false
-            });
-            this.webrtc = undefined
-          }
-        })
-      }
-    }
-  }
-
-  websocketMediaConnect = (enabled, { cameraMode = "default" } = {}) => {
-    this.wsavc.send("open camera", { enabled, cameraMode });
-  }
-
-  onLogin = () => {
-    const time = setInterval(() => {
-      if (!this.video.current) return;
-      clearInterval(time);
-      this.changeCamera(true);
-    }, 100)
-
-  }
+  // webrtcMediaConnect = (enabled) => {
+  //   if (this.webrtc) {
+  //     this.wsavc.send("webrtc camera", enabled);
+  //     this.setState({ cameraEnabled: enabled, cameraLoading: false });
+  //   } else {
+  //     if (enabled) {
+  //       this.setState({
+  //         cameraLoading: false
+  //       });
+  //       this.webrtc = new WebRTC({
+  //         socket: this.wsavc.ws,
+  //         video: this.video.current,
+  //         onError(e) {
+  //           message.warn(e.message)
+  //         },
+  //         onSuccess: () => {
+  //           this.setState({
+  //             localMicrphoneEnabled: true,
+  //             cameraEnabled: true,
+  //             cameraLoading: false
+  //           })
+  //         },
+  //         onClose: () => {
+  //           this.setState({
+  //             localMicrphoneEnabled: false,
+  //             cameraEnabled: false
+  //           });
+  //           this.webrtc = undefined
+  //         }
+  //       })
+  //     }
+  //   }
+  // }
 
   changeCamera = (enabled) => {
     const {
       state: {
         setting: { cameraMode },
         wsConnected,
-        protocol
+        // protocol
       },
+      socket
     } = this;
     if (!wsConnected) return;
     this.setState({ cameraLoading: true });
-    if (protocol === "webrtc") {
-      this.webrtcMediaConnect(enabled);
-    } else {
-      this.websocketMediaConnect(enabled, { cameraMode });
-    }
+    socket && socket.sendData("open camera", { enabled, cameraMode });
   };
 
   changeLight = (enable) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
-    this.wsavc.send("open light", enable);
+    this.sendData("open light", enable);
   };
 
   changePower = (enable) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
-    this.wsavc.send("open power", enable);
+    this.sendData("open power", enable);
   };
 
 
@@ -337,12 +336,12 @@ export default class App extends Component {
       content: <Fragment>
         <Button type="danger"
           icon={<PoweroffOutlined />}
-          onClick={() => { this.wsavc.send("pi power off"); modal.destroy() }}
+          onClick={() => { this.sendData("pi power off"); modal.destroy() }}
         >关机</Button>
         &nbsp;
         <Button
           icon={<ReloadOutlined />}
-          onClick={() => { this.wsavc.send("pi reboot"); modal.destroy() }}
+          onClick={() => { this.sendData("pi reboot"); modal.destroy() }}
         >重启</Button>
       </Fragment>,
       maskClosable: true,
@@ -360,24 +359,24 @@ export default class App extends Component {
 
   changeZeroSpeedRate = (speedZeroRate) => {
     if (!this.state.wsConnected) return;
-    this.wsavc.send("speed zero rate", speedZeroRate);
+    this.sendData("speed zero rate", speedZeroRate);
     this.setState({ speedZeroRate });
   };
 
   changeSpeed = (speedRate) => {
     if (!this.state.wsConnected) return;
-    this.wsavc.send("speed rate", speedRate);
+    this.sendData("speed rate", speedRate);
   };
 
   changeDirection = (directionRate) => {
     if (!this.state.wsConnected) return;
-    this.wsavc.send("direction rate", directionRate);
+    this.sendData("direction rate", directionRate);
   };
 
 
   changeSteering = (index, rate) => {
     if (!this.state.wsConnected) return;
-    this.wsavc.send("steering rate", { index, rate });
+    this.sendData("steering rate", { index, rate });
   }
 
   changeLocalMicrphone = (enabled) => {
@@ -387,10 +386,10 @@ export default class App extends Component {
     })
   }
 
-  tts = (text="一起玩网络遥控车") => {
+  tts = (text = "一起玩网络遥控车") => {
     if (!this.state.wsConnected) return;
     this.setState({ ttsPlaying: true });
-    this.wsavc.send("tts", { text });
+    this.sendData("tts", { text });
   }
 
   render() {
@@ -453,7 +452,6 @@ export default class App extends Component {
           videoSize={videoSize}
           onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
           disabled={!isLogin}
-          onChangeProtocol={protocol => this.switchProtocol(protocol)}
         />
         <Match path="/:item">
           {({ match }) => <div
@@ -465,7 +463,10 @@ export default class App extends Component {
               transform: `scale(${videoSize / 50})`,
             }}
           >
-            <video ref={this.video} autoPlay controls style={{ display: protocol === "webrtc" ? undefined : "none" }} />
+            <Camera url={`${setting.wsAddress}/video0`} />
+            <Camera url={`${setting.wsAddress}/video1`}
+              defaultPosition={{ x: 400, y: 0 }}
+            />
           </div>}
         </Match>
         <Router className="app-page">
