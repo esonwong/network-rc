@@ -7,7 +7,6 @@ import {
   Popover,
   Slider,
   Tag,
-  Radio
 } from "antd";
 import {
   HomeOutlined,
@@ -44,7 +43,6 @@ export default function Status({
   isFullscreen,
   changeLocalMicrphone,
   cameraLoading,
-  onChangeProtocol,
   disabled
 }) {
   return (
@@ -104,23 +102,7 @@ export default function Status({
         />
       </Form.Item>
 
-      <Form.Item>
-        <Popover
-          placement="bottomRight"
-          content={
-            <Radio.Group value={protocol} onChange={({ target: { value } }) => onChangeProtocol(value)}>
-              <Radio.Button value="webrtc">webrtc</Radio.Button>
-              <Radio.Button value="websocket">websocket</Radio.Button>
-            </Radio.Group>
-          }
-        >
-          <Button shape="round"
-            disabled={disabled}
-          >
-            {protocol}
-          </Button>
-        </Popover>
-      </Form.Item>
+
 
       {cameraEnabled && (
         <Form.Item>
@@ -140,7 +122,7 @@ export default function Status({
             <Button shape="round">
               <ExpandOutlined />
               {/* {(videoSize * 2).toFixed(1)}% */}
-                </Button>
+            </Button>
           </Popover>
         </Form.Item>
       )}
