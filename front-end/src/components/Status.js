@@ -14,10 +14,10 @@ import {
   FullscreenExitOutlined,
   ThunderboltOutlined,
   PoweroffOutlined,
-  AudioOutlined
 } from "@ant-design/icons"
 import { Location } from "@reach/router";
 import Nav from './Nav';
+import Microphone from './Microphone'
 
 export default function Status({
   piPowerOff,
@@ -28,12 +28,10 @@ export default function Status({
   changePower,
   lightEnabled,
   changeLight,
-  localMicrphoneEnabled,
-  webrtc,
   delay,
   isFullscreen,
-  changeLocalMicrphone,
-  disabled
+  disabled,
+  setting
 }) {
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -81,18 +79,14 @@ export default function Status({
         />
       </Form.Item>
 
+      <Form.Item>
+        <Microphone
+          url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
+        />
+      </Form.Item>
 
 
-      {webrtc && webrtc.localStream &&
-        <Form.Item>
-          <Switch
-            checked={localMicrphoneEnabled}
-            onChange={changeLocalMicrphone}
-            checkedChildren={<AudioOutlined />}
-            unCheckedChildren={<AudioOutlined />}
-          />
-        </Form.Item>
-      }
+
 
       {document.body.requestFullscreen && (
         <Form.Item>
