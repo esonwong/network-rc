@@ -76,8 +76,7 @@ body {
 }
 .direction-slider .ant-slider-handle {
   margin-top: -1vh;
- }
-
+}
 
 .speed-slider .ant-slider-handle,
 .direction-slider .ant-slider-handle {
@@ -168,26 +167,36 @@ body {
   flex-shrink: 1;
 }
 .camera-rnd {
-  border: 1px solid #000;
-  overflow: hidden;
+  border: 2px solid #1890ff;
+  /* overflow: hidden; */
+}
+.camera-rnd.disabled {
+  border: none;
 }
 
 .camera-rnd .button-box {
   position: absolute;
-  right: 38px;
-  top: -100px;
+  left: 50%;
+  top: 50%;
   z-index: 99;
-  opacity: 0;
+  transform: translate(-50%, -50%);
 }
-.camera-rnd:focus .button-box {
-  opacity: 1;
-  top: 38px;
+.camera-rnd .edit {
+  position: absolute;
+  right: 0.5em;
+  z-index: 99;
+  top: 50%;
+  transform: translate(0, -50%);
+  opacity: 0.3;
+}
+.camera-rnd .edit button{
+  margin-bottom: 0.5em;
 }
 
-.camera-rnd .button-box button{
+.camera-rnd .button-box button {
   margin-right: 0.5em;
+  margin-bottom: 0.5em;
 }
-
 
 .camera-box {
   width: 100%;
@@ -203,7 +212,6 @@ body {
   flex-grow: 1;
   flex-shrink: 1;
 }
-
 
 .inline-form .ant-form-item {
   margin-bottom: 0.5em;
