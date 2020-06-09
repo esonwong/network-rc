@@ -2,6 +2,7 @@
 
 ## 依赖
 - ffmpeg: 运行前请确保树莓派上安装了 ffmpeg，安装方法 `sudo apt install ffmpeg -y`
+- nodejs
 
 
 ## 使用教程
@@ -12,6 +13,19 @@
   - 视频教程：[4G 5G 网络 RC 遥控车03 - 无限距离远程遥控？](https://www.bilibili.com/video/BV1Xp4y1X7fa)
   - 图文教程：[网络遥控车互联网控制教程](https://blog.esonwong.com/%E7%BD%91%E7%BB%9C%E9%81%A5%E6%8E%A7%E8%BD%A6%E4%BA%92%E8%81%94%E7%BD%91%E6%8E%A7%E5%88%B6%E6%95%99%E7%A8%8B/)
 
+## 开始
+
+```bash
+git clone https://github.com/itiwll/network-rc.git
+cd network-rc/front-end
+yarn # or npm install
+yarn build # or npm run build
+cd ..
+yarn # or npm install
+sudo node index.js
+```
+
+打开 `http://[你的树莓派 ip 地址]:8080`
 ## 使用
 ```bash
 # 基本使用
@@ -27,11 +41,14 @@ node index.js -f -o 9088
 node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerToken xxxxx
 ```
 
+## 接线图
+![GPIO](./gpio.jpg)
+
 ## ToDo
 - [x] 支持手柄
 - [x] 网络穿透
-- [x] Ai 控制
-- [x] 支持语音
+- [x] Ai 控制(暂时移除)
+- [x] 支持车辆麦克风
 - [x] ~~使用 webrtc 点对点音视频控制信号传输~~（延迟高已弃用）
 - [x] ~~使用 MSE~~ (延迟高已弃用）)
 - [x] 掉线、大延迟自动处理
@@ -40,6 +57,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+### 0.9.8
+- 支持多摄像头
+- websocket 连接支持车子麦克风
 ### 0.9.3
 - 支持语音播报
 - 支持发送文字语音
@@ -50,6 +70,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - 0 号按钮切换电调电源
   - 1 号按钮切换车灯
 > 按键布局： https://w3c.github.io/gamepad/#fig-visual-representation-of-a-standard-gamepad-layout
+
 ### 0.9.0
 - 支持 webrtc 视频传输和语音对讲
 - 支持 USB 摄像头和麦克风
@@ -98,6 +119,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## Credits
 - [ws-avc-player](https://github.com/matijagaspar/ws-avc-player)
-- [@clusterws/cws]()
+- [@clusterws/cws](https://github.com/ClusterWS/cWS)
 - [rpio](https://github.com/jperkin/node-rpio)
 - [rpio-pwm](https://github.com/xinkaiwang/rpio-pwm)
+- [xf-tts-socket](https://github.com/jimuyouyou/xf-tts-socket)
