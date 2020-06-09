@@ -9,6 +9,7 @@ const { spawn } = require('child_process');
 const User = require("./lib/user")
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
+const Microphone = require("./lib/Microphone");
 const { existsSync } = require("fs");
 const { sleep } = require("./lib/unit")
 const argv = require("yargs")
@@ -111,15 +112,19 @@ server.on('upgrade', (request, socket, head) => {
     });
 });
 
+let cameraCount = 0;
 (async () => {
   for (let index = 0; index < 8; index++) {
     if (await existsSync(`/dev/video${index}`)) {
       new Camera({ server, cameraIndex: index });
+      cameraCount++
     } else {
       return;
     }
   }
 })()
+
+new Microphone({ server });
 
 
 const clients = new Set();
@@ -176,6 +181,8 @@ wss.on("connection", function (socket) {
     maxSpeed,
     needPassword: password ? true : false,
   });
+
+  socket.sendData("camera count", cameraCount);
 
   socket.sendData("light enabled", lightEnabled)
   socket.sendData("power enabled", powerEnabled)
