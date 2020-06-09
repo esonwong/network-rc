@@ -369,7 +369,8 @@ export default class App extends Component {
             piPowerOff,
             connect,
             disconnect,
-            setting
+            setting,
+            isLogin
           }}
           videoSize={videoSize}
           onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
@@ -387,7 +388,7 @@ export default class App extends Component {
               }}
             >
               {
-                cameraCount.map((_, index) => <Camera index={index} url={`${setting.wsAddress}/video${index}`} />)
+                cameraCount.map((_, index) => <Camera key={index} index={index} url={`${setting.wsAddress}/video${index}`} />)
               }
             </div>}
           </Match>
