@@ -20,11 +20,17 @@ export default function Camera({
     if (!audioEl.current || !enabled) return;
     const mediaSource = new MediaSource();
     let ws;
+    let buffer = [];
     mediaSource.addEventListener('sourceopen', function () {
       var sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+      setInterval(() => {
+        if (buffer.length && !sourceBuffer.updating) {
+          sourceBuffer.appendBuffer(buffer.shift());
+        }
+      }, 10);
 
-      function onAudioLoaded({data}) {
-        sourceBuffer.appendBuffer(data);
+      function onAudioLoaded({ data }) {
+        buffer.push(data);
       }
 
       ws = new WebSocket(url);

@@ -31,7 +31,8 @@ export default function Status({
   delay,
   isFullscreen,
   disabled,
-  setting
+  setting,
+  isLogin
 }) {
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -78,12 +79,14 @@ export default function Status({
           disabled={disabled}
         />
       </Form.Item>
-
-      <Form.Item>
-        <Microphone
-          url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
-        />
-      </Form.Item>
+      
+      {isLogin &&
+        <Form.Item>
+          <Microphone
+            url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
+          />
+        </Form.Item>
+      }
 
 
 
