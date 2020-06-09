@@ -41,8 +41,6 @@ export default class App extends Component {
       },
       wsConnected: false,
       cameraEnabled: false,
-      cameraLoading: false,
-      protocol: "websocket",
       lightEnabled: false,
       powerEnabled: false,
       canvasRef: undefined,
@@ -59,11 +57,10 @@ export default class App extends Component {
       isLogin: true
     };
 
-    const { changeCamera, changeLight, changePower, changeSteering } = this;
+    const { changeLight, changePower, changeSteering } = this;
 
     this.controller = {
       changeLight,
-      changeCamera,
       changePower,
       changeSteering,
       speed: (v) => {
@@ -253,69 +250,7 @@ export default class App extends Component {
     });
   };
 
-  // switchProtocol = (protocol) => {
-  //   message.info(`切换到${protocol}`);
-  //   if (protocol === "websocket" && this.webrtc) {
-  //     this.webrtc.close();
-  //     this.webrtc = undefined;
-  //   }
-  //   if (protocol === "webrtc" && this.state.canvasRef) {
-  //     // eslint-disable-next-line
-  //     this.state.canvasRef.style.display = "none";
-  //     this.websocketMediaConnect(false);
-  //   }
-  //   this.setState({ protocol }, () => {
-  //     this.changeCamera(true);
-  //   })
-  // }
 
-  // webrtcMediaConnect = (enabled) => {
-  //   if (this.webrtc) {
-  //     this.wsavc.send("webrtc camera", enabled);
-  //     this.setState({ cameraEnabled: enabled, cameraLoading: false });
-  //   } else {
-  //     if (enabled) {
-  //       this.setState({
-  //         cameraLoading: false
-  //       });
-  //       this.webrtc = new WebRTC({
-  //         socket: this.wsavc.ws,
-  //         video: this.video.current,
-  //         onError(e) {
-  //           message.warn(e.message)
-  //         },
-  //         onSuccess: () => {
-  //           this.setState({
-  //             localMicrphoneEnabled: true,
-  //             cameraEnabled: true,
-  //             cameraLoading: false
-  //           })
-  //         },
-  //         onClose: () => {
-  //           this.setState({
-  //             localMicrphoneEnabled: false,
-  //             cameraEnabled: false
-  //           });
-  //           this.webrtc = undefined
-  //         }
-  //       })
-  //     }
-  //   }
-  // }
-
-  changeCamera = (enabled) => {
-    const {
-      state: {
-        setting: { cameraMode },
-        wsConnected,
-        // protocol
-      },
-      socket
-    } = this;
-    if (!wsConnected) return;
-    this.setState({ cameraLoading: true });
-    socket && socket.sendData("open camera", { enabled, cameraMode });
-  };
 
   changeLight = (enable) => {
     const { wsConnected } = this.state;
@@ -383,13 +318,6 @@ export default class App extends Component {
     this.sendData("steering rate", { index, rate });
   }
 
-  changeLocalMicrphone = (enabled) => {
-    this.webrtc.openMicrophone(enabled);
-    this.setState({
-      localMicrphoneEnabled: enabled
-    })
-  }
-
   tts = (text = "一起玩网络遥控车") => {
     if (!this.state.wsConnected) return;
     this.setState({ ttsPlaying: true });
@@ -403,9 +331,7 @@ export default class App extends Component {
       controller,
       changeSetting,
       changeLight,
-      changeCamera,
       changePower,
-      changeLocalMicrphone,
       piPowerOff,
       login,
       state: {
@@ -419,14 +345,11 @@ export default class App extends Component {
         lightEnabled,
         videoSize,
         delay,
-        cameraLoading,
         powerEnabled,
         localMicrphoneEnabled,
-        protocol,
         isLogin,
         ttsPlaying
       },
-      webrtc,
       tts
     } = this;
 
@@ -435,24 +358,18 @@ export default class App extends Component {
         <Status
           {...{
             wsConnected,
-            cameraEnabled,
-            cameraLoading,
             isFullscreen,
             serverSetting,
             lightEnabled,
-            videoSize,
             delay,
             powerEnabled,
             localMicrphoneEnabled,
             changePower,
-            changeCamera,
             changeLight,
-            changeLocalMicrphone,
-            webrtc,
             piPowerOff,
             connect,
             disconnect,
-            protocol
+            setting
           }}
           videoSize={videoSize}
           onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
