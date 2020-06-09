@@ -5,11 +5,12 @@ const app = express();
 const server = require("http").Server(app);
 const package = require("./package.json");
 const md5 = require("md5");
-const { startMediaStream, stopMediaStream, cameraModes, NALseparator } = require("./lib/stream.js");
-const WebRTC = require("./lib/WebRTC");
 const { spawn } = require('child_process');
 const User = require("./lib/user")
-const TTS = require("./lib/tts")
+const TTS = require("./lib/tts");
+const Camera = require("./lib/Camera");
+const { existsSync } = require("fs");
+const { sleep } = require("./lib/unit")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9088", "开启网络穿透")
@@ -94,10 +95,33 @@ app.get("*", (req, res) => {
 });
 
 
-let cameraMode = "default";
 let powerEnabled = false, lightEnabled = false;
 
-const wss = new WebSocketServer({ server });
+
+
+
+const wss = new WebSocketServer({ noServer: true, path: "/control" }, () => {
+  console.log("控制 websocket 服务已启动");
+});
+
+server.on('upgrade', (request, socket, head) => {
+  if (request.url === "/control")
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+});
+
+(async () => {
+  for (let index = 0; index < 8; index++) {
+    if (await existsSync(`/dev/video${index}`)) {
+      new Camera({ server, cameraIndex: index });
+    } else {
+      return;
+    }
+  }
+})()
+
+
 const clients = new Set();
 function sendData(action, payload) {
   this.send(JSON.stringify({ action, payload }));
@@ -122,36 +146,6 @@ const broadcast = (action, payload) => {
     (socket) => socket.isLogin && socket.sendData(action, payload)
   );
 };
-
-const broadcastStream = (data) => {
-  clients.forEach((socket) => {
-    if (socket.isLogin) {
-      socket.sendBinary(socket, data);
-    }
-  });
-};
-
-const startWebsocketMedia = () => {
-  startMediaStream(cameraMode, {
-    onStart() {
-      broadcast("initalize", {
-        width: cameraModes[cameraMode].width,
-        height: cameraModes[cameraMode].height,
-      });
-      broadcast("stream_active", true);
-    },
-    onData(data) {
-      broadcastStream(data);
-    },
-    onEnd() {
-      broadcast("stream_active", false);
-    }
-  })
-}
-
-const stopWebsocketMedia = () => {
-  stopMediaStream();
-}
 
 if (userList) {
   new User({
@@ -185,7 +179,6 @@ wss.on("connection", function (socket) {
 
   socket.sendData("light enabled", lightEnabled)
   socket.sendData("power enabled", powerEnabled)
-  // startWebsocketMedia();
 
   socket.on("close", () => {
     disconnect(socket);
@@ -194,52 +187,52 @@ wss.on("connection", function (socket) {
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
 
-    if (action.indexOf("webrtc") !== -1) {
-      if (!check(socket)) return;
-      const type = action.split(" ")[1];
-      switch (type) {
-        case "connect":
-          stopWebsocketMedia();
-          socket.webrtc = new WebRTC({
-            socket,
-            onOffer(offer) {
-              socket.sendData("webrtc offer", offer)
-            },
-            onCandidate(candidate) {
-              socket.sendData("webrtc candidate", candidate)
-            },
-            onSuccess() {
-            },
-            onClose() {
-              socket.sendData("webrtc close")
-              broadcast("stream_active", false);
-            },
-            onError({ message }) {
-              socket.sendData("switch", { protocol: "websocket" });
-            },
-            onWarnning({ message }) {
-              socket.sendData("error", { status: 1, message });
-            }
-          });
-          break;
-        case "answer":
-          socket.webrtc.onAnswer(payload);
-          break
-        case "candidate":
-          socket.webrtc.onCandidate(payload);
-          break;
-        case "camera":
-          socket.webrtc && socket.webrtc.openCamera(payload);
-          break;
-        case "close":
-          socket.webrtc && socket.webrtc.close();
-          break;
-        default:
-          console.log("怎么了？ webrtc", type);
-          break;
-      }
-      return;
-    }
+    // if (action.indexOf("webrtc") !== -1) {
+    //   if (!check(socket)) return;
+    //   const type = action.split(" ")[1];
+    //   switch (type) {
+    //     case "connect":
+    //       stopWebsocketMedia();
+    //       socket.webrtc = new WebRTC({
+    //         socket,
+    //         onOffer(offer) {
+    //           socket.sendData("webrtc offer", offer)
+    //         },
+    //         onCandidate(candidate) {
+    //           socket.sendData("webrtc candidate", candidate)
+    //         },
+    //         onSuccess() {
+    //         },
+    //         onClose() {
+    //           socket.sendData("webrtc close")
+    //           broadcast("stream_active", false);
+    //         },
+    //         onError({ message }) {
+    //           socket.sendData("switch", { protocol: "websocket" });
+    //         },
+    //         onWarnning({ message }) {
+    //           socket.sendData("warn", { status: 1, message });
+    //         }
+    //       });
+    //       break;
+    //     case "answer":
+    //       socket.webrtc.onAnswer(payload);
+    //       break
+    //     case "candidate":
+    //       socket.webrtc.onCandidate(payload);
+    //       break;
+    //     case "camera":
+    //       socket.webrtc && socket.webrtc.openCamera(payload);
+    //       break;
+    //     case "close":
+    //       socket.webrtc && socket.webrtc.close();
+    //       break;
+    //     default:
+    //       console.log("怎么了？ webrtc", type);
+    //       break;
+    //   }
+    //   return;
+    // }
 
     switch (action) {
       case "ping":
@@ -248,9 +241,9 @@ wss.on("connection", function (socket) {
       case "login":
         login(socket, payload);
         break;
-      case "open camera":
-        openCamera(socket, payload);
-        break;
+      // case "open camera":
+      //   openCamera(socket, payload);
+      //   break;
       case "open light":
         openLight(socket, payload);
         break;
@@ -316,16 +309,16 @@ const check = (socket) => {
   }
 };
 
-const openCamera = (socket, v) => {
-  console.log("open camera", v);
-  if (!check(socket)) return;
-  if (v.enabled) {
-    cameraMode = v.cameraMode;
-    startWebsocketMedia();
-  } else {
-    stopWebsocketMedia();
-  }
-};
+// const openCamera = (socket, v) => {
+//   console.log("open camera", v);
+//   if (!check(socket)) return;
+//   if (v.enabled) {
+//     cameraMode = v.cameraMode;
+//     startWebsocketMedia();
+//   } else {
+//     stopWebsocketMedia();
+//   }
+// };
 
 const speedRate = (socket, v) => {
   console.log("speed", v);
@@ -382,15 +375,17 @@ const disconnect = (socket) => {
     closeController();
     lightEnabled = false;
     powerEnabled = false;
-    stopWebsocketMedia();
   }
 };
 
 const speak = async (socket, payload) => {
   if (!check(socket)) return;
-  if(socket.webrtc) socket.webrtc.closeAudioPlayer();
+  socket.sendData("tts playing", true)
+  if (socket.webrtc) socket.webrtc.closeAudioPlayer();
   await TTS(payload.text, payload);
-  if(socket.webrtc) socket.webrtc.openAudioPlayer();
+  if (socket.webrtc) socket.webrtc.openAudioPlayer();
+  await sleep(3000);
+  socket.sendData("tts playing", false);
 }
 
 const piPowerOff = () => {
