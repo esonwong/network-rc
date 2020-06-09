@@ -29,6 +29,7 @@ export default class App extends Component {
     this.playerBoxRef = createRef();
     this.video = createRef();
     this.state = {
+      cameraCount: [],
       setting: {
         speedMax: 30,
         wsAddress: window.location.host,
@@ -134,6 +135,9 @@ export default class App extends Component {
         switch (action) {
           case "controller init":
             this.onInit(payload);
+            break;
+          case "camera count":
+            this.setState({ cameraCount: new Array(payload).fill(1) });
             break;
           case "login":
             this.onLogin(payload);
@@ -405,6 +409,7 @@ export default class App extends Component {
       piPowerOff,
       login,
       state: {
+        cameraCount,
         setting,
         wsConnected,
         cameraEnabled,
@@ -453,22 +458,23 @@ export default class App extends Component {
           onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
           disabled={!isLogin}
         />
-        <Match path="/:item">
-          {({ match }) => <div
-            className="player-box"
-            ref={this.playerBoxRef}
-            style={{
-              // opacity: cameraEnabled ? 1 : 0,
-              display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
-              transform: `scale(${videoSize / 50})`,
-            }}
-          >
-            <Camera url={`${setting.wsAddress}/video0`} />
-            <Camera url={`${setting.wsAddress}/video1`}
-              defaultPosition={{ x: 400, y: 0 }}
-            />
-          </div>}
-        </Match>
+        {isLogin &&
+          <Match path="/:item">
+            {({ match }) => <div
+              className="player-box"
+              ref={this.playerBoxRef}
+              style={{
+                // opacity: cameraEnabled ? 1 : 0,
+                display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
+                transform: `scale(${videoSize / 50})`,
+              }}
+            >
+              {
+                cameraCount.map((_, index) => <Camera index={index} url={`${setting.wsAddress}/video${index}`} />)
+              }
+            </div>}
+          </Match>
+        }
         <Router className="app-page">
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}

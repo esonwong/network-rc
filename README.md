@@ -32,8 +32,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [x] 网络穿透
 - [x] Ai 控制
 - [x] 支持语音
-- [x] 使用 webrtc 点对点音视频控制信号传输
+- [x] ~~使用 webrtc 点对点音视频控制信号传输~~（延迟高已弃用）
+- [x] ~~使用 MSE~~ (延迟高已弃用）)
 - [x] 掉线、大延迟自动处理
+- [x] 支持多摄像头
+  - [ ] 编辑/锁定状态
+  - [ ] 检测摄像头数量
 
 ## 更新记录
 ### 0.9.1

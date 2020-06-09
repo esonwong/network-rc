@@ -4,16 +4,12 @@ import {
   Switch,
   Dropdown,
   Button,
-  Popover,
-  Slider,
   Tag,
 } from "antd";
 import {
   HomeOutlined,
-  ExpandOutlined,
   FullscreenOutlined,
   ApiOutlined,
-  VideoCameraOutlined,
   BulbOutlined,
   FullscreenExitOutlined,
   ThunderboltOutlined,
@@ -27,22 +23,16 @@ export default function Status({
   piPowerOff,
   wsConnected,
   connect,
-  protocol,
   disconnect,
   powerEnabled,
   changePower,
-  cameraEnabled,
-  changeCamera,
-  onChangeVideoSize,
   lightEnabled,
   changeLight,
   localMicrphoneEnabled,
   webrtc,
-  videoSize,
   delay,
   isFullscreen,
   changeLocalMicrphone,
-  cameraLoading,
   disabled
 }) {
   return (
@@ -90,53 +80,6 @@ export default function Status({
           disabled={disabled}
         />
       </Form.Item>
-
-      <Form.Item>
-        <Switch
-          checked={cameraEnabled}
-          onChange={changeCamera}
-          checkedChildren={<VideoCameraOutlined />}
-          unCheckedChildren={<VideoCameraOutlined />}
-          loading={cameraLoading}
-          disabled={disabled}
-        />
-      </Form.Item>
-
-
-
-      {cameraEnabled && (
-        <Form.Item>
-          <Popover
-            placement="bottomRight"
-            content={
-              <Slider
-                defaultValue={videoSize}
-                step={0.1}
-                tipFormatter={(v) => v * 2}
-                onAfterChange={onChangeVideoSize}
-                style={{ width: "30vw" }}
-                marks={{ 0: 0, 50: 100, 100: 200 }}
-              />
-            }
-          >
-            <Button shape="round">
-              <ExpandOutlined />
-              {/* {(videoSize * 2).toFixed(1)}% */}
-            </Button>
-          </Popover>
-        </Form.Item>
-      )}
-
-      {/* <Form.Item>
-            <Button style={{ width: "6em" }}>
-              舵机:{action.direction.toFixed(2)}
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button style={{ width: "6em" }}>
-              电调:{action.speed.toFixed(2)}
-            </Button>
-          </Form.Item> */}
 
 
 
