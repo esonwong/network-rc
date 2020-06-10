@@ -38,6 +38,12 @@ const argv = require("yargs")
       describe: "是否开启网络穿透",
       type: "boolean",
     },
+    t: {
+      alias: "tts",
+      describe: "是否开启语音播报",
+      type: "boolean",
+      default: true
+    },
     o: {
       alias: "frpPort",
       describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
@@ -73,10 +79,13 @@ const {
   frpServer,
   frpServerPort,
   frpServerToken,
-  userList
+  userList,
+  tts
 } = argv;
 let { password } = argv;
-let currentUser
+let currentUser;
+
+process.env.TTS = tts;
 
 
 

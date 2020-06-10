@@ -21,7 +21,7 @@ export default function Camera({
     const mediaSource = new MediaSource();
     let ws;
     let buffer = [];
-    mediaSource.addEventListener('sourceopen', function () {
+    function sourceopen() {
       var sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
       setInterval(() => {
         if (buffer.length && !sourceBuffer.updating) {
@@ -36,10 +36,13 @@ export default function Camera({
       ws = new WebSocket(url);
       ws.binaryType = "arraybuffer";
       ws.addEventListener("message", onAudioLoaded);
-    });
+    }
+
+    mediaSource.addEventListener('sourceopen', sourceopen);
     setSrc(URL.createObjectURL(mediaSource));
     return function () {
-      ws.close();
+      ws && ws.close();
+      mediaSource.removeEventListener("sourceopen",sourceopen);
     }
   }, [audioEl, enabled, url])
 
