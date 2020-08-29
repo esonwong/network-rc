@@ -44,11 +44,8 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## 接线图
 ![GPIO](./gpio.jpg)
 
-## 安装包地址
-### 最新版本 
-[https://esonwong.synology.me:5012/network-rc.tar.gz]()
-### 老版本 
-[https://esonwong.synology.me:5012/network-rc-v0.9.9.tar.gz]()
+## 树莓派软件下载
+[https://github.com/itiwll/network-rc/releases]()
 
 ## ToDo
 - [x] 支持手柄
