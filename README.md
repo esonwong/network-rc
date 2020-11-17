@@ -51,9 +51,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## ToDo
 - [] 一键安装脚本
 - [] 更新内置 frp 配置
-- [] 自定义舵机参数
+- [] 自定义多个舵机通道
 - [] 自定义电调参数
+  - [] 频率
+  - [] 控制空占比
 - [] 替换播放声音的程序
+- [] 修复摄像头数量检测错误
 - [x] 支持手柄
 - [x] 网络穿透
 - [x] Ai 控制(暂时移除)
