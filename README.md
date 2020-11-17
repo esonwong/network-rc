@@ -46,6 +46,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 树莓派软件下载
 [https://github.com/itiwll/network-rc/releases]()
+[https://network-rc.esonwong.com/download]()
 
 ## ToDo
 - [x] 支持手柄
