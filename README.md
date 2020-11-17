@@ -45,8 +45,8 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ![GPIO](./gpio.jpg)
 
 ## 树莓派软件下载
-[https://github.com/itiwll/network-rc/releases]()
-[https://network-rc.esonwong.com/download]()
+- [github](https://github.com/itiwll/network-rc/releases)
+- [network-rc.esonwong.com](https://network-rc.esonwong.com/download)
 
 ## ToDo
 - [x] 支持手柄
