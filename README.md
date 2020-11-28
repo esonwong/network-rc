@@ -57,6 +57,13 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+### 0.9.11
+- 更新内置 frps 配置
+- 默认可设置的最大油门调整为 100%
+### 0.9.10
+- 优化油门控制，增强电调的兼容性
+### 0.9.9
+- 修复大量 bug
 ### 0.9.8
 - 支持多摄像头
 - websocket 连接支持车子麦克风

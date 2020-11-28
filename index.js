@@ -24,7 +24,7 @@ const argv = require("yargs")
     },
     s: {
       alias: "maxSpeed",
-      default: 60,
+      default: 100,
       describe: "最大速度",
       type: "number",
     },
@@ -50,17 +50,17 @@ const argv = require("yargs")
       type: "number",
     },
     frpServer: {
-      default: "itiwll.synology.me",
+      default: "home.esonwong.com",
       describe: "frp 服务器, server_addr",
       type: "string",
     },
     frpServerPort: {
-      default: 6401,
+      default: 9910,
       describe: "frp 服务器连接端口, server_port",
       type: "number",
     },
     frpServerToken: {
-      default: "9080",
+      default: "eson's network-rc",
       describe: "frp 服务器认证token, token",
       type: "string",
     },
