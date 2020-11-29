@@ -107,7 +107,7 @@ export default class App extends Component {
 
   connect = () => {
     const { wsAddress } = this.state.setting;
-    let pingTime;
+    let pingTime, heartbeatTime;
     const socket = this.socket = new WebSocket(
       `${
       window.location.protocol === "https:" ? "wss://" : "ws://"
@@ -124,6 +124,10 @@ export default class App extends Component {
         const sendTime = new Date().getTime();
         socket.sendData("ping", { sendTime });
       }, 1000)
+
+      heartbeatTime = setInterval(() => {
+        socket.sendData("heartbeat");
+      }, 300)
     });
 
     socket.addEventListener("message", async ({ data }) => {
@@ -169,6 +173,7 @@ export default class App extends Component {
 
     socket.addEventListener("close", () => {
       clearInterval(pingTime);
+      clearInterval(heartbeatTime);
       this.setState({ wsConnected: false });
     })
   };

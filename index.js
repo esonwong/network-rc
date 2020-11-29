@@ -71,6 +71,7 @@ const argv = require("yargs")
 console.info("版本", package.version);
 console.info("鸣谢：");
 console.info("  Eson Wong - 提供免费的 frp 服务器");
+console.info("  @千 在爱发电的支持");
 
 const {
   maxSpeed,
@@ -183,7 +184,6 @@ wss.on("connection", function (socket) {
   console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
-  socket.timeout = timeout(socket);
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
   socket.sendData("controller init", {
@@ -250,9 +250,14 @@ wss.on("connection", function (socket) {
     //   return;
     // }
 
+    makeHeartbeatTimer(socket)
+
     switch (action) {
+      case "heartbeat":
+        makeHeartbeatTimer(socket);
+        break;
       case "ping":
-        ping(socket, payload);
+        receivePing(socket, payload);
         break;
       case "login":
         login(socket, payload);
@@ -304,16 +309,25 @@ const login = (socket, { uid, token }) => {
   }
 };
 
-const timeout = (socket) => setTimeout(() => {
-  console.log("等待 Ping 超时!");
-  disconnect(socket);
-}, 3000);
-
-const ping = (socket, { sendTime }) => {
-  clearTimeout(socket.timeout);
-  socket.timeout = timeout(socket);
+/**
+ * 接收到 ping 信号时执行
+ * @param {WebSocket} socket 
+ * @param {object} param1 
+ */
+const receivePing = (socket, { sendTime }) => {
   socket.sendData("pong", { sendTime });
 };
+
+/** 清除、创建心跳超时计时器 */
+const makeHeartbeatTimer = (socket) => {
+  socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId)
+  socket.heartbeatTimeoutId = setTimeout(async () => {
+    console.warn("网络连接不稳定，自动刹车")
+    speedRate(socket,-currentSpeedRateValue)
+    await sleep(200)
+    speedRate(socket, 0)
+  },800)
+}
 
 const check = (socket) => {
   if (socket.isLogin) {
@@ -336,6 +350,7 @@ const check = (socket) => {
 //   }
 // };
 
+let currentSpeedRateValue
 const speedRate = (socket, v) => {
   console.log("speed", v);
   if (!check(socket)) return;
@@ -344,6 +359,7 @@ const speedRate = (socket, v) => {
   }
   changeSpeed(v);
   broadcast("speed", v);
+  currentSpeedRateValue = v
 };
 
 const directionRate = (socket, v) => {
