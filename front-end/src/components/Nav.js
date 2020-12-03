@@ -4,9 +4,8 @@ import { Link } from "@reach/router";
 import {
   GithubOutlined,
   YoutubeOutlined,
-  WeiboOutlined,
   SettingOutlined,
-  // CarOutlined,
+  HeartOutlined
 } from "@ant-design/icons";
 import Icon from "./Icon";
 
@@ -56,11 +55,11 @@ export default function Nav(props) {
       </Menu.Item>
       <Menu.Item>
         <a
-          href="https://weibo.com/u/5034944416"
+          href="https://afdian.net/@esonwong"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <WeiboOutlined /> 微博 Eson_Wong
+          <HeartOutlined /> 请我喝杯咖啡吧！
         </a>
       </Menu.Item>
       {/* <Menu.Item>

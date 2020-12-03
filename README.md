@@ -150,3 +150,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [rpio](https://github.com/jperkin/node-rpio)
 - [rpio-pwm](https://github.com/xinkaiwang/rpio-pwm)
 - [xf-tts-socket](https://github.com/jimuyouyou/xf-tts-socket)
+- @千 - 在爱发电的支持
+- @一生无悔 - 在爱发电的支持
+- @摩天 - 在爱发电的支持
+- Eson Wong - 提供免费的 frp 服务器
