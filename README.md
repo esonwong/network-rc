@@ -45,12 +45,13 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ![GPIO](./gpio.jpg)
 
 ## 树莓派软件下载
-- [github](https://github.com/itiwll/network-rc/releases)
 - [network-rc.esonwong.com](https://network-rc.esonwong.com/download)
+- [github](https://github.com/itiwll/network-rc/releases)
 
 ## ToDo
 - [ ] 一键安装脚本
 - [x] 更新内置 frp 配置
+- [ ] 为本人提供的 frp 服务启用 https
 - [ ] 自定义多个舵机通道
 - [ ] 自定义电调参数
   - [ ] 频率
@@ -135,9 +136,13 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - 相机模式切换
 - 舵机微调
 
+## 社群
+### 微信群
+交流请移步微信群，入群方法添加微信 `EsonWong_` 备注 `Network RC`
 
 ## 链接
 - [作者B站主页](https://space.bilibili.com/96740361)
+- [爱发电支持 Network RC](https://afdian.net/@esonwong)
 
 ## Credits
 - [ws-avc-player](https://github.com/matijagaspar/ws-avc-player)
