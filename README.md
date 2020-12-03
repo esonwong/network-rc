@@ -153,4 +153,5 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - @千 - 在爱发电的支持
 - @一生无悔 - 在爱发电的支持
 - @摩天 - 在爱发电的支持
-- Eson Wong - 提供免费的 frp 服务器
+- @桥段 - 在爱发电的支持
+- @Eson Wong - 提供免费的 frp 服务器
