@@ -3,14 +3,10 @@ import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
-  // DownOutlined,
-  // UpOutlined,
-  // LeftOutlined,
-  // RightOutlined,
   NotificationOutlined
 } from "@ant-design/icons";
 import store from "store";
-import Keybord from "../Keyboard";
+import Keybord from "./Keyboard";
 // import { vibrate } from "../unit";
 import Icon from "./Icon";
 import Ai from "./Ai";
@@ -521,7 +517,7 @@ export default class Controller extends Component {
             </Popover>
           </Form.Item>
         </Form>
-        <Keybord controller={fixedController} onEnter={() => {
+        <Keybord controller={fixedController} currentAction={fixedAction} onEnter={() => {
           this.setState({ ttsInputVisible: true })
           setTimeout(() => {
             ttsInput.current && ttsInput.current.focus();

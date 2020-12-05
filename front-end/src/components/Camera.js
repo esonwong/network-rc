@@ -102,6 +102,7 @@ export default function Camera({
       wsavc.disconnect();
       box.removeChild(wsavc.AvcPlayer.canvas);
     }
+  // eslint-disable-next-line
   }, [url, wsavc]);
 
 
