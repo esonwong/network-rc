@@ -4,10 +4,46 @@ export default class Keybord extends Component {
   constructor(props) {
     super(props);
     this.ref = createRef();
+    
+  }
+
+  holdKeyList = []
+
+  makeTimer(){
+    this.timer = setInterval(() => {
+      const {
+        props: {
+          currentAction: {
+            steering:[s0=0, s1=0]
+          },
+          controller: { steering },
+        },
+      } = this;
+      console.log(s0)
+      this.holdKeyList.forEach(key => {
+        switch (key) {
+          case 'j':
+            steering(0, s0 + 0.1 );
+            break;
+          case 'l':
+            steering(0, s0 - 0.1 );
+            break;
+          case 'i':
+            steering(1, s1 - 0.1 );
+            break;
+          case 'k':
+            steering(1, s1 + 0.1 );
+            break;
+          default:
+            break;
+        }
+      })
+    },100)
   }
 
   componentDidMount() {
     this.keyboardBind();
+    this.makeTimer();
   }
 
   componentWillUnmount() {
@@ -26,6 +62,8 @@ export default class Keybord extends Component {
       },
     } = this;
     const keyName = event.key;
+    this.holdKeyList.push(keyName)
+
     if(keyName === "Enter") {
       onEnter && onEnter();
     }
@@ -42,18 +80,18 @@ export default class Keybord extends Component {
       direction(-1);
     }
 
-    if (keyName === "j") {
-      steering(0, 1);
-    }
-    if (keyName === "l") {
-      steering(0, -1);
-    }
-    if (keyName === "i") {
-      steering(1, -1);
-    }
-    if (keyName === "k") {
-      steering(1, 1);
-    }
+    // if (keyName === "j") {
+    //   steering(0, 1);
+    // }
+    // if (keyName === "l") {
+    //   steering(0, -1);
+    // }
+    // if (keyName === "i") {
+    //   steering(1, -1);
+    // }
+    // if (keyName === "k") {
+    //   steering(1, 1);
+    // }
     onControl && onControl();
   };
 
@@ -66,6 +104,8 @@ export default class Keybord extends Component {
       },
     } = this;
     const keyName = event.key;
+
+    this.holdKeyList = this.holdKeyList.filter(key => keyName !== key)
     if (keyName === "w") {
       speed(0);
     }
@@ -78,18 +118,18 @@ export default class Keybord extends Component {
     if (keyName === "d") {
       direction(0);
     }
-    if (keyName === "j") {
-      steering(0, 0);
-    }
-    if (keyName === "l") {
-      steering(0, 0);
-    }
-    if (keyName === "i") {
-      steering(1, 0);
-    }
-    if (keyName === "k") {
-      steering(1, 0);
-    }
+    // if (keyName === "j") {
+    //   steering(0, 0);
+    // }
+    // if (keyName === "l") {
+    //   steering(0, 0);
+    // }
+    // if (keyName === "i") {
+    //   steering(1, 0);
+    // }
+    // if (keyName === "k") {
+    //   steering(1, 0);
+    // }
 
     onControl && onControl();
   };
