@@ -71,6 +71,10 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+### 0.9.13
+- 云台舵机键盘操作改为按下步进控制的方法
+- 作者提供的 frp 服务支持 https
+- 更新支持者列表
 ### 0.9.12
 - 添加网络连接响应时间超过 500 毫秒自动刹车功能
 ### 0.9.11
