@@ -50,6 +50,7 @@ export default class Keybord extends Component {
     const { handleKeyDown, handleKeyUp } = this;
     window.document.removeEventListener("keydown", handleKeyDown, false);
     window.document.removeEventListener("keyup", handleKeyUp, false);
+    clearInterval(this.timer)
   }
 
   handleKeyDown = (event) => {
