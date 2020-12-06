@@ -462,13 +462,13 @@ process.on("SIGINT", async function () {
 server.listen(8080, "0.0.0.0", async (e) => {
   console.log("server", server.address());
   await TTS(`系统初始化完成!`);
-  console.log(`本地访问地址 http${enabledHttps?'s': s}:{getIPAdress()}:8080`)
-  await TTS(`可使用 http${enabledHttps?'s': s}协议访问${getIPAdress()} 8080端`);
+  console.log(`本地访问地址 http${enabledHttps?'s': ''}//:${getIPAdress()}:8080`)
+  await TTS(`可使用 http${enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
 
 
   if (frp) {
     if (!frpPort) {
-      console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9099");
+      console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9049");
       process.exit();
     } else {
       process.env.FRP_REMOTE_PORT = frpPort;
