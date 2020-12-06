@@ -1,8 +1,7 @@
 const path = require("path");
 const express = require("express");
-const { WebSocketServer } = require("@clusterws/cws");
+const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const app = express();
-const server = require("http").Server(app);
 const package = require("./package.json");
 const md5 = require("md5");
 const { spawn } = require('child_process');
@@ -10,11 +9,11 @@ const User = require("./lib/user")
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
 const Microphone = require("./lib/Microphone");
-const { existsSync } = require("fs");
+const { existsSync, readFileSync } = require("fs");
 const { sleep } = require("./lib/unit")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
-  .example("$0 -f -o 9088", "开启网络穿透")
+  .example("$0 -f -o 9058", "开启网络穿透")
   .options({
     u: {
       alias: "userList",
@@ -91,6 +90,9 @@ let currentUser;
 process.env.TTS = tts;
 
 
+const enabledHttps = frp && (frpServer === 'home.esonwong.com')
+
+
 
 const {
   changeLight,
@@ -102,6 +104,15 @@ const {
 } = require("./lib/controller.js");
 
 
+
+const {createServer} = require(`http${enabledHttps !== 'false' ? 's':''}`);
+
+const server = createServer({
+  secureProtocol: enabledHttps ? secureProtocol : undefined,
+  key: enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/privkey.pem")) : undefined,
+  cert: enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/fullchain.pem")) : undefined
+}, app)
+
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname + "/front-end/build/index.html"));
@@ -112,8 +123,10 @@ let powerEnabled = false, lightEnabled = false;
 
 
 
-
-const wss = new WebSocketServer({ noServer: true, path: "/control" }, () => {
+const wss = new WebSocketServer({ 
+  noServer: true, 
+  path: "/control",
+}, () => {
   console.log("控制 websocket 服务已启动");
 });
 
@@ -200,6 +213,10 @@ wss.on("connection", function (socket) {
 
   socket.on("close", () => {
     disconnect(socket);
+  });
+
+  socket.on('error', (err) => {
+    console.log('Received error: ', err);
   });
 
   socket.on("message", (m) => {
@@ -325,10 +342,10 @@ const makeHeartbeatTimer = (socket) => {
   socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId)
   socket.heartbeatTimeoutId = setTimeout(async () => {
     console.warn("网络连接不稳定，自动刹车")
-    speedRate(socket,-currentSpeedRateValue)
+    speedRate(socket, -currentSpeedRateValue)
     await sleep(200)
     speedRate(socket, 0)
-  },800)
+  }, 800)
 }
 
 const check = (socket) => {
@@ -440,7 +457,7 @@ process.on("SIGINT", async function () {
 
 server.listen(8080, "0.0.0.0", async (e) => {
   console.log("server", server.address());
-  await TTS(`系统初始化完成!本地网络访问地址${getIPAdress()}冒号8080`);
+  await TTS(`系统初始化完成!本地网络访问地址 ${getIPAdress()}冒号8080`);
 
   if (frp) {
     if (!frpPort) {
