@@ -70,10 +70,14 @@ const argv = require("yargs")
 
 console.info("版本", package.version);
 console.info("鸣谢：");
-console.info("  @千 在爱发电的支持");
-console.info("  @一生无悔 在爱发电的支持");
-console.info("  @摩天 在爱发电的支持");
-console.info("  Eson Wong - 提供免费的 frp 服务器");
+console.info(`
+- @千 - 在爱发电的支持
+- @一生无悔 - 在爱发电的支持
+- @摩天 - 在爱发电的支持
+- @爱发电用户_t87M - 在爱发电的支持
+- @桥段 - 在爱发电的支持
+- Eson Wong - 提供免费的 frp 服务
+`);
 
 const {
   maxSpeed,
