@@ -461,7 +461,10 @@ process.on("SIGINT", async function () {
 
 server.listen(8080, "0.0.0.0", async (e) => {
   console.log("server", server.address());
-  await TTS(`系统初始化完成!本地网络访问地址 ${getIPAdress()}冒号8080`);
+  await TTS(`系统初始化完成!`);
+  console.log(`本地访问地址 http${enabledHttps?'s': s}:{getIPAdress()}:8080`)
+  await TTS(`可使用 http${enabledHttps?'s': s}协议访问${getIPAdress()} 8080端`);
+
 
   if (frp) {
     if (!frpPort) {
