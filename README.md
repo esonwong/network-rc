@@ -49,15 +49,18 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [github](https://github.com/itiwll/network-rc/releases)
 
 ## ToDo
+- [ ] 更新支持者列表
+- [ ] 检测摄像头分辨率
+- [ ] 修复摄像头数量检测错误 
+- [ ] 播放手机端录制的音频
 - [ ] 一键安装脚本
 - [x] 更新内置 frp 配置
-- [ ] 为本人提供的 frp 服务启用 https
+- [x] 为本人提供的 frp 服务启用 https
 - [ ] 自定义多个舵机通道
 - [ ] 自定义电调参数
   - [ ] 频率
   - [ ] 控制空占比
 - [ ] 替换播放声音的程序
-- [ ] 修复摄像头数量检测错误 
 - [x] 网络连接响应时间超过 500 毫秒自动刹车
 - [x] ping 值显示
 - [x] 支持手柄
