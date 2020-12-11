@@ -383,25 +383,28 @@ export default class App extends Component {
         />
         {isLogin &&
           <Match path="/:item">
-            {({ match }) => <div
-              className="player-box"
-              ref={this.playerBoxRef}
-              style={{
-                // opacity: cameraEnabled ? 1 : 0,
-                display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
-                transform: `scale(${videoSize / 50})`,
-              }}
-            >
-              {
-                cameraCount.map((_, index) => <Camera key={index} index={index} url={`${setting.wsAddress}/video${index}`} />)
-              }
-            </div>}
+            {({ match }) => 
+              <div
+                className="player-box"
+                ref={this.playerBoxRef}
+                style={{
+                  // opacity: cameraEnabled ? 1 : 0,
+                  display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
+                  transform: `scale(${videoSize / 50})`,
+                }}
+              >
+                {
+                  cameraCount.map((_, index) => <Camera key={index} index={index} url={`${setting.wsAddress}/video${index}`} />)
+                }
+              </div>
+            }
           </Match>
         }
         <Router className="app-page">
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
+            cameraCount={cameraCount}
             serverSetting={serverSetting}
             wsConnected={wsConnected}
             onDisconnect={disconnect}

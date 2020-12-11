@@ -19,7 +19,7 @@ axios.get('http://network-rc.esonwong.com:3000/afdian/api/creator/get-top-sponso
       message: '鸣谢',
       icon: <HeartOutlined style={{ color: '#e62662' }} />,
       description: (<div>
-        { list.map(({ name, avatar }) => <> {name} - 在在爱发电的支持 <br/> </>)}
+        { list.map(({ name, avatar,  }) => <> {name} - 在在爱发电的支持 <br/> </>)}
         <p> EsonWong - 提供免费的 frp 服务 </p>
         <a target="_blank" href="https://afdian.net/@esonwong" rel="noopener noreferrer">去爱发电支持 Network RC</a>
       </div>)
