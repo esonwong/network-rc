@@ -49,7 +49,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [github](https://github.com/itiwll/network-rc/releases)
 
 ## ToDo
-- [ ] 更新支持者列表
+- [x] 更新支持者列表
 - [ ] 检测摄像头分辨率
 - [ ] 修复摄像头数量检测错误 
 - [ ] 播放手机端录制的音频
@@ -74,10 +74,17 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+
+### 0.9.14
+- 默认禁用 https
+- 设置界面添加重置摄像头按钮
+- 更新支持者列表
+
 ### 0.9.13
 - 云台舵机键盘操作改为按下步进控制的方法
 - 作者提供的 frp 服务支持 https
 - 更新支持者列表
+
 ### 0.9.12
 - 添加网络连接响应时间超过 500 毫秒自动刹车功能
 ### 0.9.11

@@ -48,6 +48,11 @@ const argv = require("yargs")
       describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
       type: "number",
     },
+    tsl: {
+      describe: '开启 HTTPS',
+      type: "boolean",
+      default: false
+    },
     frpServer: {
       default: "home.esonwong.com",
       describe: "frp 服务器, server_addr",
@@ -86,7 +91,8 @@ const {
   frpServerPort,
   frpServerToken,
   userList,
-  tts
+  tts,
+  tsl
 } = argv;
 let { password } = argv;
 let currentUser;
@@ -94,7 +100,7 @@ let currentUser;
 process.env.TTS = tts;
 
 
-const enabledHttps = frp && (frpServer === 'home.esonwong.com')
+const enabledHttps = tsl && (frpServer === 'home.esonwong.com')
 
 
 
@@ -109,7 +115,7 @@ const {
 
 
 
-const {createServer} = require(`http${enabledHttps !== 'false' ? 's':''}`);
+const {createServer} = require(`http${enabledHttps ? 's':''}`);
 
 const server = createServer({
   secureProtocol: enabledHttps ? secureProtocol : undefined,
@@ -462,7 +468,7 @@ process.on("SIGINT", async function () {
 server.listen(8080, "0.0.0.0", async (e) => {
   console.log("server", server.address());
   await TTS(`系统初始化完成!`);
-  console.log(`本地访问地址 http${enabledHttps?'s': ''}//:${getIPAdress()}:8080`)
+  console.log(`本地访问地址 http${enabledHttps?'s': ''}://${getIPAdress()}:8080`)
   await TTS(`可使用 http${enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
 
 
@@ -475,7 +481,7 @@ server.listen(8080, "0.0.0.0", async (e) => {
       process.env.FRP_SERVER = frpServer;
       process.env.FRP_SERVER_PORT = frpServerPort;
       process.env.FRP_SERVER_TOKEN = frpServerToken;
-      require("./lib/frp.js");
+      require("./lib/frp.js")({ enabledHttps });
     }
   }
 });
