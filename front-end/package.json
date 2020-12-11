@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^7.2.1",
     "@umijs/hooks": "^1.9.3",
     "antd": "^4.1.0",
+    "axios": "^0.21.0",
     "debounce": "^1.2.0",
     "file-saver": "^2.0.2",
     "is-mobile": "^2.2.1",

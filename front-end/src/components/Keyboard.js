@@ -19,7 +19,6 @@ export default class Keybord extends Component {
           controller: { steering },
         },
       } = this;
-      console.log(s0)
       this.holdKeyList.forEach(key => {
         switch (key) {
           case 'j':
