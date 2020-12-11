@@ -26,7 +26,9 @@ sudo node index.js
 ```
 
 打开 `http://[你的树莓派 ip 地址]:8080`
+
 ## 使用
+
 ```bash
 # 基本使用
 node index.js
@@ -42,25 +44,28 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ```
 
 ## 接线图
+
 ![GPIO](./gpio.jpg)
 
 ## 树莓派软件下载
+
 - [network-rc.esonwong.com](https://network-rc.esonwong.com/download)
 - [github](https://github.com/itiwll/network-rc/releases)
 
 ## ToDo
-- [x] 更新支持者列表
 - [ ] 检测摄像头分辨率
 - [ ] 修复摄像头数量检测错误 
 - [ ] 播放手机端录制的音频
 - [ ] 一键安装脚本
-- [x] 更新内置 frp 配置
-- [x] 为本人提供的 frp 服务启用 https
 - [ ] 自定义多个舵机通道
 - [ ] 自定义电调参数
   - [ ] 频率
   - [ ] 控制空占比
 - [ ] 替换播放声音的程序
+- [x] 更新支持者列表
+- [x] 添加摄像头画面重置按钮
+- [x] 更新内置 frp 配置
+- [x] 为本人提供的 frp 服务启用 https
 - [x] 网络连接响应时间超过 500 毫秒自动刹车
 - [x] ping 值显示
 - [x] 支持手柄
@@ -151,22 +156,21 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - 舵机微调
 
 ## 社群
+
 ### 微信群
+
 交流请移步微信群，入群方法添加微信 `EsonWong_` 备注 `Network RC`
 
 ## 链接
+
 - [作者B站主页](https://space.bilibili.com/96740361)
 - [爱发电支持 Network RC](https://afdian.net/@esonwong)
 
 ## Credits
+
 - [ws-avc-player](https://github.com/matijagaspar/ws-avc-player)
 - [@clusterws/cws](https://github.com/ClusterWS/cWS)
 - [rpio](https://github.com/jperkin/node-rpio)
 - [rpio-pwm](https://github.com/xinkaiwang/rpio-pwm)
 - [xf-tts-socket](https://github.com/jimuyouyou/xf-tts-socket)
-- @千 - 在爱发电的支持
-- @一生无悔 - 在爱发电的支持
-- @摩天 - 在爱发电的支持
-- @爱发电用户_t87M - 在爱发电的支持
-- @桥段 - 在爱发电的支持
 - Eson Wong - 提供免费的 frp 服务器

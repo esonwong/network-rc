@@ -1,6 +1,7 @@
 import React from "react";
 import { Slider, Form, Button, Input } from "antd";
 import { layout, tailLayout } from "../unit";
+import store from "store";
 
 
 export default function Setting({
@@ -8,10 +9,17 @@ export default function Setting({
   wsConnected,
   onSubmit,
   serverSetting,
+  cameraCount,
   ...form
 }) {
+  const clearCameraSetting = () => {
+    cameraCount.forEach((_, index) => store.remove(`camera-${form.wsAddress}/video${index}`));
+    window.location.reload()
+  }
+  
   return (
 
+    
     <Form {...layout} onFinish={onSubmit} initialValues={form}>
       <br />
       <Form.Item
@@ -23,6 +31,11 @@ export default function Setting({
       </Form.Item>
       <Form.Item label="最大速度" name="speedMax">
         <Slider min={0} max={serverSetting.maxSpeed} tooltipVisible />
+      </Form.Item>
+      <Form.Item {...tailLayout}>
+        <Button onClick={clearCameraSetting}>
+          重置摄像头
+        </Button>
       </Form.Item>
       <Form.Item {...tailLayout}>
         <Button type="primary" htmlType="submit">

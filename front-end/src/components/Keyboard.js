@@ -19,7 +19,6 @@ export default class Keybord extends Component {
           controller: { steering },
         },
       } = this;
-      console.log(s0)
       this.holdKeyList.forEach(key => {
         switch (key) {
           case 'j':
@@ -57,7 +56,7 @@ export default class Keybord extends Component {
     if(event.target.tagName === "INPUT") return;
     const {
       props: {
-        controller: { speed, direction, steering },
+        controller: { speed, direction },
         onControl,
         onEnter
       },
@@ -100,7 +99,7 @@ export default class Keybord extends Component {
     if(event.target.tagName === "INPUT") return;
     const {
       props: {
-        controller: { speed, direction, steering },
+        controller: { speed, direction },
         onControl,
       },
     } = this;
