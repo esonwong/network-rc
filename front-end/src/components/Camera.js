@@ -55,7 +55,6 @@ export default function Camera({
     } else {
       setRotate(rotate + 90);
     }
-    // setSize({ width: size.height, height: size.width });
   }
 
 
@@ -78,7 +77,6 @@ export default function Camera({
 
   function start() {
     wsavc.connect(`${window.location.protocol === "https:" ? "wss://" : "ws://"}${url}`);
-    resize(size);
   }
 
   function resize(payload) {
@@ -94,6 +92,7 @@ export default function Camera({
       console.log("initalized", payload);
       setVideoSize(payload);
       setEnabled(true);
+      resize(size);
     });
     wsavc.on("disconnected", function () {
       setEnabled(false);

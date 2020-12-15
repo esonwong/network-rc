@@ -349,7 +349,7 @@ export default class Controller extends Component {
       fixContent,
       fixedController,
       ttsInput,
-      props: { action, cameraEnabled, videoSize, videoEl, onTTS, ttsPlaying },
+      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying },
     } = this;
     const {
       gamepadEnabled,
@@ -379,7 +379,6 @@ export default class Controller extends Component {
             action={action}
             controller={fixedController}
             onAi={(isAiControlling) => this.setState({ isAiControlling })}
-            videoSize={videoSize}
           />
         </Router>
         <Form className="controller-form" size="small" layout="inline">

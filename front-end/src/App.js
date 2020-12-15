@@ -377,8 +377,6 @@ export default class App extends Component {
             setting,
             isLogin
           }}
-          videoSize={videoSize}
-          onChangeVideoSize={(videoSize) => this.setState({ videoSize })}
           disabled={!isLogin}
         />
         {isLogin &&
@@ -390,7 +388,6 @@ export default class App extends Component {
                 style={{
                   // opacity: cameraEnabled ? 1 : 0,
                   display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
-                  transform: `scale(${videoSize / 50})`,
                 }}
               >
                 {
@@ -419,7 +416,6 @@ export default class App extends Component {
             videoEl={this.video.current}
             action={action}
             powerEnabled={powerEnabled}
-            videoSize={videoSize}
             onTTS={tts}
             ttsPlaying={ttsPlaying}
           >
