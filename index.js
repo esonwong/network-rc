@@ -8,6 +8,7 @@ const { spawn } = require('child_process');
 const User = require("./lib/user")
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
+const Audio = require("./lib/Audio");
 const Microphone = require("./lib/Microphone");
 const { existsSync, readFileSync } = require("fs");
 const { sleep } = require("./lib/unit")
@@ -73,15 +74,6 @@ const argv = require("yargs")
   .help().argv;
 
 console.info("版本", package.version);
-console.info("鸣谢：");
-console.info(`
-- @千 - 在爱发电的支持
-- @一生无悔 - 在爱发电的支持
-- @摩天 - 在爱发电的支持
-- @爱发电用户_t87M - 在爱发电的支持
-- @桥段 - 在爱发电的支持
-- Eson Wong - 提供免费的 frp 服务
-`);
 
 const {
   maxSpeed,
@@ -157,9 +149,10 @@ let cameraCount = 0;
       return;
     }
   }
+  new Microphone({ server });
+  new Audio({ server });
 })()
 
-new Microphone({ server });
 
 
 const clients = new Set();
@@ -464,7 +457,11 @@ process.on("SIGINT", async function () {
   process.exit();
 });
 
-
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE') {
+    console.log('哎哟喂，你已经启动了一个 Network RC， 或者 8080 端口被其他程序使用了...');
+  }
+});
 server.listen(8080, "0.0.0.0", async (e) => {
   console.log("server", server.address());
   await TTS(`系统初始化完成!`);
