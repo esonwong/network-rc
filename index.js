@@ -9,6 +9,7 @@ const User = require("./lib/user")
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
 const Audio = require("./lib/Audio");
+const status = require("./lib/status")
 const Microphone = require("./lib/Microphone");
 const { existsSync, readFileSync } = require("fs");
 const { sleep } = require("./lib/unit")
@@ -69,6 +70,11 @@ const argv = require("yargs")
       describe: "frp 服务器认证token, token",
       type: "string",
     },
+    frpServerToken: {
+      default: "eson's network-rc",
+      describe: "frp 服务器认证token, token",
+      type: "string",
+    },
   })
   .env("NETWORK_RC")
   .help().argv;
@@ -89,10 +95,12 @@ const {
 let { password } = argv;
 let currentUser;
 
+status.argv = argv
+status.enabledHttps = tsl && (frpServer === 'home.esonwong.com')
+
 process.env.TTS = tts;
 
 
-const enabledHttps = tsl && (frpServer === 'home.esonwong.com')
 
 
 
@@ -107,12 +115,12 @@ const {
 
 
 
-const {createServer} = require(`http${enabledHttps ? 's':''}`);
+const {createServer} = require(`http${status.enabledHttps ? 's':''}`);
 
 const server = createServer({
-  secureProtocol: enabledHttps ? secureProtocol : undefined,
-  key: enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/privkey.pem")) : undefined,
-  cert: enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/fullchain.pem")) : undefined
+  secureProtocol: status.enabledHttps ? secureProtocol : undefined,
+  key: status.enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/privkey.pem")) : undefined,
+  cert: status.enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/fullchain.pem")) : undefined
 }, app)
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
@@ -465,8 +473,8 @@ server.on('error', (e) => {
 server.listen(8080, "0.0.0.0", async (e) => {
   console.log("server", server.address());
   await TTS(`系统初始化完成!`);
-  console.log(`本地访问地址 http${enabledHttps?'s': ''}://${getIPAdress()}:8080`)
-  await TTS(`可使用 http${enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
+  console.log(`本地访问地址 http${status.enabledHttps?'s': ''}://${getIPAdress()}:8080`)
+  await TTS(`可使用 http${status.enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
 
 
   if (frp) {
@@ -478,7 +486,7 @@ server.listen(8080, "0.0.0.0", async (e) => {
       process.env.FRP_SERVER = frpServer;
       process.env.FRP_SERVER_PORT = frpServerPort;
       process.env.FRP_SERVER_TOKEN = frpServerToken;
-      require("./lib/frp.js")({ enabledHttps });
+      require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
     }
   }
 });
