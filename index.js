@@ -147,6 +147,8 @@ server.on('upgrade', (request, socket, head) => {
     });
 });
 
+new Microphone({ server });
+new Audio({ server });
 let cameraCount = 0;
 (async () => {
   for (let index = 0; index < 8; index++) {
@@ -157,8 +159,6 @@ let cameraCount = 0;
       return;
     }
   }
-  new Microphone({ server });
-  new Audio({ server });
 })()
 
 
@@ -351,9 +351,26 @@ const receivePing = (socket, { sendTime }) => {
 /** 清除、创建心跳超时计时器 */
 const makeHeartbeatTimer = (socket) => {
   socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId)
+  if(status.autoLocking){
+    status.unlockHearbertCount++
+    if(status.unlockHearbertCount > 5) {
+      status.autoLocking = false
+      status.unlockHearbertCount = 0
+      console.info("网络恢复")
+      broadcast("info", { 
+        message: `网络恢复 (￣︶￣)↗  ，解除锁定 !` 
+      });
+    }
+  }
   socket.heartbeatTimeoutId = setTimeout(async () => {
+    status.unlockHearbertCount = 0
+    if(status.autoLocking === true) return;
+    status.autoLocking = true
     console.warn("网络连接不稳定，自动刹车")
-    speedRate(socket, -currentSpeedRateValue)
+    broadcast("info", { 
+      message: `网络连接不稳定，自动刹车, 并锁定` 
+    });
+    speedRate(socket, -status.currentSpeedRateValue)
     await sleep(200)
     speedRate(socket, 0)
   }, 800)
@@ -380,8 +397,8 @@ const check = (socket) => {
 //   }
 // };
 
-let currentSpeedRateValue
 const speedRate = (socket, v) => {
+  if(status.autoLocking === true) return
   console.log("speed", v);
   if (!check(socket)) return;
   if (Math.abs(v) * 100 > maxSpeed) {
@@ -389,7 +406,7 @@ const speedRate = (socket, v) => {
   }
   changeSpeed(v);
   broadcast("speed", v);
-  currentSpeedRateValue = v
+  status.currentSpeedRateValue = v
 };
 
 const directionRate = (socket, v) => {

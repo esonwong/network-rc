@@ -83,7 +83,7 @@ export default function Status({
       {isLogin &&
         <Form.Item>
           <Microphone
-            url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
+            url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/microphone`}
           />
         </Form.Item>
       }
