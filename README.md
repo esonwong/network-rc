@@ -83,10 +83,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
-### 0.9.14
-- 优化联网高延迟刹车的逻辑和交互
-- 优化运行日志输出
-- 修复控制滑杆被视频画面挡住的 bug
+### 0.9.15
+- 优化网络波动刹车逻辑和交互
+- 修复提示交互
+- 修复控件被遮挡的 bug
+- 增加 frp 的 user 参数 --frpServerUser xxx
+- 优化运行日志
 
 ### 0.9.14
 - 默认禁用 https
