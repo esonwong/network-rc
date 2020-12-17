@@ -45,15 +45,15 @@ const argv = require("yargs")
       type: "boolean",
       default: true
     },
-    o: {
-      alias: "frpPort",
-      describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
-      type: "number",
-    },
     tsl: {
       describe: '开启 HTTPS',
       type: "boolean",
       default: false
+    },
+    o: {
+      alias: "frpPort",
+      describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
+      type: "number",
     },
     frpServer: {
       default: "home.esonwong.com",
@@ -65,14 +65,14 @@ const argv = require("yargs")
       describe: "frp 服务器连接端口, server_port",
       type: "number",
     },
-    frpServerToken: {
-      default: "eson's network-rc",
-      describe: "frp 服务器认证token, token",
+    frpServerUser: {
+      default: "",
+      describe: "frp 服务器认证 user, user",
       type: "string",
     },
     frpServerToken: {
       default: "eson's network-rc",
-      describe: "frp 服务器认证token, token",
+      describe: "frp 服务器认证 token, token",
       type: "string",
     },
   })
@@ -88,6 +88,7 @@ const {
   frpServer,
   frpServerPort,
   frpServerToken,
+  frpServerUser,
   userList,
   tts,
   tsl
@@ -503,6 +504,7 @@ server.listen(8080, "0.0.0.0", async (e) => {
       process.env.FRP_SERVER = frpServer;
       process.env.FRP_SERVER_PORT = frpServerPort;
       process.env.FRP_SERVER_TOKEN = frpServerToken;
+      process.env.FRP_SERVER_USER = frpServerUser;
       require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
     }
   }

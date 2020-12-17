@@ -17,9 +17,13 @@ body {
 
 .app-status {
   padding: 0.5em;
-  z-index: 1;
   flex-grow: 0;
   flex-shrink: 1;
+
+}
+
+.app-status .ant-form-item {
+  z-index: 10;
 }
 
 .app-page {
@@ -45,11 +49,16 @@ body {
   padding: 0.5em;
 }
 
+.controller-form .ant-form-item {
+  z-index:10;
+}
+
 .direction-slider {
   position: fixed;
   width: 50vh;
   bottom: 48vh;
   right: 4vw;
+  z-index: 10;
 }
 
 .speed-slider {
@@ -58,6 +67,7 @@ body {
   bottom: 25vh;
   left: 10vw;
   width: 10vh;
+  z-index: 10;
 }
 
 .speed-slider .ant-slider-rail {
@@ -84,6 +94,8 @@ body {
   height: 10vh;
   /* transition: all 0.036s cubic-bezier(0.78, 0.14, 0.15, 0.86); */
 }
+
+
 
 .controller-form .backward-button,
 .controller-form .left-button,
