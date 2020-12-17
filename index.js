@@ -357,7 +357,7 @@ const makeHeartbeatTimer = (socket) => {
       status.autoLocking = false
       status.unlockHearbertCount = 0
       console.info("网络恢复")
-      broadcast("info", { 
+      broadcast("success", { 
         message: `网络恢复 (￣︶￣)↗  ，解除锁定 !` 
       });
     }

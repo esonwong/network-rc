@@ -156,13 +156,16 @@ export default class App extends Component {
             this.setState({ delay: (new Date().getTime() - payload.sendTime) / 2 });
             break;
           case "info":
-            message.info(payload);
+            message.info(payload.message);
             break;
           case "warn":
-            message.warn(payload);
+            message.warn(payload.message);
             break;
           case "error":
-            message.error(payload);
+            message.error(payload.message);
+            break;
+          case "success":
+            message.success(payload.message);
             break;
           default:
             // message.info(`action: ${action}`)

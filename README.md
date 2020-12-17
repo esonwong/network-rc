@@ -53,6 +53,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [github](https://github.com/itiwll/network-rc/releases)
 
 ## ToDo
+
+- [ ] frp 运行添加 user 参数
+- [ ] 添加远程获取 frps 配置的功能
 - [ ] 检测摄像头分辨率
 - [ ] 修复摄像头数量检测错误 
 - [ ] 播放手机端录制的音频
@@ -83,8 +86,6 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ### 0.9.14
 - 优化联网高延迟刹车的逻辑和交互
 - 优化运行日志输出
-- frp 运行添加 user 参数
-- 添加远程获取 frps 配置的功能
 - 修复控制滑杆被视频画面挡住的 bug
 
 ### 0.9.14
