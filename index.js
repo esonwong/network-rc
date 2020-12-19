@@ -303,6 +303,7 @@ wss.on("connection", function (socket) {
         openPower(socket, payload);
         break;
       case "speed rate":
+        if(status.autoLocking === true) return
         speedRate(socket, payload);
         break;
       case "direction rate":
@@ -399,7 +400,6 @@ const check = (socket) => {
 // };
 
 const speedRate = (socket, v) => {
-  if(status.autoLocking === true) return
   console.log("speed", v);
   if (!check(socket)) return;
   if (Math.abs(v) * 100 > maxSpeed) {
