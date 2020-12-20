@@ -8,7 +8,7 @@ export default function Microphone({ url }) {
 
   const [recordAudio, setRecordAudio] = useState(undefined);
   const [enabled, setEnabled] = useState(undefined);
-  const [ws,  setWs] = useState(undefined);
+  const [ws, setWs] = useState(undefined);
 
   useEffect(() => {
     if (!url) return;
@@ -26,42 +26,46 @@ export default function Microphone({ url }) {
   }, [url])
 
   const startRecording = () => {
-    navigator.getUserMedia({
-      audio: true
-    }, function (audioStream) {
-      const record = new window.RecordRTC(audioStream, {
-        type: 'audio',
+    try {
+      navigator.getUserMedia({
+        audio: true
+      }, function (audioStream) {
+        const record = new window.RecordRTC(audioStream, {
+          type: 'audio',
 
-        //6)
-        mimeType: 'audio/wav',
-        sampleRate: 44100,
-        // used by StereoAudioRecorder
-        // the range 22050 to 96000.
-        // let us force 16khz recording:
-        // desiredSampRate: 16000,
+          //6)
+          mimeType: 'audio/wav',
+          sampleRate: 44100,
+          // used by StereoAudioRecorder
+          // the range 22050 to 96000.
+          // let us force 16khz recording:
+          // desiredSampRate: 16000,
 
-        // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
-        // CanvasRecorder, GifRecorder, WhammyRecorder
-        recorderType: window.StereoAudioRecorder,
-        // Dialogflow / STT requires mono audio
-        numberOfAudioChannels: 1,
+          // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
+          // CanvasRecorder, GifRecorder, WhammyRecorder
+          recorderType: window.StereoAudioRecorder,
+          // Dialogflow / STT requires mono audio
+          numberOfAudioChannels: 1,
+        });
+
+        record.startRecording();
+
+        setRecordAudio(record)
+      }, function (error) {
+        message.error('打开麦克风错误')
       });
-
-      record.startRecording();
-
-      setRecordAudio(record)
-    }, function (error) {
-      console.error(JSON.stringify(error));
-    });
+    } catch {
+      message.error('需要启用 https://')
+    }
   }
 
   const endRecording = () => {
-    if(!recordAudio || ! ws) return;
-    recordAudio.stopRecording(function() {
+    if (!recordAudio || !ws) return;
+    recordAudio.stopRecording(function () {
       let blob = recordAudio.getBlob();
       ws.send(blob)
       message.success('发送语音')
-  });
+    });
   }
 
 
