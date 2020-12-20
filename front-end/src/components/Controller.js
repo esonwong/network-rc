@@ -15,6 +15,7 @@ import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
 import NSlider from "./Slider";
 import { createRef } from "react";
+import Microphone from './Microphone'
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -349,7 +350,7 @@ export default class Controller extends Component {
       fixContent,
       fixedController,
       ttsInput,
-      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying },
+      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying, setting },
     } = this;
     const {
       gamepadEnabled,
@@ -514,6 +515,11 @@ export default class Controller extends Component {
                 <NotificationOutlined />
               </Button>
             </Popover>
+          </Form.Item>
+          <Form.Item>
+            <Microphone
+              url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
+            />
           </Form.Item>
         </Form>
         <Keybord controller={fixedController} currentAction={fixedAction} onEnter={() => {

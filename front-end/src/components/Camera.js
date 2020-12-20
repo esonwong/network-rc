@@ -27,26 +27,28 @@ export default function Camera({
   const boxEl = useRef(null);
 
   const [position, setPosition] = useState(defaultPosition)
-  const [size, setSize] = useState(defaultSize);
+  const [size, setSize] = useState(defaultSize); // 画布大小
   const [rotate, setRotate] = useState(0);
-  const [videoSize, setVideoSize] = useState({ width: 400, height: 300 });
+  const [videoSize, setVideoSize] = useState({ width: 400, height: 300 }); // 视频分辨率
   const [enabled, setEnabled] = useState(false);
   const [editabled, setEditabled] = useState(false);
 
   const wsavc = useCreation(() => {
-
-    return new WSAvcPlayer({
+    const { size, position } = store.get(storeName) || { size: defaultSize, position: defaultPosition };
+    setPosition(position);
+    setSize(size);
+    const w = new WSAvcPlayer({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
     });
-  }
-  );
 
-  useMount(() => {
-    const { size, position } = store.get(storeName) || { size: defaultSize, position: defaultPosition };
-    setSize(size);
-    setPosition(position);
-  })
+    w.on('connected', function () {
+      setEnabled(true);
+      resize(size);
+    })
+    return w
+  });
+
 
 
   function changeRotate() {
@@ -80,8 +82,7 @@ export default function Camera({
   }
 
   function resize(payload) {
-    if (!enabled) return;
-    wsavc.send("resize", payload)
+    wsavc && wsavc.send("resize", payload)
   }
 
   useEffect(() => {
@@ -91,8 +92,6 @@ export default function Camera({
     wsavc.on("initalized", (payload) => {
       console.log("initalized", payload);
       setVideoSize(payload);
-      setEnabled(true);
-      resize(size);
     });
     wsavc.on("disconnected", function () {
       setEnabled(false);
@@ -101,7 +100,7 @@ export default function Camera({
       wsavc.disconnect();
       box.removeChild(wsavc.AvcPlayer.canvas);
     }
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [url, wsavc]);
 
 
@@ -122,14 +121,11 @@ export default function Camera({
         const p = { x, y, z: position.z };
         setPosition(p)
         const size = {
-          width: ref.style.width,
-          height: ref.style.height
+          width: ref.offsetWidth,
+          height: ref.offsetHeight
         };
         setSize(size);
-        resize({
-          width: size.width.replace("px", ""),
-          height: size.height.replace("px", "")
-        });
+        resize(size);
       }}
       style={{ zIndex: position.z }}
     >

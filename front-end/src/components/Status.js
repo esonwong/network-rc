@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons"
 import { Location } from "@reach/router";
 import Nav from './Nav';
-import Microphone from './Microphone'
+import Audio from './Audio'
 
 export default function Status({
   piPowerOff,
@@ -82,11 +82,12 @@ export default function Status({
       
       {isLogin &&
         <Form.Item>
-          <Microphone
+          <Audio
             url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/microphone`}
           />
         </Form.Item>
       }
+
 
 
 

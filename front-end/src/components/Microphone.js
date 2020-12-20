@@ -1,63 +1,81 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
-import { Switch } from 'antd';
+import { Button, message } from 'antd';
 
-import {
-  AudioOutlined,
-  AudioMutedOutlined,
-} from "@ant-design/icons"
+import { AudioOutlined } from "@ant-design/icons"
 
-export default function Camera({
-  url,
-}) {
+export default function Microphone({ url }) {
 
-  const audioEl = useRef(null);
-  const [enabled, setEnabled] = useState(true);
-  const [src, setSrc] = useState(null);
-
+  const [recordAudio, setRecordAudio] = useState(undefined);
+  const [enabled, setEnabled] = useState(undefined);
+  const [ws,  setWs] = useState(undefined);
 
   useEffect(() => {
-    if (!audioEl.current || !enabled) return;
-    const mediaSource = new MediaSource();
-    let ws;
-    let buffer = [];
-    function sourceopen() {
-      var sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
-      setInterval(() => {
-        if (buffer.length && !sourceBuffer.updating) {
-          sourceBuffer.appendBuffer(buffer.shift());
-        }
-      }, 10);
+    if (!url) return;
+    const ws = new WebSocket(url);
 
-      function onAudioLoaded({ data }) {
-        buffer.push(data);
-      }
+    ws.addEventListener('open', () => { setEnabled(true) })
+    ws.addEventListener('close', () => { setEnabled(false) })
 
-      ws = new WebSocket(url);
-      ws.binaryType = "arraybuffer";
-      ws.addEventListener("message", onAudioLoaded);
-    }
+    setWs(ws)
 
-    mediaSource.addEventListener('sourceopen', sourceopen);
-    setSrc(URL.createObjectURL(mediaSource));
     return function () {
       ws && ws.close();
-      mediaSource.removeEventListener("sourceopen",sourceopen);
+      setWs(undefined)
     }
-  }, [audioEl, enabled, url])
+  }, [url])
+
+  const startRecording = () => {
+    navigator.getUserMedia({
+      audio: true
+    }, function (audioStream) {
+      const record = new window.RecordRTC(audioStream, {
+        type: 'audio',
+
+        //6)
+        mimeType: 'audio/wav',
+        sampleRate: 44100,
+        // used by StereoAudioRecorder
+        // the range 22050 to 96000.
+        // let us force 16khz recording:
+        // desiredSampRate: 16000,
+
+        // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
+        // CanvasRecorder, GifRecorder, WhammyRecorder
+        recorderType: window.StereoAudioRecorder,
+        // Dialogflow / STT requires mono audio
+        numberOfAudioChannels: 1,
+      });
+
+      record.startRecording();
+
+      setRecordAudio(record)
+    }, function (error) {
+      console.error(JSON.stringify(error));
+    });
+  }
+
+  const endRecording = () => {
+    if(!recordAudio || ! ws) return;
+    recordAudio.stopRecording(function() {
+      let blob = recordAudio.getBlob();
+      ws.send(blob)
+      message.success('发送语音')
+  });
+  }
 
 
 
   return (
     <div>
-      <audio ref={audioEl} src={src} autoPlay></audio>
-      <Switch
-        checked={enabled}
-        onChange={v => {
-          setEnabled(v);
-        }}
-        checkedChildren={<AudioOutlined />}
-        unCheckedChildren={<AudioMutedOutlined />}
+      <Button
+        disabled={!enabled}
+        shape="circle"
+        onMouseDown={startRecording}
+        onMouseUp={endRecording}
+        onTouchStart={startRecording}
+        onTouchEnd={endRecording}
+        icon={<AudioOutlined />}
       />
     </div>
   )

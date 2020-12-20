@@ -351,7 +351,6 @@ export default class App extends Component {
         isFullscreen,
         serverSetting,
         lightEnabled,
-        videoSize,
         delay,
         powerEnabled,
         localMicrphoneEnabled,
@@ -421,6 +420,7 @@ export default class App extends Component {
             powerEnabled={powerEnabled}
             onTTS={tts}
             ttsPlaying={ttsPlaying}
+            setting={setting}
           >
           </Controller>
         </Router>
