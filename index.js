@@ -223,6 +223,9 @@ wss.on("connection", function (socket) {
   socket.sendData("light enabled", lightEnabled)
   socket.sendData("power enabled", powerEnabled)
 
+
+  socket.sendData("info", { message: `Network RC v${package.version}` });
+
   socket.on("close", () => {
     disconnect(socket);
   });
@@ -375,7 +378,7 @@ const makeHeartbeatTimer = (socket) => {
     speedRate(socket, -status.currentSpeedRateValue)
     await sleep(200)
     speedRate(socket, 0)
-  }, 800)
+  }, status.autoLockTime * 2)
 }
 
 const check = (socket) => {
