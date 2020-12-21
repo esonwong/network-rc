@@ -107,7 +107,7 @@ body {
   min-height: 3em;
 }
 
-.backward-button {
+/* .backward-button {
   position: fixed;
   bottom: 30vh;
   right: 5vw;
@@ -128,7 +128,7 @@ body {
   position: fixed;
   bottom: 40vh;
   left: 20vw;
-}
+} */
 
 .controller-router {
   /* height: 100%; */

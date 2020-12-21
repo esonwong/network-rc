@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react';
+import { useKeyPress, useEventListener } from '@umijs/hooks';
 import { Button, message, Popover } from 'antd';
 
 import { AudioOutlined } from "@ant-design/icons"
@@ -28,6 +29,7 @@ export default function Microphone({ url }) {
   }, [url])
 
   const startRecording = () => {
+    if(recording) return;
     setRecording(true)
     navigator.mediaDevices.getUserMedia({
       audio: true
@@ -60,7 +62,7 @@ export default function Microphone({ url }) {
   }
 
   const endRecording = () => {
-
+    if(!recording) return;
     setRecording(false)
     if (!recordAudio || !ws) return;
     recordAudio.stopRecording(function () {
@@ -70,7 +72,20 @@ export default function Microphone({ url }) {
     });
   }
 
+  const gamepadPress = ({ detail: { index, value }}) => {
+    if(index === 2) {
+      if(value > 0.5) {
+       startRecording()
+      } else {
+        endRecording()
+      }
+    }
+  }
 
+  useKeyPress('space', startRecording);
+  useKeyPress('space', endRecording, { events: ['keyup'] });
+
+  useEventListener('gamepadpress', gamepadPress)
 
   return (
     <Popover 

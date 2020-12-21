@@ -3,7 +3,7 @@ import WSAvcPlayer from "ws-avc-player";
 import { Rnd } from 'react-rnd'
 import { useState } from 'react';
 import { Button } from 'antd';
-import { useCreation, useMount } from '@umijs/hooks';
+import { useCreation  } from '@umijs/hooks';
 import store from "store";
 
 import {
