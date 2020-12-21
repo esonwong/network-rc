@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react';
-import { Button, message } from 'antd';
+import { Button, message, Popover } from 'antd';
 
 import { AudioOutlined } from "@ant-design/icons"
+import gif from '../assets/开骂.gif'
 
 export default function Microphone({ url }) {
 
   const [recordAudio, setRecordAudio] = useState(undefined);
   const [enabled, setEnabled] = useState(undefined);
   const [ws, setWs] = useState(undefined);
+  const [recording, setRecording] = useState(false);
 
   useEffect(() => {
     if (!url) return;
@@ -26,6 +28,7 @@ export default function Microphone({ url }) {
   }, [url])
 
   const startRecording = () => {
+    setRecording(true)
     try {
       navigator.getUserMedia({
         audio: true
@@ -60,6 +63,8 @@ export default function Microphone({ url }) {
   }
 
   const endRecording = () => {
+
+    setRecording(false)
     if (!recordAudio || !ws) return;
     recordAudio.stopRecording(function () {
       let blob = recordAudio.getBlob();
@@ -71,7 +76,9 @@ export default function Microphone({ url }) {
 
 
   return (
-    <div>
+    <Popover visible={recording}
+      content={<img src={recording ? gif : ''} alt="录音中" />}
+    >
       <Button
         disabled={!enabled}
         shape="circle"
@@ -81,6 +88,6 @@ export default function Microphone({ url }) {
         onTouchEnd={endRecording}
         icon={<AudioOutlined />}
       />
-    </div>
+    </Popover>
   )
 }
