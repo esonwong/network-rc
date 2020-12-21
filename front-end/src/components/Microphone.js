@@ -35,7 +35,7 @@ export default function Microphone({ url }) {
 
           //6)
           mimeType: 'audio/wav',
-          sampleRate: 44100,
+          sampleRate: 16000,
           // used by StereoAudioRecorder
           // the range 22050 to 96000.
           // let us force 16khz recording:
