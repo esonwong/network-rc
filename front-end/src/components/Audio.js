@@ -18,7 +18,6 @@ export default function Audio({
 
   useEffect(() => {
     if (!audioEl.current || !enabled) return;
-    message.success('已连接到麦克风')
     const mediaSource = new MediaSource();
     let ws;
     let buffer = [];
@@ -37,6 +36,13 @@ export default function Audio({
       ws = new WebSocket(url);
       ws.binaryType = "arraybuffer";
       ws.addEventListener("message", onAudioLoaded);
+
+      ws.addEventListener('open', () => { 
+        message.success('已连接到麦克风')
+        setEnabled(true)
+      })
+      ws.addEventListener('close', () => { setEnabled(false) })
+      
     }
 
     mediaSource.addEventListener('sourceopen', sourceopen);

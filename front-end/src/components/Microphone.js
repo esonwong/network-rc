@@ -29,37 +29,34 @@ export default function Microphone({ url }) {
 
   const startRecording = () => {
     setRecording(true)
-    try {
-      navigator.getUserMedia({
-        audio: true
-      }, function (audioStream) {
-        const record = new window.RecordRTC(audioStream, {
-          type: 'audio',
+    navigator.mediaDevices.getUserMedia({
+      audio: true
+    }).then(function (audioStream) {
+      const record = new window.RecordRTC(audioStream, {
+        type: 'audio',
 
-          //6)
-          mimeType: 'audio/wav',
-          sampleRate: 16000,
-          // used by StereoAudioRecorder
-          // the range 22050 to 96000.
-          // let us force 16khz recording:
-          // desiredSampRate: 16000,
+        //6)
+        mimeType: 'audio/wav',
+        sampleRate: 48000,
+        // used by StereoAudioRecorder
+        // the range 22050 to 96000.
+        // let us force 16khz recording:
+        // desiredSampRate: 16000,
 
-          // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
-          // CanvasRecorder, GifRecorder, WhammyRecorder
-          recorderType: window.StereoAudioRecorder,
-          // Dialogflow / STT requires mono audio
-          numberOfAudioChannels: 1,
-        });
-
-        record.startRecording();
-
-        setRecordAudio(record)
-      }, function (error) {
-        message.error('打开麦克风错误')
+        // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
+        // CanvasRecorder, GifRecorder, WhammyRecorder
+        recorderType: window.StereoAudioRecorder,
+        // Dialogflow / STT requires mono audio
+        numberOfAudioChannels: 1,
       });
-    } catch {
-      message.error('需要启用 https://')
-    }
+
+      record.startRecording();
+
+      setRecordAudio(record)
+    }).catch(function (e) {
+      console.error(e)
+      message.error(e.message)
+    });
   }
 
   const endRecording = () => {
@@ -76,10 +73,14 @@ export default function Microphone({ url }) {
 
 
   return (
-    <Popover visible={recording}
-      content={<img src={recording ? gif : ''} alt="录音中" />}
+    <Popover 
+      visible={recording}
+      placement="leftBottom"
+      content={<img class="select-disabled" src={recording ? gif : ''} alt="录音中" />}
     >
       <Button
+        className="record-button"
+        size="large"
         disabled={!enabled}
         shape="circle"
         onMouseDown={startRecording}
