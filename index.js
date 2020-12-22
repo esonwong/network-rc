@@ -97,7 +97,7 @@ let { password } = argv;
 let currentUser;
 
 status.argv = argv
-status.enabledHttps = tsl && (frpServer === 'home.esonwong.com')
+status.enabledHttps = tsl
 
 process.env.TTS = tts;
 
@@ -120,8 +120,8 @@ const {createServer} = require(`http${status.enabledHttps ? 's':''}`);
 
 const server = createServer({
   secureProtocol: status.enabledHttps ? secureProtocol : undefined,
-  key: status.enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/privkey.pem")) : undefined,
-  cert: status.enabledHttps ? readFileSync(path.resolve(__dirname, "./lib/frpc/home.esonwong.com/fullchain.pem")) : undefined
+  key: status.enabledHttps ? readFileSync(path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`)) : undefined,
+  cert: status.enabledHttps ? readFileSync(path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`)) : undefined
 }, app)
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
