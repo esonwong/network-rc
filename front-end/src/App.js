@@ -127,7 +127,7 @@ export default class App extends Component {
 
       heartbeatTime = setInterval(() => {
         socket.sendData("heartbeat");
-      }, 300)
+      }, 200)
     });
 
     socket.addEventListener("message", async ({ data }) => {
