@@ -54,17 +54,15 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## ToDo
 
-- [ ] frp 运行添加 user 参数
 - [ ] 添加远程获取 frps 配置的功能
 - [ ] 检测摄像头分辨率
 - [ ] 修复摄像头数量检测错误 
-- [ ] 播放手机端录制的音频
 - [ ] 一键安装脚本
 - [ ] 自定义多个舵机通道
-- [ ] 自定义电调参数
-  - [ ] 频率
-  - [ ] 控制空占比
-- [ ] 替换播放声音的程序
+- [x] 播放手机端录制的音频
+- [x] 支持自定义证书
+- [x] frp 运行添加 user 参数
+- [x] ~~替换播放声音的程序~~
 - [x] 更新支持者列表
 - [x] 添加摄像头画面重置按钮
 - [x] 更新内置 frp 配置
@@ -82,6 +80,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+
+
+### 0.9.17
+- 添加发送语音到 The car (需要穿透并开启 https，`-f -o 90xx --tsl`)
+- 支持其他域名的证书 (使用`--frpServer xx.xx.xx` 参数后，在 `lib/frpc` 目录下新建 `xx.xx.xx` 文件夹，将证书文件 `fullchain.pem` 和 `privkey.pem` 放在此文件夹内)
 
 ### 0.9.15
 - 优化网络波动刹车逻辑和交互
