@@ -85,6 +85,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ### 0.9.17
 - 添加发送语音到 The car (需要穿透并开启 https，`-f -o 90xx --tsl`)
 - 支持其他域名的证书 (使用`--frpServer xx.xx.xx` 参数后，在 `lib/frpc` 目录下新建 `xx.xx.xx` 文件夹，将证书文件 `fullchain.pem` 和 `privkey.pem` 放在此文件夹内)
+- 优化网络延迟检测
 
 ### 0.9.15
 - 优化网络波动刹车逻辑和交互
