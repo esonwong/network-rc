@@ -152,6 +152,7 @@ new Microphone({ server });
 new Audio({ server });
 let cameraCount = 0;
 (async () => {
+  Camera.getCameraList()
   for (let index = 0; index < 8; index++) {
     if (await existsSync(`/dev/video${index}`)) {
       new Camera({ server, cameraIndex: index });
