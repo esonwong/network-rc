@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import WSAvcPlayer from "ws-avc-player";
 import { Rnd } from 'react-rnd'
 import { useState } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { useCreation  } from '@umijs/hooks';
 import store from "store";
 
@@ -44,7 +44,7 @@ export default function Camera({
 
     w.on('connected', function () {
       setEnabled(true);
-      resize(size);
+      reCameraSize(size);
     })
     return w
   });
@@ -61,11 +61,11 @@ export default function Camera({
 
 
   function setFullScreen() {
-    const height = window.innerHeight;
-    const width = height / videoSize.height * videoSize.width;
+    const width = window.innerWidth;
+    const height = width / videoSize.width * videoSize.height;
     setSize({ width, height });
-    resize({ width, height });
-    setPosition({ x: (window.innerWidth - width) / 2, y: -38, z: 0 });
+    reCameraSize({ width, height });
+    setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
   }
 
   function setCenterScreen() {
@@ -74,14 +74,14 @@ export default function Camera({
     const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 }
     setPosition(position)
     setSize({ width, height });
-    resize({ width, height });
+    reCameraSize({ width, height });
   }
 
   function start() {
     wsavc.connect(`${window.location.protocol === "https:" ? "wss://" : "ws://"}${url}`);
   }
 
-  function resize(payload) {
+  function reCameraSize(payload) {
     wsavc && wsavc.send("resize", payload)
   }
 
@@ -89,9 +89,9 @@ export default function Camera({
     start();
     const box = boxEl.current;
     box.appendChild(wsavc.AvcPlayer.canvas);
-    wsavc.on("initalized", (payload) => {
-      console.log("initalized", payload);
-      setVideoSize(payload);
+    wsavc.on("initalized", ({ cameraName, size }) => {
+      message.success(`${cameraName} 开启 ${size.width}x${size.height}`)
+      setVideoSize(size);
     });
     wsavc.on("disconnected", function () {
       setEnabled(false);
@@ -125,7 +125,7 @@ export default function Camera({
           height: ref.offsetHeight
         };
         setSize(size);
-        resize(size);
+        reCameraSize(size);
       }}
       style={{ zIndex: position.z }}
     >

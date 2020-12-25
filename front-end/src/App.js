@@ -29,7 +29,7 @@ export default class App extends Component {
     this.playerBoxRef = createRef();
     this.video = createRef();
     this.state = {
-      cameraCount: [],
+      cameraList: [],
       setting: {
         speedMax: 30,
         wsAddress: window.location.host,
@@ -137,8 +137,8 @@ export default class App extends Component {
           case "controller init":
             this.onInit(payload);
             break;
-          case "camera count":
-            this.setState({ cameraCount: new Array(payload).fill(1) });
+          case "camera list":
+            this.setState({ cameraList: payload });
             break;
           case "login":
             this.onLogin(payload);
@@ -343,7 +343,7 @@ export default class App extends Component {
       piPowerOff,
       login,
       state: {
-        cameraCount,
+        cameraList,
         setting,
         wsConnected,
         cameraEnabled,
@@ -393,7 +393,7 @@ export default class App extends Component {
                 }}
               >
                 {
-                  cameraCount.map((_, index) => <Camera key={index} index={index} url={`${setting.wsAddress}/video${index}`} />)
+                  cameraList.map(({name, size,index}) => <Camera key={index} index={index} url={`${setting.wsAddress}/video${index}`} />)
                 }
               </div>
             }
@@ -403,7 +403,7 @@ export default class App extends Component {
           <Setting
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
-            cameraCount={cameraCount}
+            cameraList={cameraList}
             serverSetting={serverSetting}
             wsConnected={wsConnected}
             onDisconnect={disconnect}

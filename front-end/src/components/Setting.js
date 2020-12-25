@@ -9,11 +9,11 @@ export default function Setting({
   wsConnected,
   onSubmit,
   serverSetting,
-  cameraCount,
+  cameraList,
   ...form
 }) {
   const clearCameraSetting = () => {
-    cameraCount.forEach((_, index) => store.remove(`camera-${form.wsAddress}/video${index}`));
+    cameraList.forEach((_, index) => store.remove(`camera-${form.wsAddress}/video${index}`));
     window.location.reload()
   }
   

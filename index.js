@@ -11,7 +11,7 @@ const Camera = require("./lib/Camera");
 const Audio = require("./lib/Audio");
 const status = require("./lib/status")
 const Microphone = require("./lib/Microphone");
-const { existsSync, readFileSync } = require("fs");
+const { readFileSync } = require("fs");
 const { sleep } = require("./lib/unit")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
@@ -150,18 +150,6 @@ server.on('upgrade', (request, socket, head) => {
 
 new Microphone({ server });
 new Audio({ server });
-let cameraCount = 0;
-(async () => {
-  Camera.getCameraList()
-  for (let index = 0; index < 8; index++) {
-    if (await existsSync(`/dev/video${index}`)) {
-      new Camera({ server, cameraIndex: index });
-      cameraCount++
-    } else {
-      return;
-    }
-  }
-})()
 
 
 
@@ -219,7 +207,7 @@ wss.on("connection", function (socket) {
     needPassword: password ? true : false,
   });
 
-  socket.sendData("camera count", cameraCount);
+  socket.sendData("camera list", cameraList.map(({ name, size }, index ) => ({ name, size, index})));
 
   socket.sendData("light enabled", lightEnabled)
   socket.sendData("power enabled", powerEnabled)
@@ -492,27 +480,8 @@ server.on('error', (e) => {
     console.log('哎哟喂，你已经启动了一个 Network RC， 或者 8080 端口被其他程序使用了...');
   }
 });
-server.listen(8080, "0.0.0.0", async (e) => {
-  console.log("server", server.address());
-  await TTS(`系统初始化完成!`);
-  console.log(`本地访问地址 http${status.enabledHttps?'s': ''}://${getIPAdress()}:8080`)
-  await TTS(`可使用 http${status.enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
 
 
-  if (frp) {
-    if (!frpPort) {
-      console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9049");
-      process.exit();
-    } else {
-      process.env.FRP_REMOTE_PORT = frpPort;
-      process.env.FRP_SERVER = frpServer;
-      process.env.FRP_SERVER_PORT = frpServerPort;
-      process.env.FRP_SERVER_TOKEN = frpServerToken;
-      process.env.FRP_SERVER_USER = frpServerUser;
-      require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
-    }
-  }
-});
 
 
 
@@ -529,3 +498,36 @@ function getIPAdress() {
     }
   }
 }
+
+let cameraList
+(async () => {
+  cameraList =  await Camera.getCameraList()
+  cameraList.forEach((item, index) => {
+      const {  dev, size, name, cardType } = item;
+      item.server = new Camera({ server, devPath: dev, name, cardType, size, cameraIndex: index });
+  })
+
+  server.listen(8080, "0.0.0.0", async (e) => {
+    console.log("server", server.address());
+    await TTS(`系统初始化完成!`);
+    console.log(`本地访问地址 http${status.enabledHttps?'s': ''}://${getIPAdress()}:8080`)
+    await TTS(`可使用 http${status.enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
+  
+  
+    if (frp) {
+      if (!frpPort) {
+        console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9049");
+        process.exit();
+      } else {
+        process.env.FRP_REMOTE_PORT = frpPort;
+        process.env.FRP_SERVER = frpServer;
+        process.env.FRP_SERVER_PORT = frpServerPort;
+        process.env.FRP_SERVER_TOKEN = frpServerToken;
+        process.env.FRP_SERVER_USER = frpServerUser;
+        require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
+      }
+    }
+  });
+
+
+})()
