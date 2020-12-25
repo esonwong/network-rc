@@ -23,12 +23,6 @@ const argv = require("yargs")
       type: "boolean",
       describe: "用户列表",
     },
-    s: {
-      alias: "maxSpeed",
-      default: 100,
-      describe: "最大速度",
-      type: "number",
-    },
     p: {
       alias: "password",
       describe: "密码",
@@ -82,7 +76,6 @@ const argv = require("yargs")
 console.info("版本", package.version);
 
 const {
-  maxSpeed,
   frp,
   frpPort,
   frpServer,
@@ -203,14 +196,17 @@ wss.on("connection", function (socket) {
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
   socket.sendData("controller init", {
-    maxSpeed,
     needPassword: password ? true : false,
   });
+
 
   socket.sendData("camera list", cameraList.map(({ name, size }, index ) => ({ name, size, index})));
 
   socket.sendData("light enabled", lightEnabled)
+
   socket.sendData("power enabled", powerEnabled)
+
+  socket.sendData("config", status.config)
 
 
   socket.sendData("info", { message: `Network RC v${package.version}` });
@@ -285,9 +281,6 @@ wss.on("connection", function (socket) {
       case "login":
         login(socket, payload);
         break;
-      // case "open camera":
-      //   openCamera(socket, payload);
-      //   break;
       case "open light":
         openLight(socket, payload);
         break;
@@ -314,6 +307,11 @@ wss.on("connection", function (socket) {
       case "pi reboot":
         if (!check(socket)) break;
         piReboot();
+      case "save config":
+        if (!check(socket)) break;
+        status.saveConfig(payload)
+        socket.sendData('success',{  message: '设置已保存！'})
+        broadcast('config', status.config)
       default:
         console.log("怎么了？");
     }
@@ -345,29 +343,29 @@ const receivePing = (socket, { sendTime }) => {
 /** 清除、创建心跳超时计时器 */
 const makeHeartbeatTimer = (socket) => {
   socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId)
-  if(status.autoLocking){
+  if (status.autoLocking) {
     status.unlockHearbertCount++
-    if(status.unlockHearbertCount > 5) {
+    if (status.unlockHearbertCount > 5) {
       status.autoLocking = false
       status.unlockHearbertCount = 0
       console.info("网络恢复")
-      broadcast("success", { 
-        message: `网络恢复 (￣︶￣)↗  ，解除锁定 !` 
+      broadcast("success", {
+        message: `网络恢复 (￣︶￣)↗  ，解除锁定 !`
       });
     }
   }
   socket.heartbeatTimeoutId = setTimeout(async () => {
     status.unlockHearbertCount = 0
-    if(status.autoLocking === true) return;
+    if (status.autoLocking === true) return;
     status.autoLocking = true
     console.warn("网络连接不稳定，自动刹车")
-    broadcast("info", { 
-      message: `网络连接不稳定，自动刹车, 并锁定` 
+    broadcast("info", {
+      message: `网络连接不稳定，自动刹车, 并锁定`
     });
     speedRate(socket, -status.currentSpeedRateValue)
     await sleep(200)
     speedRate(socket, 0)
-  }, status.autoLockTime * 2)
+  }, status.config.autoLockTime * 2)
 }
 
 const check = (socket) => {
@@ -392,6 +390,7 @@ const check = (socket) => {
 // };
 
 const speedRate = (socket, v) => {
+  const { maxSpeed } = status.config
   console.log("speed", v);
   if (!check(socket)) return;
   if (Math.abs(v) * 100 > maxSpeed) {
@@ -501,19 +500,19 @@ function getIPAdress() {
 
 let cameraList
 (async () => {
-  cameraList =  await Camera.getCameraList()
+  cameraList = await Camera.getCameraList()
   cameraList.forEach((item, index) => {
-      const {  dev, size, name, cardType } = item;
-      item.server = new Camera({ server, devPath: dev, name, cardType, size, cameraIndex: index });
+    const { dev, size, name, cardType } = item;
+    item.server = new Camera({ server, devPath: dev, name, cardType, size, cameraIndex: index });
   })
 
   server.listen(8080, "0.0.0.0", async (e) => {
     console.log("server", server.address());
     await TTS(`系统初始化完成!`);
-    console.log(`本地访问地址 http${status.enabledHttps?'s': ''}://${getIPAdress()}:8080`)
-    await TTS(`可使用 http${status.enabledHttps?'s': ''}协议访问${getIPAdress()} 8080端口`);
-  
-  
+    console.log(`本地访问地址 http${status.enabledHttps ? 's' : ''}://${getIPAdress()}:8080`)
+    await TTS(`可使用 http${status.enabledHttps ? 's' : ''}协议访问${getIPAdress()} 8080端口`);
+
+
     if (frp) {
       if (!frpPort) {
         console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9049");

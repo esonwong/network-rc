@@ -5,9 +5,7 @@ import {
   AimOutlined,
   NotificationOutlined
 } from "@ant-design/icons";
-import store from "store";
 import Keybord from "./Keyboard";
-// import { vibrate } from "../unit";
 import Icon from "./Icon";
 import Ai from "./Ai";
 import mobile from "is-mobile";
@@ -36,11 +34,8 @@ export default class Controller extends Component {
     this.ttsInput = createRef();
     this.state = {
       zeroOrientation: undefined,
-      directionReverse: store.get("directionReverse") || false,
-      speedReverse: store.get("speedReverse") || false,
       backwardPower: 50,
       forwardPower: 50,
-      directionFix: store.get("directionFix") || 0,
       isShowButton: mobile(),
       gamepadEnabled: false,
       ttsInputVisible: false,
@@ -61,6 +56,12 @@ export default class Controller extends Component {
     window.addEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
     this.gamePadsLoop();
   }
+
+  componentDidUpdate(prevProps, prevState, snapshot){
+    if(prevProps.serverConfig !== this.props.serverConfig) {
+      this.fixedController.direction(0)
+    }
+  } 
 
   componentWillUnmount() {
     clearInterval(this.gamePadsTime);
@@ -229,8 +230,8 @@ export default class Controller extends Component {
 
   deviceorientation = ({ alpha, beta, gamma }) => {
     const {
-      props: { controller },
-      state: { directionReverse, isAiControlling, zeroOrientation },
+      state: { isAiControlling, zeroOrientation },
+      fixedController
     } = this;
     if (!zeroOrientation) return;
     if (isAiControlling) return;
@@ -238,7 +239,7 @@ export default class Controller extends Component {
     let bateDegree = beta - baseBeta;
     bateDegree = bateDegree < -30 ? -30 : bateDegree;
     bateDegree = bateDegree > 30 ? 30 : bateDegree;
-    controller.direction((bateDegree / 30) * (directionReverse ? 1 : -1));
+    fixedController.direction(bateDegree / 30);
   };
 
   fixedController = {
@@ -246,8 +247,9 @@ export default class Controller extends Component {
       const {
         props: {
           controller: { speed },
+          serverConfig: { speedReverse }
         },
-        state: { forwardPower, backwardPower, speedReverse, fixedAction },
+        state: { forwardPower, backwardPower, fixedAction },
       } = this;
       this.setState({ fixedAction: { ...fixedAction, speed: v } });
       speed(
@@ -260,8 +262,9 @@ export default class Controller extends Component {
       const {
         props: {
           controller: { direction },
+          serverConfig: { directionReverse, directionFix }
         },
-        state: { directionReverse, directionFix, fixedAction },
+        state: { fixedAction },
       } = this;
       this.setState({ fixedAction: { ...fixedAction, direction: v } });
       direction(v * (directionReverse ? -1 : 1) + directionFix);
@@ -279,7 +282,8 @@ export default class Controller extends Component {
   };
 
   fixContent = () => {
-    const { directionReverse, speedReverse, directionFix } = this.state;
+    const { serverConfig: { directionReverse, directionFix, speedReverse }, saveServerConfig } = this.props
+
     return (
       <Form>
         <Form.Item
@@ -307,10 +311,7 @@ export default class Controller extends Component {
           <Switch
             checked={directionReverse}
             onChange={(v) => {
-              this.setState({
-                directionReverse: v,
-              });
-              store.set("directionReverse", v);
+              saveServerConfig({ directionReverse: v })
             }}
           />
         </Form.Item>
@@ -318,25 +319,19 @@ export default class Controller extends Component {
           <Switch
             checked={speedReverse}
             onChange={(v) => {
-              this.setState({
-                speedReverse: v,
-              });
-              store.set("speedReverse", v);
+              saveServerConfig({ speedReverse: v })
             }}
           />
         </Form.Item>
         <Form.Item label="舵机微调">
           <Slider
-            value={directionFix * 50 + 50}
+            defaultValue={directionFix * 50 + 50}
             min={0}
             max={100}
             included={false}
             onChange={(v) => {
               const directionFix = v / 50 - 1;
-              store.set("directionFix", directionFix);
-              this.setState({ directionFix }, () => {
-                this.fixedController.direction(0);
-              });
+              saveServerConfig({ directionFix })
             }}
             style={{ width: "50vw" }}
           />

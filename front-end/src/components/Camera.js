@@ -2,16 +2,14 @@ import React, { useEffect, useRef } from 'react'
 import WSAvcPlayer from "ws-avc-player";
 import { Rnd } from 'react-rnd'
 import { useState } from 'react';
-import { Button, message } from 'antd';
-import { useCreation  } from '@umijs/hooks';
+import { Button, Switch, message } from 'antd';
+import { useCreation, useEventListener } from '@umijs/hooks';
 import store from "store";
 
 import {
   BorderOutlined,
   UpSquareOutlined,
   RotateRightOutlined,
-  PauseOutlined,
-  PlayCircleOutlined,
   FormOutlined,
   LockOutlined
 } from "@ant-design/icons"
@@ -30,7 +28,8 @@ export default function Camera({
   const [size, setSize] = useState(defaultSize); // 画布大小
   const [rotate, setRotate] = useState(0);
   const [videoSize, setVideoSize] = useState({ width: 400, height: 300 }); // 视频分辨率
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true);
+  const [pause, setPause] = useState(false);
   const [editabled, setEditabled] = useState(false);
 
   const wsavc = useCreation(() => {
@@ -46,6 +45,20 @@ export default function Camera({
       setEnabled(true);
       reCameraSize(size);
     })
+
+    w.on("info", ({ cameraName, size }) => {
+      setVideoSize(size);
+    });
+
+    w.on("initalized", ({ cameraName, size }) => {
+      message.success(`${cameraName} 开启 ${size.width}x${size.height}`)
+      setVideoSize(size);
+    });
+
+    w.on("disconnected", function () {
+      // setEnabled(false);
+    });
+
     return w
   });
 
@@ -81,27 +94,37 @@ export default function Camera({
     wsavc.connect(`${window.location.protocol === "https:" ? "wss://" : "ws://"}${url}`);
   }
 
-  function reCameraSize(payload) {
-    wsavc && wsavc.send("resize", payload)
+  function end() {
+    wsavc && wsavc.ws && wsavc.disconnect();
+    wsavc.AvcPlayer.canvas.remove();
   }
 
+  function reCameraSize(payload) {
+    wsavc && wsavc.ws && wsavc.send("resize", payload)
+  }
+
+  useEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      setPause(false)
+    }
+    else {
+      setPause(true)
+    }
+  }, { dom: document })
+
   useEffect(() => {
-    start();
     const box = boxEl.current;
-    box.appendChild(wsavc.AvcPlayer.canvas);
-    wsavc.on("initalized", ({ cameraName, size }) => {
-      message.success(`${cameraName} 开启 ${size.width}x${size.height}`)
-      setVideoSize(size);
-    });
-    wsavc.on("disconnected", function () {
-      setEnabled(false);
-    });
+    if (!enabled || pause) {
+      end()
+    } else {
+      start();
+      box.appendChild(wsavc.AvcPlayer.canvas);
+    }
     return function () {
-      wsavc.disconnect();
-      box.removeChild(wsavc.AvcPlayer.canvas);
+      end()
     }
     // eslint-disable-next-line
-  }, [url, wsavc]);
+  }, [url, wsavc, enabled, pause]);
 
 
   return (
@@ -143,15 +166,7 @@ export default function Camera({
           <Button size="small" shape="circle" icon={<FormOutlined />} onClick={() => { setEditabled(true) }} />
           <br />
           {
-            enabled ?
-              <Button size="small" type="danger" shape="circle" icon={
-                <PauseOutlined />
-              } onClick={() => {
-                wsavc.ws.close();
-              }} /> :
-              <Button size="small" type="primary" shape="circle" icon={
-                <PlayCircleOutlined />
-              } onClick={start} />
+            <Switch size="small" checked={enabled} onChange={setEnabled} />
           }
         </div>
       }

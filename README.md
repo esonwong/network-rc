@@ -55,10 +55,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## ToDo
 
 - [ ] 添加远程获取 frps 配置的功能
-- [ ] 检测摄像头分辨率
-- [ ] 修复摄像头数量检测错误 
 - [ ] 一键安装脚本
 - [ ] 自定义多个舵机通道
+- [x] 保存车子运行的相关状态
+- [x] 检测摄像头分辨率
+- [x] 修复摄像头数量检测错误 
 - [x] 播放手机端录制的音频
 - [x] 支持自定义证书
 - [x] frp 运行添加 user 参数
@@ -81,6 +82,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
+
+### 0.9.18
+- 优化图传功能
+- 修复摄像头数量检测错误
+- 保存最大电调功率和舵机修正状态
 
 ### 0.9.17
 - 添加发送语音到 The car (需要穿透并开启 https，`-f -o 90xx --tsl`)

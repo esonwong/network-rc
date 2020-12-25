@@ -33,12 +33,9 @@ export default class App extends Component {
       setting: {
         speedMax: 30,
         wsAddress: window.location.host,
-        cameraMode: "default",
         ...store.get("setting"),
       },
-      serverSetting: {
-        maxSpeed: 100,
-      },
+      serverConfig: { },
       wsConnected: false,
       cameraEnabled: false,
       lightEnabled: false,
@@ -85,10 +82,7 @@ export default class App extends Component {
         this.setState({ action: { ...action } });
       },
     };
-
-    this.changeVideoSize = debounce(() => {
-      this.setState({ unbounceVideoSize: this.state });
-    }, 300);
+    this.saveServerConfig = debounce(this._saveServerConfig, 300)
   }
 
   componentDidMount() {
@@ -143,6 +137,9 @@ export default class App extends Component {
           case "login":
             this.onLogin(payload);
             break;
+          case "config":
+            this.setState({ serverConfig: payload })
+            break;
           case "light enabled":
             this.setState({ lightEnabled: payload });
             break;
@@ -189,8 +186,7 @@ export default class App extends Component {
     }
   }
 
-  onInit({ needPassword, maxSpeed }) {
-    this.setState({ serverSetting: { maxSpeed, needPassword } });
+  onInit({ needPassword }) {
     if (needPassword) {
       navigate(`${pubilcUrl}/login`);
       this.setState({ isLogin: false })
@@ -332,6 +328,11 @@ export default class App extends Component {
     this.sendData("tts", { text });
   }
 
+  _saveServerConfig = (config) => {
+    if (!this.state.wsConnected) return;
+    this.sendData("save config", config);
+  }
+
   render() {
     const {
       connect,
@@ -342,6 +343,7 @@ export default class App extends Component {
       changePower,
       piPowerOff,
       login,
+      saveServerConfig,
       state: {
         cameraList,
         setting,
@@ -349,7 +351,7 @@ export default class App extends Component {
         cameraEnabled,
         action,
         isFullscreen,
-        serverSetting,
+        serverConfig,
         lightEnabled,
         delay,
         powerEnabled,
@@ -366,7 +368,6 @@ export default class App extends Component {
           {...{
             wsConnected,
             isFullscreen,
-            serverSetting,
             lightEnabled,
             delay,
             powerEnabled,
@@ -404,10 +405,11 @@ export default class App extends Component {
             path={`${process.env.PUBLIC_URL}/setting`}
             {...setting}
             cameraList={cameraList}
-            serverSetting={serverSetting}
             wsConnected={wsConnected}
             onDisconnect={disconnect}
             onSubmit={changeSetting}
+            saveServerConfig={saveServerConfig}
+            serverConfig={serverConfig}
           />
           <Login path={`${process.env.PUBLIC_URL}/login`} onSubmit={login} />
           <Controller
@@ -421,6 +423,8 @@ export default class App extends Component {
             onTTS={tts}
             ttsPlaying={ttsPlaying}
             setting={setting}
+            saveServerConfig={saveServerConfig}
+            serverConfig={serverConfig}
           >
           </Controller>
         </Router>

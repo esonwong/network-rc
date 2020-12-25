@@ -49,9 +49,9 @@ export default function Slider({
       }}
       ref={silder}
     >
-      <div ref={rail} class="ant-slider-rail"></div>
+      <div ref={rail} className="ant-slider-rail"></div>
       <div
-        tabindex="0"
+        tabIndex="0"
         className="ant-slider-handle"
         style={{
           [`${vertical === false ? "right" : "bottom"}`]: `${(value + 1) * 50}%`,
