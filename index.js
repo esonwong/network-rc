@@ -503,7 +503,7 @@ let cameraList
   cameraList = await Camera.getCameraList()
   cameraList.forEach((item, index) => {
     const { dev, size, name, cardType } = item;
-    item.server = new Camera({ server, devPath: dev, name, cardType, size, cameraIndex: index });
+    item.server = new Camera({ server, devPath: dev, name, cardType, deviceSize:size, cameraIndex: index });
   })
 
   server.listen(8080, "0.0.0.0", async (e) => {

@@ -18,7 +18,7 @@ export default function Camera({
   url,
   index = 0,
   defaultPosition = { x: index * 20, y: 0, z: 1 },
-  defaultSize = { width: 400, height: 300, },
+  defaultSize = { width: 400, height: 300, }
 }) {
 
   const storeName = `camera-${url}`;

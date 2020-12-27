@@ -82,11 +82,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
+### 0.9.20
+- 优化图传功能
 
 ### 0.9.18
 - 优化图传功能
 - 修复摄像头数量检测错误
-- 保存最大电调功率和舵机修正状态
 - 重新设计设置功能
 
 ### 0.9.17
