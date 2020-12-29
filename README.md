@@ -56,6 +56,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 - [ ] 添加远程获取 frps 配置的功能
 - [ ] 一键安装脚本
+- [ ] 修复云台舵机的卡顿
 - [ ] 自定义多个舵机通道
 - [x] 保存车子运行的相关状态
 - [x] 检测摄像头分辨率
@@ -81,6 +82,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+
+### 0.9.21
+- 修复图传功能图像边缘的杂色
+- 修复在移动端的 safari 不能运行控制界面的 bug
+- 重写页面布局，优化 UI 交互体验
 
 ### 0.9.20
 - 优化图传功能
