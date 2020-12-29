@@ -17,25 +17,24 @@ import {
 export default function Camera({
   url,
   index = 0,
-  defaultPosition = { x: index * 20, y: 0, z: 1 },
-  defaultSize = { width: 400, height: 300, }
 }) {
 
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
 
-  const [position, setPosition] = useState(defaultPosition)
-  const [size, setSize] = useState(defaultSize); // 画布大小
+  const [position, setPosition] = useState({ x: index * 20, y: 0, z: 1 }); // 摄像头位置
+  const [size, setViewSize] = useState({ width: 400, height: 300, }); // 画布大小
   const [rotate, setRotate] = useState(0);
   const [videoSize, setVideoSize] = useState({ width: 400, height: 300 }); // 视频分辨率
   const [enabled, setEnabled] = useState(true);
   const [pause, setPause] = useState(false);
   const [editabled, setEditabled] = useState(false);
+  const [cameraName ,setCameraName] = useState('')
 
   const wsavc = useCreation(() => {
-    const { size, position } = store.get(storeName) || { size: defaultSize, position: defaultPosition };
-    setPosition(position);
-    setSize(size);
+    const { size: _size, position: _position } = store.get(storeName) || { size, position };
+    setPosition(_position);
+    setViewSize(_size);
     const w = new WSAvcPlayer({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
@@ -47,16 +46,16 @@ export default function Camera({
     })
 
     w.on("info", ({ cameraName, size }) => {
-      setVideoSize(size);
+      setCameraName(cameraName);
     });
 
-    w.on("initalized", ({ cameraName, size }) => {
+    w.on("resized", size => {
       message.success(`${cameraName} 开启 ${size.width}x${size.height}`)
-      setVideoSize(size);
-    });
+      setVideoSize(size)
+    })
 
     w.on("disconnected", function () {
-      // setEnabled(false);
+      message.info(`${cameraName} 已断开`)
     });
 
     return w
@@ -76,7 +75,7 @@ export default function Camera({
   function setFullScreen() {
     const width = window.innerWidth;
     const height = width / videoSize.width * videoSize.height;
-    setSize({ width, height });
+    setViewSize({ width, height });
     reCameraSize({ width, height });
     setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
   }
@@ -86,7 +85,7 @@ export default function Camera({
     const width = height / videoSize.height * videoSize.width;
     const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 }
     setPosition(position)
-    setSize({ width, height });
+    setViewSize({ width, height });
     reCameraSize({ width, height });
   }
 
@@ -147,7 +146,7 @@ export default function Camera({
           width: ref.offsetWidth,
           height: ref.offsetHeight
         };
-        setSize(size);
+        setViewSize(size);
         reCameraSize(size);
       }}
       style={{ zIndex: position.z }}

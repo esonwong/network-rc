@@ -12,12 +12,17 @@ export default function Audio({
 }) {
 
   const audioEl = useRef(null);
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState(window.MediaSource ? true :false);
   const [src, setSrc] = useState(null);
 
 
   useEffect(() => {
     if (!audioEl.current || !enabled) return;
+    if(!window.MediaSource) {
+      message.warn('移动版的 safari 浏览器暂不支持收听声音 😢')
+      setTimeout(() => { setEnabled(false) }, 1000)
+      return
+    }
     const mediaSource = new MediaSource();
     let ws;
     let buffer = [];
