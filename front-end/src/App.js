@@ -10,7 +10,6 @@ import "./App.css";
 import { Router, navigate } from "@reach/router";
 import Controller from "./components/Controller";
 import CameraContainer from "./components/CameraContainer";
-import Remote from "./components/Remote";
 import Setting from "./components/Setting";
 import {
   PoweroffOutlined,
