@@ -14,6 +14,22 @@ import {
   LockOutlined
 } from "@ant-design/icons"
 
+const defaultStatus = [
+  {
+    size: { width: window.innerWidth, height: window.innerWidth * 0.75 },
+    position: { x: 0, y: 0, z: 1 }
+  },
+  {
+    size: { width: window.innerWidth / 4, height: window.innerWidth * 0.75 / 4 },
+    position: { x: window.innerWidth / 8 * 3, y: 0, z: 2 }
+  },
+  {
+    size: { width: window.innerWidth / 4, height: window.innerWidth * 0.75 / 4 },
+    position: { x: window.innerWidth / 8 * 3, y: 0, z: 2 }
+  },
+]
+
+
 export default function Camera({
   url,
   index = 0,
@@ -22,8 +38,8 @@ export default function Camera({
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
 
-  const [position, setPosition] = useState({ x: index * 20, y: 0, z: 1 }); // 摄像头位置
-  const [size, setViewSize] = useState({ width: 400, height: 300, }); // 画布大小
+  const [position, setPosition] = useState(defaultStatus[index].position); // 摄像头位置
+  const [size, setViewSize] = useState(defaultStatus[index].size); // 画布大小
   const [rotate, setRotate] = useState(0);
   const [videoSize, setVideoSize] = useState({ width: 400, height: 300 }); // 视频分辨率
   const [enabled, setEnabled] = useState(true);
@@ -47,15 +63,16 @@ export default function Camera({
 
     w.on("info", ({ cameraName, size }) => {
       setCameraName(cameraName);
+      w.cameraName = cameraName
     });
 
     w.on("resized", size => {
-      message.success(`${cameraName} 开启 ${size.width}x${size.height}`)
+      message.success(`${w.cameraName} 开启 ${size.width}x${size.height}`)
       setVideoSize(size)
     })
 
     w.on("disconnected", function () {
-      message.info(`${cameraName} 已断开`)
+      message.info(`${w.cameraName} 已断开`)
     });
 
     return w
@@ -99,7 +116,7 @@ export default function Camera({
   }
 
   function reCameraSize(payload) {
-    wsavc && wsavc.ws && wsavc.send("resize", payload)
+    enabled && !pause && wsavc && wsavc.ws && wsavc.send("resize", payload)
   }
 
   useEventListener('visibilitychange', function () {
@@ -152,7 +169,7 @@ export default function Camera({
       style={{ zIndex: position.z }}
     >
       {editabled ?
-        <div className="button-box transition-animation">
+        <div className="button-box transition-animation" title={cameraName}>
           <Button size="small" shape="circle" icon={<BorderOutlined />} onClick={setFullScreen} />
           <Button size="small" shape="circle" icon={<UpSquareOutlined />} onClick={setCenterScreen} />
           <Button size="small" shape="circle" icon={<RotateRightOutlined />} onClick={changeRotate} />

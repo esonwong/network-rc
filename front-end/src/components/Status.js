@@ -40,8 +40,8 @@ export default function Status({
         <Location>
           {({ navigate }) => (
             <Dropdown.Button
-              overlay={<Nav piPowerOff={piPowerOff} />}
-              onClick={() => navigate(`${process.env.PUBLIC_URL}/`)}
+              overlay={<Nav />}
+              onClick={() => navigate(`${process.env.PUBLIC_URL}/controller`)}
               type="primary"
             >
               <HomeOutlined /> 控制

@@ -2,6 +2,8 @@
 
 html, body {
   background-color: #fff;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -9,18 +11,11 @@ html, body {
   height: 100%;
   width: 100%;
   user-select: none;
-  /* background-color: rgb(240, 240, 240); */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
 }
 
 .app-status {
   padding: 0.5em;
-  flex-grow: 0;
-  flex-shrink: 1;
-
+  width: 100%;  
 }
 
 .app-status .ant-form-item {
@@ -29,23 +24,30 @@ html, body {
 
 .app-page {
   overflow-y: auto;
-  flex-grow: 0;
-  flex-shrink: 0;
-  max-height: calc(100% - 38px);
+  height: calc(100% - 38px);
+  padding: 20px;
 }
 
 .controller {
-  position: relative;
-  height: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
+  overflow-x: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.controller video {
-  flex: auto;
+.camera-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
+
 
 .controller-form {
   padding: 0.5em;
@@ -109,32 +111,7 @@ html, body {
   min-height: 3em;
 }
 
-/* .backward-button {
-  position: fixed;
-  bottom: 30vh;
-  right: 5vw;
-}
 
-.forward-button {
-  position: fixed;
-  bottom: 55vh;
-  right: 5vw;
-}
-.left-button {
-  position: fixed;
-  bottom: 40vh;
-  left: 5vw;
-}
-
-.right-button {
-  position: fixed;
-  bottom: 40vh;
-  left: 20vw;
-} */
-
-.controller-router {
-  /* height: 100%; */
-}
 
 .ai {
   height: 80vh;
@@ -201,7 +178,7 @@ html, body {
   z-index: 99;
   top: 50%;
   transform: translate(0, -50%);
-  opacity: 0.3;
+  /* opacity: 0.5; */
 }
 .camera-rnd .edit button{
   margin-bottom: 0.5em;

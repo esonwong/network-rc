@@ -345,7 +345,7 @@ export default class Controller extends Component {
       fixContent,
       fixedController,
       ttsInput,
-      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying, setting },
+      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying, setting, children },
     } = this;
     const {
       gamepadEnabled,
@@ -523,6 +523,7 @@ export default class Controller extends Component {
             ttsInput.current && ttsInput.current.focus();
           }, 200)
         }} />
+        { children }
       </div>
     );
   }

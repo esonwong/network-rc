@@ -7,8 +7,10 @@ import {
   Button,
 } from "antd";
 import "./App.css";
-import { Router, navigate, Match } from "@reach/router";
+import { Router, navigate } from "@reach/router";
 import Controller from "./components/Controller";
+import CameraContainer from "./components/CameraContainer";
+import Remote from "./components/Remote";
 import Setting from "./components/Setting";
 import {
   PoweroffOutlined,
@@ -18,7 +20,7 @@ import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
 import Status from "./components/Status";
-import Camera from "./components/Camera";
+import Home from "./components/Home";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -26,8 +28,6 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.appRef = createRef();
-    this.playerBoxRef = createRef();
-    this.video = createRef();
     this.state = {
       cameraList: [],
       setting: {
@@ -35,7 +35,7 @@ export default class App extends Component {
         wsAddress: window.location.host,
         ...store.get("setting"),
       },
-      serverConfig: { },
+      serverConfig: {},
       wsConnected: false,
       cameraEnabled: false,
       lightEnabled: false,
@@ -103,8 +103,7 @@ export default class App extends Component {
     const { wsAddress } = this.state.setting;
     let pingTime, heartbeatTime;
     const socket = this.socket = new WebSocket(
-      `${
-      window.location.protocol === "https:" ? "wss://" : "ws://"
+      `${window.location.protocol === "https:" ? "wss://" : "ws://"
       }${wsAddress}/control`
     );
     socket.binaryType = "arraybuffer"
@@ -198,7 +197,10 @@ export default class App extends Component {
   onLogin = ({ message: m = "无密码" } = {}) => {
     message.success(m);
     this.setState({ isLogin: true })
-    navigate(`${pubilcUrl}/`, { replace: true });
+    navigate(`${pubilcUrl}/controller`, { replace: true });
+
+
+    // video 标签
     // const time = setInterval(() => {
     //   if (!this.video.current) return;
     //   clearInterval(time);
@@ -382,27 +384,10 @@ export default class App extends Component {
           }}
           disabled={!isLogin}
         />
-        {isLogin &&
-          <Match path="/:item">
-            {({ match }) => 
-              <div
-                className="player-box"
-                ref={this.playerBoxRef}
-                style={{
-                  // opacity: cameraEnabled ? 1 : 0,
-                  display: !match || match.uri.indexOf("/ai") > -1 ? "flex" : "none",
-                }}
-              >
-                {
-                  cameraList.map(({name, size,index}) => <Camera key={index} index={index} url={`${setting.wsAddress}/video${index}`} />)
-                }
-              </div>
-            }
-          </Match>
-        }
         <Router className="app-page">
+          <Home default />
           <Setting
-            path={`${process.env.PUBLIC_URL}/setting`}
+            path={`setting`}
             {...setting}
             cameraList={cameraList}
             wsConnected={wsConnected}
@@ -411,13 +396,12 @@ export default class App extends Component {
             saveServerConfig={saveServerConfig}
             serverConfig={serverConfig}
           />
-          <Login path={`${process.env.PUBLIC_URL}/login`} onSubmit={login} />
+          <Login path={`${pubilcUrl}/login`} onSubmit={login} />
           <Controller
-            path={`${process.env.PUBLIC_URL}/*`}
+            path={`${pubilcUrl}/controller`}
             controller={controller}
             lightEnabled={lightEnabled}
             cameraEnabled={cameraEnabled}
-            videoEl={this.video.current}
             action={action}
             powerEnabled={powerEnabled}
             onTTS={tts}
@@ -426,10 +410,15 @@ export default class App extends Component {
             saveServerConfig={saveServerConfig}
             serverConfig={serverConfig}
           >
+            <CameraContainer
+              path="/"
+              cameraList={cameraList}
+              setting={setting}
+            />
           </Controller>
         </Router>
         <WakeLock preventSleep={wsConnected} />
-      </div>
+      </div >
     );
   }
 }
