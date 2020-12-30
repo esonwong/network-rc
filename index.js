@@ -506,7 +506,7 @@ let cameraList
     item.server = new Camera({ server, devPath: dev, name, cardType, deviceSize:size, cameraIndex: index });
   })
 
-  server.listen(8080, "0.0.0.0", async (e) => {
+  server.listen(8080, async (e) => {
     console.log("server", server.address());
     await TTS(`系统初始化完成!`);
     console.log(`本地访问地址 http${status.enabledHttps ? 's' : ''}://${getIPAdress()}:8080`)
@@ -526,6 +526,7 @@ let cameraList
         require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
       }
     }
+
   });
 
 

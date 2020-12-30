@@ -22,7 +22,6 @@
     "react-dom": "^16.13.1",
     "react-rnd": "^10.1.10",
     "react-scripts": "3.4.1",
-    "react-wakelock-react16": "^0.0.7",
     "store": "^2.0.12",
     "ws-avc-player": "^2.0.2"
   },

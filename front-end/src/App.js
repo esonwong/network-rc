@@ -1,5 +1,4 @@
 import React, { Component, createRef, Fragment } from "react";
-import WakeLock from "react-wakelock-react16";
 import store from "store";
 import {
   message,
@@ -416,7 +415,6 @@ export default class App extends Component {
             />
           </Controller>
         </Router>
-        <WakeLock preventSleep={wsConnected} />
       </div >
     );
   }
