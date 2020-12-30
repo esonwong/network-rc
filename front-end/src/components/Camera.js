@@ -41,7 +41,7 @@ export default function Camera({
   const [position, setPosition] = useState(defaultStatus[index].position); // 摄像头位置
   const [size, setViewSize] = useState(defaultStatus[index].size); // 画布大小
   const [rotate, setRotate] = useState(0);
-  const [videoSize, setVideoSize] = useState({ width: 400, height: 300 }); // 视频分辨率
+  const [videoRate, setVideoRate] = useState(4/3); // 视频宽高比
   const [enabled, setEnabled] = useState(true);
   const [pause, setPause] = useState(false);
   const [editabled, setEditabled] = useState(false);
@@ -61,14 +61,15 @@ export default function Camera({
       reCameraSize(size);
     })
 
-    w.on("info", ({ cameraName, size }) => {
+    w.on("info", ({ cameraName, size: {width, height} }) => {
       setCameraName(cameraName);
       w.cameraName = cameraName
+      setVideoRate(width/height)
     });
 
-    w.on("resized", size => {
-      message.success(`${w.cameraName} 开启 ${size.width}x${size.height}`)
-      setVideoSize(size)
+    w.on("resized", ({width, height}) => {
+      message.success(`${w.cameraName} 开启 ${width}x${height}`)
+      setVideoRate(width/height)
     })
 
     w.on("disconnected", function () {
@@ -91,7 +92,7 @@ export default function Camera({
 
   function setFullScreen() {
     const width = window.innerWidth;
-    const height = width / videoSize.width * videoSize.height;
+    const height = width / videoRate;
     setViewSize({ width, height });
     reCameraSize({ width, height });
     setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
@@ -99,7 +100,7 @@ export default function Camera({
 
   function setCenterScreen() {
     const height = window.innerHeight / 4;
-    const width = height / videoSize.height * videoSize.width;
+    const width = height * videoRate;
     const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 }
     setPosition(position)
     setViewSize({ width, height });
@@ -148,7 +149,7 @@ export default function Camera({
       disableDragging={!editabled}
       enableResizing={{ top: editabled, right: editabled, bottom: editabled, left: editabled, topRight: editabled, bottomRight: editabled, bottomLeft: editabled, topLeft: editabled }}
       className={editabled ? "camera-rnd" : "camera-rnd disabled"}
-      lockAspectRatio={videoSize.width / videoSize.height}
+      lockAspectRatio={videoRate}
       tabIndex={1}
       size={size}
       position={position}
