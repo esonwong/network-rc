@@ -16,8 +16,8 @@ import {
 
 const defaultStatus = [
   {
-    size: { width: window.innerWidth, height: window.innerWidth * 0.75 },
-    position: { x: 0, y: 0, z: 1 }
+    size: { width: window.innerWidth / 2, height: window.innerWidth * 0.75 / 2 },
+    position: { x:  window.innerWidth /4 , y: 0, z: 1 }
   },
   {
     size: { width: window.innerWidth / 4, height: window.innerWidth * 0.75 / 4 },
