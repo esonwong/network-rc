@@ -84,6 +84,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## 更新记录
 
 ### 0.9.21
+- 使用 IPv6
+- 优化舵机控制
+- 优化视频捕获
+- 修复视频边缘
+
+### 0.9.21
 - 修复图传功能图像边缘的杂色
 - 修复在移动端的 safari 不能运行控制界面的 bug
 - 重写页面布局，优化 UI 交互体验
