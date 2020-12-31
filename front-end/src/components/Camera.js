@@ -58,7 +58,7 @@ export default function Camera({
 
     w.on('connected', function () {
       setEnabled(true);
-      reCameraSize(size);
+      reCameraSize(_size);
     })
 
     w.on("info", ({ cameraName, size: {width, height} }) => {
