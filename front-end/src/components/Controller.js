@@ -45,6 +45,7 @@ export default class Controller extends Component {
         steering: []
       },
     };
+    this.steeringStatus = []
   }
 
   componentDidMount() {
@@ -148,11 +149,7 @@ export default class Controller extends Component {
   gamepadaxisLoop = ({ detail: { index, value } }) => {
     const {
       fixedController: { steering },
-      state: {
-        fixedAction: {
-          steering: [s0 = 0, s1 = 0]
-        }
-      }
+      steeringStatus: [s0 = 0, s1 = 0]
     } = this;
     if (index === 2 && Math.abs(value) > 0.1) {
       steering(0, s0 - value / 5);
@@ -276,6 +273,7 @@ export default class Controller extends Component {
       if (v > 2) v = 2;
       if (v < -2) v = -2;
       fixedAction.steering[index] = v;
+      this.steeringStatus = fixedAction.steering
       this.setState({ fixedAction });
       this.props.controller.changeSteering(index, v)
     },
@@ -517,13 +515,13 @@ export default class Controller extends Component {
             />
           </Form.Item>
         </Form>
-        <Keybord controller={fixedController} currentAction={fixedAction} onEnter={() => {
+        <Keybord controller={fixedController} currentAction={fixedAction} steeringStatus={this.steeringStatus}  onEnter={() => {
           this.setState({ ttsInputVisible: true })
           setTimeout(() => {
             ttsInput.current && ttsInput.current.focus();
           }, 200)
         }} />
-        { children }
+        { children}
       </div>
     );
   }

@@ -13,9 +13,7 @@ export default class Keybord extends Component {
     this.timer = setInterval(() => {
       const {
         props: {
-          currentAction: {
-            steering:[s0=0, s1=0]
-          },
+          settingStatus: :[s0=0, s1=0],
           controller: { steering },
         },
       } = this;
