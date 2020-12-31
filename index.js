@@ -526,8 +526,5 @@ let cameraList
         require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
       }
     }
-
   });
-
-
 })()

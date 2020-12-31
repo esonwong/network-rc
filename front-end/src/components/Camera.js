@@ -69,7 +69,6 @@ export default function Camera({
 
     w.on("resized", ({width, height}) => {
       message.success(`${w.cameraName} 开启 ${width}x${height}`)
-      setVideoRate(width/height)
     })
 
     w.on("disconnected", function () {
