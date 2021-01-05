@@ -29,7 +29,6 @@ export default class App extends Component {
     this.state = {
       cameraList: [],
       setting: {
-        speedMax: 30,
         wsAddress: window.location.host,
         ...store.get("setting"),
       },
@@ -66,7 +65,7 @@ export default class App extends Component {
             action,
           },
         } = this;
-        action.speed = (v * speedMax) / 100;
+        action.speed = v;
         this.setState({ action: { ...action } });
         changeSpeed(action.speed);
       },
