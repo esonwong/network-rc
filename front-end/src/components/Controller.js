@@ -495,8 +495,9 @@ export default class Controller extends Component {
                     enterButton="发送"
                     onSearch={onTTS}
                     loading={ttsPlaying}
-                    onKeyDown={({ key }) => {
-                      if (key === "Escape") {
+                    onKeyDown={(e) => {
+                      e.stopPropagation()
+                      if (e.key === "Escape") {
                         this.setState({ ttsInputVisible: false })
                       }
                     }}

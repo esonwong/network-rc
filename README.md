@@ -83,7 +83,12 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
-### 0.9.21
+### 0.9.25
+- 修复打开多个控制端时，图传画面的问题
+- 修复发送文本时触发语音录制
+- 
+
+### 0.9.22
 - 使用 IPv6
 - 优化舵机控制
 - 优化视频捕获

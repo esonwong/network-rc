@@ -61,7 +61,6 @@ export default class App extends Component {
         const {
           changeSpeed,
           state: {
-            setting: { speedMax },
             action,
           },
         } = this;

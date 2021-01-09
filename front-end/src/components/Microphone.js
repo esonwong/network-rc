@@ -91,7 +91,7 @@ export default function Microphone({ url }) {
     <Popover 
       visible={recording}
       placement="leftBottom"
-      content={<img className="select-disabled" src={recording ? gif : ''} alt="录音中" />}
+      content={<img className="select-disabled recording-img" src={recording ? gif : ''} alt="录音中" />}
     >
       <Button
         className="record-button"
