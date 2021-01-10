@@ -17,6 +17,8 @@ import Microphone from './Microphone'
 
 let curentOrientation;
 let isSupportedOrientaion = false;
+
+
 const deviceorientation = (e) => {
   const { alpha, beta, gamma } = e;
   curentOrientation = { alpha, beta, gamma };
@@ -163,12 +165,14 @@ export default class Controller extends Component {
   gamepadAxis = ({ detail: { index, value } }) => {
     const {
       fixedController: { direction, speed },
+      props: {
+        serverConfig: { enabledAxis1Controal }
+      }
     } = this;
-    if (Math.abs(value) < 0.05) return;
     if (index === 0) {
       direction(-value);
     }
-    if (index === 0) {
+    if (index === 1 && enabledAxis1Controal) {
       speed(value);
     }
   };

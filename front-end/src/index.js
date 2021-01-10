@@ -13,18 +13,18 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-axios.get('http://network-rc.esonwong.com:3000/afdian/api/creator/get-top-sponsors?user_id=8335f4eef7cf11ea8b1052540025c377')
-  .then(({ data: { data : { list }} }) => {
-    notification.open({
-      message: '鸣谢',
-      icon: <HeartOutlined style={{ color: '#e62662' }} />,
-      description: (<div>
-        { list.map(({ name, avatar,  }) => <> {name} - 在在爱发电的支持 <br/> </>)}
-        <p> EsonWong - 提供免费的 frp 服务 </p>
-        <a target="_blank" href="https://afdian.net/@esonwong" rel="noopener noreferrer">去爱发电支持 Network RC</a>
-      </div>)
-    });
-  })
+// axios.get('http://network-rc.esonwong.com:3000/afdian/api/creator/get-top-sponsors?user_id=8335f4eef7cf11ea8b1052540025c377')
+//   .then(({ data: { data : { list }} }) => {
+//     notification.open({
+//       message: '鸣谢',
+//       icon: <HeartOutlined style={{ color: '#e62662' }} />,
+//       description: (<div>
+//         { list.map(({ name, avatar,  }) => <> {name} - 在在爱发电的支持 <br/> </>)}
+//         <p> EsonWong - 提供免费的 frp 服务 </p>
+//         <a target="_blank" href="https://afdian.net/@esonwong" rel="noopener noreferrer">去爱发电支持 Network RC</a>
+//       </div>)
+//     });
+//   })
 
 
 // If you want your app to work offline and load faster, you can change

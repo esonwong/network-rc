@@ -307,11 +307,13 @@ wss.on("connection", function (socket) {
       case "pi reboot":
         if (!check(socket)) break;
         piReboot();
+        break;
       case "save config":
         if (!check(socket)) break;
         status.saveConfig(payload)
         socket.sendData('success',{  message: '设置已保存！'})
         broadcast('config', status.config)
+        break;
       default:
         console.log("怎么了？");
     }
