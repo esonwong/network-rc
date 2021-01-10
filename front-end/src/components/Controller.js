@@ -58,11 +58,11 @@ export default class Controller extends Component {
     this.gamePadsLoop();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot){
-    if(prevProps.serverConfig !== this.props.serverConfig) {
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.serverConfig !== this.props.serverConfig) {
       this.fixedController.direction(0)
     }
-  } 
+  }
 
   componentWillUnmount() {
     clearInterval(this.gamePadsTime);
@@ -151,20 +151,25 @@ export default class Controller extends Component {
       fixedController: { steering },
       steeringStatus: [s0 = 0, s1 = 0]
     } = this;
-    if (index === 2 && Math.abs(value) > 0.1) {
+
+    if (index === 2) {
       steering(0, s0 - value / 5);
     }
-    if (index === 3 && Math.abs(value) > 0.1) {
+    if (index === 3) {
       steering(1, s1 + value / 5);
     }
   }
 
   gamepadAxis = ({ detail: { index, value } }) => {
     const {
-      fixedController: { direction },
+      fixedController: { direction, speed },
     } = this;
+    if (Math.abs(value) < 0.05) return;
     if (index === 0) {
       direction(-value);
+    }
+    if (index === 0) {
+      speed(value);
     }
   };
 
@@ -203,6 +208,7 @@ export default class Controller extends Component {
           buttonsStatus[`${gamePadIndex}-${index}`] = status;
         });
         axes.forEach((value, index) => {
+          if (Math.abs(value) < 0.05) return
           if (!axesStatus[`${gamePadIndex}-${index}`]) {
             axesStatus[`${gamePadIndex}-${index}`] = { value };
             return;
@@ -214,6 +220,7 @@ export default class Controller extends Component {
               })
             );
           }
+
           window.dispatchEvent(
             new CustomEvent("gamepadaxisLoop", {
               detail: { index, value },
@@ -516,7 +523,7 @@ export default class Controller extends Component {
             />
           </Form.Item>
         </Form>
-        <Keybord controller={fixedController} currentAction={fixedAction} steeringStatus={this.steeringStatus}  onEnter={() => {
+        <Keybord controller={fixedController} currentAction={fixedAction} steeringStatus={this.steeringStatus} onEnter={() => {
           this.setState({ ttsInputVisible: true })
           setTimeout(() => {
             ttsInput.current && ttsInput.current.focus();
