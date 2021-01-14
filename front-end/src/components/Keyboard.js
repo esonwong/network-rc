@@ -4,38 +4,42 @@ export default class Keybord extends Component {
   constructor(props) {
     super(props);
     this.ref = createRef();
-    
+
   }
 
   holdKeyList = []
 
-  makeTimer(){
+  makeTimer() {
     this.timer = setInterval(() => {
       const {
         props: {
-          steeringStatus: [s0=0, s1=0],
+          steeringStatus: [s0 = 0, s1 = 0],
           controller: { steering },
         },
       } = this;
       this.holdKeyList.forEach(key => {
         switch (key) {
           case 'j':
-            steering(0, s0 + 0.1 );
+            steering(0, s0 + 0.1);
             break;
           case 'l':
-            steering(0, s0 - 0.1 );
+            steering(0, s0 - 0.1);
             break;
           case 'i':
-            steering(1, s1 - 0.1 );
+            steering(1, s1 - 0.1);
             break;
           case 'k':
-            steering(1, s1 + 0.1 );
+            steering(1, s1 + 0.1);
             break;
+          case 'p':
+            steering(1, 0);
+            steering(0, 0);
+            break
           default:
             break;
         }
       })
-    },100)
+    }, 100)
   }
 
   componentDidMount() {
@@ -51,7 +55,7 @@ export default class Keybord extends Component {
   }
 
   handleKeyDown = (event) => {
-    if(event.target.tagName === "INPUT") return;
+    if (event.target.tagName === "INPUT") return;
     const {
       props: {
         controller: { speed, direction },
@@ -62,7 +66,7 @@ export default class Keybord extends Component {
     const keyName = event.key;
     this.holdKeyList.push(keyName)
 
-    if(keyName === "Enter") {
+    if (keyName === "Enter") {
       onEnter && onEnter();
     }
     if (keyName === "w") {
@@ -94,7 +98,7 @@ export default class Keybord extends Component {
   };
 
   handleKeyUp = (event) => {
-    if(event.target.tagName === "INPUT") return;
+    if (event.target.tagName === "INPUT") return;
     const {
       props: {
         controller: { speed, direction },
