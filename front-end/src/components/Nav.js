@@ -55,7 +55,7 @@ export default function Nav(props) {
       </Menu.Item>
       <Menu.Item>
         <a
-          href="https://afdian.net/@esonwong"
+          href="https://blog.esonwong.com/donate/"
           target="_blank"
           rel="noopener noreferrer"
         >

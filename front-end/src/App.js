@@ -183,7 +183,9 @@ export default class App extends Component {
 
   onInit({ needPassword }) {
     if (needPassword) {
-      navigate(`${pubilcUrl}/login`);
+      if (window.location.pathname !== '/login') {
+        navigate(`${pubilcUrl}/login`);
+      }
       this.setState({ isLogin: false })
     } else {
       this.onLogin();
@@ -244,11 +246,12 @@ export default class App extends Component {
     this.socket.close();
   };
 
-  login = ({ password }) => {
+  login = ({ password, sharedCode }) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
     this.socket.sendData("login", {
-      token: md5(`${password}eson`),
+      token: password ? md5(`${password}eson`) : undefined,
+      sharedCode,
     });
   };
 
@@ -382,36 +385,44 @@ export default class App extends Component {
         />
         <Router className="app-page">
           <Home default />
-          <Setting
-            path={`setting`}
-            {...setting}
-            cameraList={cameraList}
-            wsConnected={wsConnected}
-            onDisconnect={disconnect}
-            onSubmit={changeSetting}
-            saveServerConfig={saveServerConfig}
-            serverConfig={serverConfig}
-          />
-          <Login path={`${pubilcUrl}/login`} onSubmit={login} />
-          <Controller
-            path={`${pubilcUrl}/controller`}
-            controller={controller}
-            lightEnabled={lightEnabled}
-            cameraEnabled={cameraEnabled}
-            action={action}
-            powerEnabled={powerEnabled}
-            onTTS={tts}
-            ttsPlaying={ttsPlaying}
-            setting={setting}
-            saveServerConfig={saveServerConfig}
-            serverConfig={serverConfig}
-          >
-            <CameraContainer
-              path="/"
-              cameraList={cameraList}
-              setting={setting}
-            />
-          </Controller>
+          { wsConnected && <Login path={`${pubilcUrl}/login`} onSubmit={login} /> }
+          {
+            isLogin ?
+              <>
+                <Setting
+                  path={`setting`}
+                  {...setting}
+                  cameraList={cameraList}
+                  wsConnected={wsConnected}
+                  onDisconnect={disconnect}
+                  onSubmit={changeSetting}
+                  saveServerConfig={saveServerConfig}
+                  serverConfig={serverConfig}
+                />
+                <Controller
+                  path={`${pubilcUrl}/controller`}
+                  controller={controller}
+                  lightEnabled={lightEnabled}
+                  cameraEnabled={cameraEnabled}
+                  action={action}
+                  powerEnabled={powerEnabled}
+                  onTTS={tts}
+                  ttsPlaying={ttsPlaying}
+                  setting={setting}
+                  saveServerConfig={saveServerConfig}
+                  serverConfig={serverConfig}
+                >
+                  <CameraContainer
+                    path="/"
+                    cameraList={cameraList}
+                    setting={setting}
+                  />
+                </Controller>
+              </>
+              :
+              undefined
+          }
+
         </Router>
       </div >
     );

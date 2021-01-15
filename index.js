@@ -320,16 +320,36 @@ wss.on("connection", function (socket) {
   });
 });
 
-const login = (socket, { uid, token }) => {
-  console.log("login", token);
+const login = (socket, { uid, token, sharedCode }) => {
+  console.log("login token", token);
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
   }
-  if (md5(password + "eson") == token) {
-    socket.isLogin = true;
-    socket.sendData("login", { status: 0, message: "OMG 你登录啦！" });
-  } else {
-    socket.sendData("error", { status: 1, message: "哎呦喂，密码错了啊！" });
+
+  if (token) {
+    if (md5(password + "eson") == token) {
+      socket.isLogin = true;
+      const userType = 'admin'
+      socket.userType = userType
+      socket.sendData("login", { status: 0, message: "OMG 你登录啦！", userType });
+      return;
+    } else {
+      socket.sendData("error", { status: 1, message: "哎呦喂，密码错了啊！" });
+      return;
+    }
+  }
+  if (status.config.sharedCode) {
+    console.log('login shared code', sharedCode)
+    if (status.config.sharedCode === sharedCode) {
+      socket.isLogin = true;
+      const userType = 'guest'
+      socket.userType = userType
+      socket.sendData("login", { status: 0, message: "🏎️ 分享链接登陆成功 ！", userType });
+      return;
+    } else {
+      socket.sendData("error", { status: 1, message: "哎呦喂，分享链接已失效！" });
+      return;
+    }
   }
 };
 
@@ -379,17 +399,6 @@ const check = (socket) => {
     return false;
   }
 };
-
-// const openCamera = (socket, v) => {
-//   console.log("open camera", v);
-//   if (!check(socket)) return;
-//   if (v.enabled) {
-//     cameraMode = v.cameraMode;
-//     startWebsocketMedia();
-//   } else {
-//     stopWebsocketMedia();
-//   }
-// };
 
 const speedRate = (socket, v) => {
   const { maxSpeed } = status.config
@@ -505,7 +514,7 @@ let cameraList
   cameraList = await Camera.getCameraList()
   cameraList.forEach((item, index) => {
     const { dev, size, name, cardType } = item;
-    item.server = new Camera({ server, devPath: dev, name, cardType, deviceSize:size, cameraIndex: index });
+    item.server = new Camera({ server, devPath: dev, name, cardType, deviceSize: size, cameraIndex: index });
   })
 
   server.listen(8080, async (e) => {

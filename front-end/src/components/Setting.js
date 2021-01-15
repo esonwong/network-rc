@@ -1,5 +1,6 @@
 import React from "react";
 import { Slider, Form, Button, Input, Tabs, Switch } from "antd";
+import Shared from "./Shared"
 import { layout, tailLayout } from "../unit";
 import store from "store";
 const { TabPane } = Tabs;
@@ -75,6 +76,9 @@ export default function Setting({
           </Button>
           </Form.Item>
         </Form>
+      </TabPane>
+      <TabPane tab="分享设置" key="shared">
+        <Shared wsConnected={wsConnected} saveServerConfig={saveServerConfig} sharedCode={serverConfig.sharedCode} />
       </TabPane>
     </Tabs>
 
