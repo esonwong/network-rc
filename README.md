@@ -107,6 +107,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
+### 0.9.28
+- 修复手柄错误
+
 ### 0.9.27
 - 添加分享控制功能
 - 更新捐赠连接

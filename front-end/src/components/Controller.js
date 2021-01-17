@@ -212,7 +212,9 @@ export default class Controller extends Component {
           buttonsStatus[`${gamePadIndex}-${index}`] = status;
         });
         axes.forEach((value, index) => {
-          if (Math.abs(value) < 0.05) return
+          if (Math.abs(value) < 0.05) {
+            value = 0
+          }
           if (!axesStatus[`${gamePadIndex}-${index}`]) {
             axesStatus[`${gamePadIndex}-${index}`] = { value };
             return;
