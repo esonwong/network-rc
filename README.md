@@ -58,22 +58,26 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [ ] 一键安装脚本
 - [ ] 自定义通道
   - [ ] 通道设计
-    - [ ] 属性
-      -  pin BCM code (1~27)
-      - 信号类型 (pwm|高低电平)
+    - [x] 属性
+      -  pin BCM code `1~27`
+      - 信号类型 type `pwm|高低电平`
+      - 控制方法 method `direct｜step`
+      - 步进速度 stepSpeed 默认 `0.01` 每 50ms 
       - 交互控件类型
-        - [ ] 滑杆
-        - [ ] 开关
-        - [ ] 摇杆
+        - [ ] 滑杆 slider
+        - [ ] 开关 switch
+        - [ ] 摇杆 joystick
           - id
           - axis (x|y)
       - [ ] 键盘
-        - 正向按键/切换按键
-        - 反向按键
-        - 归位按键
+        - 正向按键 keyboardPositive
+        - 反向按键 keyboardNegative
+        - 归位按键 keyboardReset
       - [ ] 手柄
-        - 映射位置
-        - 控制类型  （default|switch）
+        - 正向 gamepadPositive
+        - 反向 gamepadNegative
+        - 归位 gamePadReset
+        - 控制类型 `default|switch`
       - 正向值 1
       - 中位值 0
       - 负向值 -1
