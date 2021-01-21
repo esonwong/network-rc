@@ -111,6 +111,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
+### 0.9.29
+- 添加视频捕获格式和桢率选择功能
+
 ### 0.9.28
 - 修复手柄错误
 
@@ -238,6 +241,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ### 微信群
 
 交流请移步微信群，入群方法添加微信 `EsonWong_` 备注 `Network RC`
+
+## 捐赠
+![微信赞赏吗](https://blog.esonwong.com/asset/wechat-donate.jpg)
 
 ## 链接
 

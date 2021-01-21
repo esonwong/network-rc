@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from 'react'
 import WSAvcPlayer from "ws-avc-player";
 import { Rnd } from 'react-rnd'
 import { useState } from 'react';
-import { Button, Switch, message } from 'antd';
+import { Button, Switch, message, Select } from 'antd';
 import { useCreation, useEventListener } from '@umijs/hooks';
 import store from "store";
-
 import {
   BorderOutlined,
   UpSquareOutlined,
@@ -13,6 +12,9 @@ import {
   FormOutlined,
   LockOutlined
 } from "@ant-design/icons"
+
+
+const { Option } = Select
 
 const defaultStatus = [
   {
@@ -46,6 +48,9 @@ export default function Camera({
   const [pause, setPause] = useState(false);
   const [editabled, setEditabled] = useState(false);
   const [cameraName ,setCameraName] = useState('')
+  const [formatList, setFormatList] = useState([])
+  const [inputFormatIndex, setInputFormatIndex] = useState(undefined)
+  const [fps, setFps] = useState(30)
 
   const wsavc = useCreation(() => {
     const { size: _size, position: _position } = store.get(storeName) || { size, position };
@@ -58,26 +63,36 @@ export default function Camera({
 
     w.on('connected', function () {
       setEnabled(true);
-      reCameraSize(_size);
+      open({inputFormatIndex, fps,..._size});
     })
 
-    w.on("info", ({ cameraName, size: {width, height} }) => {
+    w.on("info", ({ cameraName, size: {width, height}, formatList }) => {
       setCameraName(cameraName);
       w.cameraName = cameraName
       setVideoRate(width/height)
+      setFormatList(formatList)
     });
 
-    w.on("resized", ({width, height}) => {
+    w.on("open", ({ inputFormatIndex, fps }) => {
+      setInputFormatIndex(inputFormatIndex)
+      setFps(fps)
+    })
+
+    w.on("resized", ({ width, height }) => {
       message.success(`${w.cameraName} 开启 ${width}x${height}`)
     })
 
     w.on("disconnected", function () {
-      message.info(`${w.cameraName} 已断开`)
+      // message.info(`${w.cameraName} 已断开`)
     });
+
 
     return w
   });
 
+    function open(payload) {
+      enabled && !pause && wsavc && wsavc.ws && wsavc.send("open-request", { inputFormatIndex, fps, ...payload  })
+    }
 
 
   function changeRotate() {
@@ -93,7 +108,6 @@ export default function Camera({
     const width = window.innerWidth;
     const height = width / videoRate;
     setViewSize({ width, height });
-    reCameraSize({ width, height });
     setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
   }
 
@@ -103,7 +117,6 @@ export default function Camera({
     const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 }
     setPosition(position)
     setViewSize({ width, height });
-    reCameraSize({ width, height });
   }
 
   function start() {
@@ -115,9 +128,6 @@ export default function Camera({
     wsavc.AvcPlayer.canvas.remove();
   }
 
-  function reCameraSize(payload) {
-    enabled && !pause && wsavc && wsavc.ws && wsavc.send("resize", payload)
-  }
 
   useEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
@@ -127,6 +137,10 @@ export default function Camera({
       setPause(true)
     }
   }, { dom: document })
+
+  useEffect(() => {
+    open({ inputFormatIndex, fps, size})
+  }, [fps, inputFormatIndex, size])
 
   useEffect(() => {
     const box = boxEl.current;
@@ -164,7 +178,6 @@ export default function Camera({
           height: ref.offsetHeight
         };
         setViewSize(size);
-        reCameraSize(size);
       }}
       style={{ zIndex: position.z }}
     >
@@ -177,6 +190,14 @@ export default function Camera({
             setEditabled(false)
             store.set(storeName, { size, position });
           }} />
+          <Select defaultValue={0} onChange={setInputFormatIndex}>
+            {formatList.map(({ format, size }, index) => <Option value={index}>{`${size} ${format}`}</Option>)}
+          </Select>
+          <Select defaultValue={30} onChange={setFps}>
+            <Option value={15}>15</Option>
+            <Option value={30}>30</Option>
+            <Option value={60}>60</Option>
+          </Select>
         </div>
         : <div className="edit">
           <Button size="small" shape="circle" icon={<FormOutlined />} onClick={() => { setEditabled(true) }} />
