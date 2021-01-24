@@ -109,6 +109,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - 支持播放声音文件（network-rc/assets/audio`[1-4]`.mp3）
 - 优化交互界面
 - 保存视频捕获设置
+- 修复重启树莓派保存的设置失效
 
 ### 0.9.29
 - 添加视频捕获格式和桢率选择功能
