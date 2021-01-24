@@ -1,13 +1,13 @@
 const path = require("path");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
-if (!existsSync('/tmp')) {
-  mkdirSync('/tmp')
+if (!existsSync('/var')) {
+  mkdirSync('/var')
 }
-if (!existsSync('/tmp/tts')) {
-  mkdirSync('/tmp/tts')
+if (!existsSync('/var/tts')) {
+  mkdirSync('/var/tts')
 }
-if (!existsSync('/tmp/audio')) {
-  mkdirSync('/tmp/audio')
+if (!existsSync('/var/audio')) {
+  mkdirSync('/var/audio')
 }
 
 
