@@ -101,11 +101,13 @@ export default class Controller extends Component {
       lightEnabled,
       cameraEnabled,
       powerEnabled,
+      playAudio,
+      serverConfig,
       controller: { changeLight, changeCamera, changePower },
     } = this.props;
     let { forwardPower, zeroOrientation } = this.state;
     const {
-      fixedController: { speed, direction, steering },
+      fixedController: { speed, steering },
     } = this;
     if (index === 0 && value === 1) {
       changePower(!powerEnabled);
@@ -113,17 +115,11 @@ export default class Controller extends Component {
     if (index === 1 && value === 1) {
       changeLight(!lightEnabled);
     }
-    if (index === 13 || index === 6) {
+    if (index === 6) {
       speed(value * -1);
     }
-    if (index === 12 || index === 7) {
+    if (index === 7) {
       speed(value);
-    }
-    if (index === 14) {
-      direction(value * -1);
-    }
-    if (index === 15) {
-      direction(value);
     }
     if (index === 10 && value === 1) {
       message[!zeroOrientation ? "success" : "info"](zeroOrientation ? "关闭重力感应控制!" : "重力感应已校准!");
@@ -147,6 +143,19 @@ export default class Controller extends Component {
       forwardPower += 5;
       if (forwardPower > 100) forwardPower = 100;
       this.setState({ forwardPower });
+    }
+
+    if (index === 12 ) {
+      playAudio(serverConfig.audio1)
+    }
+    if (index === 13 ) {
+      playAudio(serverConfig.audio2)
+    }
+    if (index === 14) {
+      playAudio(serverConfig.audio3)
+    }
+    if (index === 15) {
+      playAudio(serverConfig.audio4)
     }
   };
 
@@ -488,7 +497,7 @@ export default class Controller extends Component {
                   云台：ikjl,p <br />
                   发送文字转语音： 回车 <br />
                   发送语音: 空格 <br />
-                  播放声音：1 <br />
+                  播放声音：1234 <br />
                 </p>
               }
             >
