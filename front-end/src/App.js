@@ -329,6 +329,11 @@ export default class App extends Component {
     this.sendData("tts", { text });
   }
 
+  playAudio = (path) => {
+    if (!this.state.wsConnected) return;
+    this.sendData("play audio", { path });
+  }
+
   _saveServerConfig = (config) => {
     if (!this.state.wsConnected) return;
     this.sendData("save config", config);
@@ -360,7 +365,8 @@ export default class App extends Component {
         isLogin,
         ttsPlaying
       },
-      tts
+      tts,
+      playAudio
     } = this;
 
     return (
@@ -407,6 +413,7 @@ export default class App extends Component {
                   action={action}
                   powerEnabled={powerEnabled}
                   onTTS={tts}
+                  playAudio={playAudio}
                   ttsPlaying={ttsPlaying}
                   setting={setting}
                   saveServerConfig={saveServerConfig}

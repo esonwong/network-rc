@@ -57,7 +57,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 - [ ] 添加远程获取 frps 配置的功能
 - [ ] 一键安装脚本
 - [ ] 自定义通道
-  - [ ] 通道设计
+  - [x] 通道设计
     - [x] 属性
       -  pin BCM code `1~27`
       - 信号类型 type `pwm|高低电平`
@@ -69,15 +69,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
         - [ ] 摇杆 joystick
           - id
           - axis (x|y)
-      - [ ] 键盘
-        - 正向按键 keyboardPositive
-        - 反向按键 keyboardNegative
-        - 归位按键 keyboardReset
+      - [X] 键盘
       - [ ] 手柄
-        - 正向 gamepadPositive
-        - 反向 gamepadNegative
-        - 归位 gamePadReset
-        - 控制类型 `default|switch`
+        - [ ]控制类型 `default|switch`
       - 正向值 1
       - 中位值 0
       - 负向值 -1
@@ -110,6 +104,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [x] 检测摄像头数量
 
 ## 更新记录
+
+### 0.9.30
+- 支持播放声音文件（network-rc/assets/audio`[1-4]`.mp3）
+- 优化交互界面
+- 保存视频捕获设置
 
 ### 0.9.29
 - 添加视频捕获格式和桢率选择功能

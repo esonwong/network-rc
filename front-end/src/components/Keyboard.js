@@ -60,7 +60,9 @@ export default class Keybord extends Component {
       props: {
         controller: { speed, direction },
         onControl,
-        onEnter
+        onEnter,
+        serverConfig,
+        playAudio
       },
     } = this;
     const keyName = event.key;
@@ -82,18 +84,23 @@ export default class Keybord extends Component {
       direction(-1);
     }
 
-    // if (keyName === "j") {
-    //   steering(0, 1);
-    // }
-    // if (keyName === "l") {
-    //   steering(0, -1);
-    // }
-    // if (keyName === "i") {
-    //   steering(1, -1);
-    // }
-    // if (keyName === "k") {
-    //   steering(1, 1);
-    // }
+    if (keyName === "1") {
+      playAudio(serverConfig.audio1)
+    }
+
+    if (keyName === "2") {
+      playAudio(serverConfig.audio2)
+    }
+
+    if (keyName === "3") {
+      playAudio(serverConfig.audio3)
+    }
+
+    if (keyName === "4") {
+      playAudio(serverConfig.audio4)
+    }
+
+   
     onControl && onControl();
   };
 

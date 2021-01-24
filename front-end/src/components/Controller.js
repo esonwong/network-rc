@@ -3,7 +3,8 @@ import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import {
   AimOutlined,
-  NotificationOutlined
+  SendOutlined ,
+  SoundOutlined
 } from "@ant-design/icons";
 import Keybord from "./Keyboard";
 import Icon from "./Icon";
@@ -35,6 +36,7 @@ export default class Controller extends Component {
     super(props);
     this.ttsInput = createRef();
     this.state = {
+      text: "",
       zeroOrientation: undefined,
       backwardPower: 50,
       forwardPower: 50,
@@ -356,7 +358,7 @@ export default class Controller extends Component {
       fixContent,
       fixedController,
       ttsInput,
-      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying, setting, children },
+      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying, setting, children, playAudio, serverConfig },
     } = this;
     const {
       gamepadEnabled,
@@ -365,7 +367,8 @@ export default class Controller extends Component {
       isShowButton,
       zeroOrientation,
       fixedAction,
-      ttsInputVisible
+      ttsInputVisible,
+      text
     } = this.state;
     const { speed, direction } = fixedController;
     return (
@@ -480,7 +483,13 @@ export default class Controller extends Component {
             <Popover
               placement="topLeft"
               content={
-                <p>移动：wsad <br /> 云台：ikjl,p</p>
+                <p>
+                  移动：wsad <br />
+                  云台：ikjl,p <br />
+                  发送文字转语音： 回车 <br />
+                  发送语音: 空格 <br />
+                  播放声音：1 <br />
+                </p>
               }
             >
               <Button shape="round">键盘</Button>
@@ -505,8 +514,10 @@ export default class Controller extends Component {
                     name="tts"
                     style={{ width: "60vw" }}
                     placeholder="发送语音"
-                    enterButton="发送"
-                    onSearch={onTTS}
+                    enterButton="发送" 
+                    value={text}
+                    onChange={e => this.setState({ text: e.target.value })}
+                    onSearch={text => {  onTTS(text); this.setState({ text: "" })  }}
                     loading={ttsPlaying}
                     onKeyDown={(e) => {
                       e.stopPropagation()
@@ -519,22 +530,37 @@ export default class Controller extends Component {
               }
             >
               <Button shape="round">
-                <NotificationOutlined />
+                <SendOutlined />
               </Button>
             </Popover>
           </Form.Item>
+
+          <Form.Item>
+            <Button shape="round" onClick={() => playAudio(serverConfig.audio1)}>
+              <SoundOutlined />
+            </Button>
+          </Form.Item>
+
+
           <Form.Item>
             <Microphone
               url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
             />
           </Form.Item>
+
         </Form>
-        <Keybord controller={fixedController} currentAction={fixedAction} steeringStatus={this.steeringStatus} onEnter={() => {
-          this.setState({ ttsInputVisible: true })
-          setTimeout(() => {
-            ttsInput.current && ttsInput.current.focus();
-          }, 200)
-        }} />
+        <Keybord
+          controller={fixedController} 
+          currentAction={fixedAction} steeringStatus={this.steeringStatus} 
+          playAudio={playAudio}
+          serverConfig={serverConfig}
+          onEnter={() => {
+            this.setState({ ttsInputVisible: true })
+            setTimeout(() => {
+              ttsInput.current && ttsInput.current.focus();
+            }, 200)
+          }} 
+        />
         { children}
       </div>
     );

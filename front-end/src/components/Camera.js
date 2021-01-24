@@ -50,7 +50,7 @@ export default function Camera({
   const [cameraName ,setCameraName] = useState('')
   const [formatList, setFormatList] = useState([])
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined)
-  const [fps, setFps] = useState(30)
+  const [fps, setFps] = useState()
 
   const wsavc = useCreation(() => {
     const { size: _size, position: _position, rotate } = store.get(storeName) || { size, position, rotate : 0};
@@ -187,14 +187,14 @@ export default function Camera({
           <Button size="small" shape="circle" icon={<BorderOutlined />} onClick={setFullScreen} />
           <Button size="small" shape="circle" icon={<UpSquareOutlined />} onClick={setCenterScreen} />
           <Button size="small" shape="circle" icon={<RotateRightOutlined />} onClick={changeRotate} />
-          <Button size="small" shape="circle" icon={<LockOutlined />} onClick={() => {
+          <Button type="primary" size="small" icon={<LockOutlined />} onClick={() => {
             setEditabled(false)
             store.set(storeName, { size, position, rotate });
           }} />
-          <Select defaultValue={0} onChange={setInputFormatIndex}>
+          <Select defaultValue={inputFormatIndex} onChange={setInputFormatIndex} size="small">
             {formatList.map(({ format, size }, index) => <Option value={index}>{`${size} ${format}`}</Option>)}
           </Select>
-          <Select defaultValue={30} onChange={setFps}>
+          <Select defaultValue={fps} onChange={setFps} size="small">
             <Option value={15}>15 fps</Option>
             <Option value={30}>30 fps</Option>
             <Option value={60}>60 fps</Option>

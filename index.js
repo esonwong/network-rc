@@ -1,4 +1,17 @@
 const path = require("path");
+const { readFileSync, existsSync, mkdirSync } = require("fs");
+if (!existsSync('/tmp')) {
+  mkdirSync('/tmp')
+}
+if (!existsSync('/tmp/tts')) {
+  mkdirSync('/tmp/tts')
+}
+if (!existsSync('/tmp/audio')) {
+  mkdirSync('/tmp/audio')
+}
+
+
+
 const express = require("express");
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const app = express();
@@ -9,9 +22,9 @@ const User = require("./lib/user")
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
 const Audio = require("./lib/Audio");
+const audioPlayer = require('./lib/AudioPlayer')
 const status = require("./lib/status")
 const Microphone = require("./lib/Microphone");
-const { readFileSync } = require("fs");
 const { sleep } = require("./lib/unit")
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
@@ -72,6 +85,9 @@ const argv = require("yargs")
   })
   .env("NETWORK_RC")
   .help().argv;
+
+
+
 
 console.info("版本", package.version);
 
@@ -314,6 +330,10 @@ wss.on("connection", function (socket) {
         socket.sendData('success',{  message: '设置已保存！'})
         broadcast('config', status.config)
         break;
+      case "play audio":
+        if (!check(socket)) break;
+        audioPlayer.push({ type: 'mp3 file path', data: payload})
+        break;
       default:
         console.log("怎么了？");
     }
@@ -464,9 +484,11 @@ const speak = async (socket, payload) => {
   if (!check(socket)) return;
   socket.sendData("tts playing", true)
   if (socket.webrtc) socket.webrtc.closeAudioPlayer();
-  await TTS(payload.text, payload);
+  if (payload.text) {
+    await TTS(payload.text, payload);
+  }
   if (socket.webrtc) socket.webrtc.openAudioPlayer();
-  await sleep(3000);
+  await sleep(1000);
   socket.sendData("tts playing", false);
 }
 
