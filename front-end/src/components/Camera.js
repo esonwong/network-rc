@@ -53,9 +53,10 @@ export default function Camera({
   const [fps, setFps] = useState(30)
 
   const wsavc = useCreation(() => {
-    const { size: _size, position: _position } = store.get(storeName) || { size, position };
+    const { size: _size, position: _position, rotate } = store.get(storeName) || { size, position, rotate : 0};
     setPosition(_position);
     setViewSize(_size);
+    setRotate(rotate)
     const w = new WSAvcPlayer({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
@@ -188,15 +189,15 @@ export default function Camera({
           <Button size="small" shape="circle" icon={<RotateRightOutlined />} onClick={changeRotate} />
           <Button size="small" shape="circle" icon={<LockOutlined />} onClick={() => {
             setEditabled(false)
-            store.set(storeName, { size, position });
+            store.set(storeName, { size, position, rotate });
           }} />
           <Select defaultValue={0} onChange={setInputFormatIndex}>
             {formatList.map(({ format, size }, index) => <Option value={index}>{`${size} ${format}`}</Option>)}
           </Select>
           <Select defaultValue={30} onChange={setFps}>
-            <Option value={15}>15</Option>
-            <Option value={30}>30</Option>
-            <Option value={60}>60</Option>
+            <Option value={15}>15 fps</Option>
+            <Option value={30}>30 fps</Option>
+            <Option value={60}>60 fps</Option>
           </Select>
         </div>
         : <div className="edit">
