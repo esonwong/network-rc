@@ -1,31 +1,29 @@
 const path = require("path");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
-if (!existsSync('/var')) {
-  mkdirSync('/var')
+if (!existsSync("/var")) {
+  mkdirSync("/var");
 }
-if (!existsSync('/var/tts')) {
-  mkdirSync('/var/tts')
+if (!existsSync("/var/tts")) {
+  mkdirSync("/var/tts");
 }
-if (!existsSync('/var/audio')) {
-  mkdirSync('/var/audio')
+if (!existsSync("/var/audio")) {
+  mkdirSync("/var/audio");
 }
-
-
 
 const express = require("express");
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const app = express();
 const package = require("./package.json");
 const md5 = require("md5");
-const { spawn } = require('child_process');
-const User = require("./lib/user")
+const { spawn } = require("child_process");
+const User = require("./lib/user");
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
 const Audio = require("./lib/Audio");
-const audioPlayer = require('./lib/AudioPlayer')
-const status = require("./lib/status")
+const audioPlayer = require("./lib/AudioPlayer");
+const status = require("./lib/status");
 const Microphone = require("./lib/Microphone");
-const { sleep } = require("./lib/unit")
+const { sleep } = require("./lib/unit");
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9058", "开启网络穿透")
@@ -50,12 +48,12 @@ const argv = require("yargs")
       alias: "tts",
       describe: "是否开启语音播报",
       type: "boolean",
-      default: true
+      default: true,
     },
     tsl: {
-      describe: '开启 HTTPS',
+      describe: "开启 HTTPS",
       type: "boolean",
-      default: false
+      default: false,
     },
     o: {
       alias: "frpPort",
@@ -86,9 +84,6 @@ const argv = require("yargs")
   .env("NETWORK_RC")
   .help().argv;
 
-
-
-
 console.info("版本", package.version);
 
 const {
@@ -100,19 +95,15 @@ const {
   frpServerUser,
   userList,
   tts,
-  tsl
+  tsl,
 } = argv;
 let { password } = argv;
 let currentUser;
 
-status.argv = argv
-status.enabledHttps = tsl
+status.argv = argv;
+status.enabledHttps = tsl;
 
 process.env.TTS = tts;
-
-
-
-
 
 const {
   changeLight,
@@ -120,47 +111,55 @@ const {
   changeSpeed,
   closeController,
   changePower,
-  changeSteering
+  changeSteering,
 } = require("./lib/controller.js");
 
+const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
-
-const {createServer} = require(`http${status.enabledHttps ? 's':''}`);
-
-const server = createServer({
-  secureProtocol: status.enabledHttps ? secureProtocol : undefined,
-  key: status.enabledHttps ? readFileSync(path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`)) : undefined,
-  cert: status.enabledHttps ? readFileSync(path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`)) : undefined
-}, app)
+const server = createServer(
+  {
+    secureProtocol: status.enabledHttps ? secureProtocol : undefined,
+    key: status.enabledHttps
+      ? readFileSync(
+          path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`)
+        )
+      : undefined,
+    cert: status.enabledHttps
+      ? readFileSync(
+          path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`)
+        )
+      : undefined,
+  },
+  app
+);
 
 app.use(express.static(path.resolve(__dirname, "./front-end/build")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname + "/front-end/build/index.html"));
 });
 
+let powerEnabled = false,
+  lightEnabled = false;
 
-let powerEnabled = false, lightEnabled = false;
+const wss = new WebSocketServer(
+  {
+    noServer: true,
+    path: "/control",
+  },
+  () => {
+    console.log("控制 websocket 服务已启动");
+  }
+);
 
-
-
-const wss = new WebSocketServer({ 
-  noServer: true, 
-  path: "/control",
-}, () => {
-  console.log("控制 websocket 服务已启动");
-});
-
-server.on('upgrade', (request, socket, head) => {
+server.on("upgrade", (request, socket, head) => {
   if (request.url === "/control")
     wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
+      wss.emit("connection", ws, request);
     });
 });
 
 new Microphone({ server });
 new Audio({ server });
-
-
 
 const clients = new Set();
 function sendData(action, payload) {
@@ -191,19 +190,21 @@ if (userList) {
   new User({
     currentUser,
     onChange(user) {
-      broadcast("info", { message: `${currentUser ? currentUser.name : ""} 时间到啦，轮到 ${user.name} 啦。` });
-      currentUser = user
+      broadcast("info", {
+        message: `${currentUser ? currentUser.name : ""} 时间到啦，轮到 ${
+          user.name
+        } 啦。`,
+      });
+      currentUser = user;
       password = user.password;
       wss.clients.forEach((ws) => {
         ws.close(0, "时间到了");
       });
-    }
+    },
   });
 }
 
-
-
-wss.on("connection", function (socket) {
+wss.on("connection", async function (socket) {
   console.log("客户端连接！");
   TTS("已建立神经连接，同步率百分之九十");
   console.log("已经设置密码", password ? "是" : "否");
@@ -215,24 +216,34 @@ wss.on("connection", function (socket) {
     needPassword: password ? true : false,
   });
 
+  const volume = await audioPlayer.getVolume();
+  const sendVolume = function () {
+    socket.sendData("volume", volume);
+  };
 
-  socket.sendData("camera list", cameraList.map(({ name, size }, index ) => ({ name, size, index})));
+  sendVolume();
+  audioPlayer.on("volume", sendVolume);
 
-  socket.sendData("light enabled", lightEnabled)
+  socket.sendData(
+    "camera list",
+    cameraList.map(({ name, size }, index) => ({ name, size, index }))
+  );
 
-  socket.sendData("power enabled", powerEnabled)
+  socket.sendData("light enabled", lightEnabled);
 
-  socket.sendData("config", status.config)
+  socket.sendData("power enabled", powerEnabled);
 
+  socket.sendData("config", status.config);
 
   socket.sendData("info", { message: `Network RC v${package.version}` });
 
   socket.on("close", () => {
+    audioPlayer.removeListener("volume", sendVolume);
     disconnect(socket);
   });
 
-  socket.on('error', (err) => {
-    console.log('Received error: ', err);
+  socket.on("error", (err) => {
+    console.log("Received error: ", err);
   });
 
   socket.on("message", (m) => {
@@ -285,7 +296,7 @@ wss.on("connection", function (socket) {
     //   return;
     // }
 
-    makeHeartbeatTimer(socket)
+    makeHeartbeatTimer(socket);
 
     switch (action) {
       case "heartbeat":
@@ -304,7 +315,7 @@ wss.on("connection", function (socket) {
         openPower(socket, payload);
         break;
       case "speed rate":
-        if(status.autoLocking === true) return
+        if (status.autoLocking === true) return;
         speedRate(socket, payload);
         break;
       case "direction rate":
@@ -326,13 +337,23 @@ wss.on("connection", function (socket) {
         break;
       case "save config":
         if (!check(socket)) break;
-        status.saveConfig(payload)
-        socket.sendData('success',{  message: '设置已保存！'})
-        broadcast('config', status.config)
+        status.saveConfig(payload);
+        socket.sendData("success", { message: "设置已保存！" });
+        broadcast("config", status.config);
+        break;
+      case "volume":
+        if (!check(socket)) break;
+        audioPlayer.volume(payload);
         break;
       case "play audio":
         if (!check(socket)) break;
-        audioPlayer.push({ type: 'mp3 file path', data: payload})
+        const { path, stop } = payload;
+        if (stop) {
+          audioPlayer.stop();
+        }
+        if (path) {
+          audioPlayer.push({ type: "mp3 file path", data: { path } });
+        }
         break;
       default:
         console.log("怎么了？");
@@ -349,9 +370,13 @@ const login = (socket, { uid, token, sharedCode }) => {
   if (token) {
     if (md5(password + "eson") == token) {
       socket.isLogin = true;
-      const userType = 'admin'
-      socket.userType = userType
-      socket.sendData("login", { status: 0, message: "OMG 你登录啦！", userType });
+      const userType = "admin";
+      socket.userType = userType;
+      socket.sendData("login", {
+        status: 0,
+        message: "OMG 你登录啦！",
+        userType,
+      });
       return;
     } else {
       socket.sendData("error", { status: 1, message: "哎呦喂，密码错了啊！" });
@@ -359,15 +384,22 @@ const login = (socket, { uid, token, sharedCode }) => {
     }
   }
   if (status.config.sharedCode) {
-    console.log('login shared code', sharedCode)
+    console.log("login shared code", sharedCode);
     if (status.config.sharedCode === sharedCode) {
       socket.isLogin = true;
-      const userType = 'guest'
-      socket.userType = userType
-      socket.sendData("login", { status: 0, message: "🏎️ 分享链接登陆成功 ！", userType });
+      const userType = "guest";
+      socket.userType = userType;
+      socket.sendData("login", {
+        status: 0,
+        message: "🏎️ 分享链接登陆成功 ！",
+        userType,
+      });
       return;
     } else {
-      socket.sendData("error", { status: 1, message: "哎呦喂，分享链接已失效！" });
+      socket.sendData("error", {
+        status: 1,
+        message: "哎呦喂，分享链接已失效！",
+      });
       return;
     }
   }
@@ -375,8 +407,8 @@ const login = (socket, { uid, token, sharedCode }) => {
 
 /**
  * 接收到 ping 信号时执行
- * @param {WebSocket} socket 
- * @param {object} param1 
+ * @param {WebSocket} socket
+ * @param {object} param1
  */
 const receivePing = (socket, { sendTime }) => {
   socket.sendData("pong", { sendTime });
@@ -384,31 +416,31 @@ const receivePing = (socket, { sendTime }) => {
 
 /** 清除、创建心跳超时计时器 */
 const makeHeartbeatTimer = (socket) => {
-  socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId)
+  socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId);
   if (status.autoLocking) {
-    status.unlockHearbertCount++
+    status.unlockHearbertCount++;
     if (status.unlockHearbertCount > 5) {
-      status.autoLocking = false
-      status.unlockHearbertCount = 0
-      console.info("网络恢复")
+      status.autoLocking = false;
+      status.unlockHearbertCount = 0;
+      console.info("网络恢复");
       broadcast("success", {
-        message: `网络恢复 (￣︶￣)↗  ，解除锁定 !`
+        message: `网络恢复 (￣︶￣)↗  ，解除锁定 !`,
       });
     }
   }
   socket.heartbeatTimeoutId = setTimeout(async () => {
-    status.unlockHearbertCount = 0
+    status.unlockHearbertCount = 0;
     if (status.autoLocking === true) return;
-    status.autoLocking = true
-    console.warn("网络连接不稳定，自动刹车")
+    status.autoLocking = true;
+    console.warn("网络连接不稳定，自动刹车");
     broadcast("info", {
-      message: `网络连接不稳定，自动刹车, 并锁定`
+      message: `网络连接不稳定，自动刹车, 并锁定`,
     });
-    speedRate(socket, -status.currentSpeedRateValue)
-    await sleep(200)
-    speedRate(socket, 0)
-  }, status.config.autoLockTime * 2)
-}
+    speedRate(socket, -status.currentSpeedRateValue);
+    await sleep(200);
+    speedRate(socket, 0);
+  }, status.config.autoLockTime * 2);
+};
 
 const check = (socket) => {
   if (socket.isLogin) {
@@ -421,7 +453,7 @@ const check = (socket) => {
 };
 
 const speedRate = (socket, v) => {
-  const { maxSpeed } = status.config
+  const { maxSpeed } = status.config;
   console.log("speed", v);
   if (!check(socket)) return;
   if (Math.abs(v) * 100 > maxSpeed) {
@@ -429,7 +461,7 @@ const speedRate = (socket, v) => {
   }
   changeSpeed(v);
   broadcast("speed", v);
-  status.currentSpeedRateValue = v
+  status.currentSpeedRateValue = v;
 };
 
 const directionRate = (socket, v) => {
@@ -444,7 +476,7 @@ const steeringRate = (socket, { index, rate }) => {
   if (!check(socket)) return;
   changeSteering(index, rate);
   broadcast("steering", { rate, index });
-}
+};
 
 const openLight = (socket, enabled) => {
   if (!check(socket)) return;
@@ -464,14 +496,14 @@ const openPower = (socket, enabled) => {
 
 const disconnect = (socket) => {
   console.log("客户端断开连接！");
-  TTS("神经连接已断开")
+  TTS("神经连接已断开");
   if (socket.webrtc) socket.webrtc.close();
   clearTimeout(socket.timeout);
   clients.delete(socket);
   let num = 0;
   clients.forEach(({ isLogin }) => {
     if (isLogin) num++;
-  })
+  });
   console.log("已连接客户端", num);
   if (num < 1) {
     closeController();
@@ -482,7 +514,7 @@ const disconnect = (socket) => {
 
 const speak = async (socket, payload) => {
   if (!check(socket)) return;
-  socket.sendData("tts playing", true)
+  socket.sendData("tts playing", true);
   if (socket.webrtc) socket.webrtc.closeAudioPlayer();
   if (payload.text) {
     await TTS(payload.text, payload);
@@ -490,14 +522,14 @@ const speak = async (socket, payload) => {
   if (socket.webrtc) socket.webrtc.openAudioPlayer();
   await sleep(1000);
   socket.sendData("tts playing", false);
-}
+};
 
 const piPowerOff = () => {
   spawn("halt");
-}
+};
 const piReboot = () => {
   spawn("reboot");
-}
+};
 
 process.on("SIGINT", async function () {
   closeController();
@@ -507,44 +539,60 @@ process.on("SIGINT", async function () {
   process.exit();
 });
 
-server.on('error', (e) => {
-  if (e.code === 'EADDRINUSE') {
-    console.log('哎哟喂，你已经启动了一个 Network RC， 或者 8080 端口被其他程序使用了...');
+server.on("error", (e) => {
+  if (e.code === "EADDRINUSE") {
+    console.log(
+      "哎哟喂，你已经启动了一个 Network RC， 或者 8080 端口被其他程序使用了..."
+    );
   }
 });
 
-
-
-
-
 //获取本机ip地址
 function getIPAdress() {
-  var interfaces = require('os').networkInterfaces();
+  var interfaces = require("os").networkInterfaces();
   for (var devName in interfaces) {
     var iface = interfaces[devName];
     for (var i = 0; i < iface.length; i++) {
       var alias = iface[i];
-      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+      if (
+        alias.family === "IPv4" &&
+        alias.address !== "127.0.0.1" &&
+        !alias.internal
+      ) {
         return alias.address;
       }
     }
   }
 }
 
-let cameraList
+let cameraList;
 (async () => {
-  cameraList = await Camera.getCameraList()
+  cameraList = await Camera.getCameraList();
   cameraList.forEach((item, index) => {
     const { dev, size, name, cardType } = item;
-    item.server = new Camera({ server, devPath: dev, name, cardType, deviceSize: size, cameraIndex: index });
-  })
+    item.server = new Camera({
+      server,
+      devPath: dev,
+      name,
+      cardType,
+      deviceSize: size,
+      cameraIndex: index,
+    });
+  });
 
   server.listen(8080, async (e) => {
     console.log("server", server.address());
     await TTS(`系统初始化完成!`);
-    console.log(`本地访问地址 http${status.enabledHttps ? 's' : ''}://${getIPAdress()}:8080`)
-    await TTS(`可使用 http${status.enabledHttps ? 's' : ''}协议访问${getIPAdress()} 8080端口`);
-
+    console.log(
+      `本地访问地址 http${
+        status.enabledHttps ? "s" : ""
+      }://${getIPAdress()}:8080`
+    );
+    await TTS(
+      `可使用 http${
+        status.enabledHttps ? "s" : ""
+      }协议访问${getIPAdress()} 8080端口`
+    );
 
     if (frp) {
       if (!frpPort) {
@@ -560,4 +608,4 @@ let cameraList
       }
     }
   });
-})()
+})();

@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react'
-import { useState } from 'react';
-import { useKeyPress, useEventListener } from '@umijs/hooks';
-import { Button, message, Popover } from 'antd';
+import React, { useEffect } from "react";
+import { useState } from "react";
+import { useKeyPress, useEventListener } from "@umijs/hooks";
+import { Button, message, Popover } from "antd";
+import RecordRTC, { StereoAudioRecorder } from "recordrtc";
 
-import { AudioOutlined } from "@ant-design/icons"
-import gif from '../assets/开骂.gif'
+import { AudioOutlined } from "@ant-design/icons";
+import gif from "../assets/开骂.gif";
 
 export default function Microphone({ url }) {
-
   const [recordAudio, setRecordAudio] = useState(undefined);
   const [enabled, setEnabled] = useState(undefined);
   const [ws, setWs] = useState(undefined);
@@ -17,81 +17,90 @@ export default function Microphone({ url }) {
     if (!url) return;
     const ws = new WebSocket(url);
 
-    ws.addEventListener('open', () => { setEnabled(true) })
-    ws.addEventListener('close', () => { setEnabled(false) })
+    ws.addEventListener("open", () => {
+      setEnabled(true);
+    });
+    ws.addEventListener("close", () => {
+      setEnabled(false);
+    });
 
-    setWs(ws)
+    setWs(ws);
 
     return function () {
       ws && ws.close();
-      setWs(undefined)
-    }
-  }, [url])
+      setWs(undefined);
+    };
+  }, [url]);
 
   const startRecording = () => {
-    if(recording) return;
-    setRecording(true)
-    navigator.mediaDevices.getUserMedia({
-      audio: true
-    }).then(function (audioStream) {
-      const record = new window.RecordRTC(audioStream, {
-        type: 'audio',
+    if (recording) return;
+    setRecording(true);
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+      })
+      .then(function (audioStream) {
+        const record = new RecordRTC(audioStream, {
+          type: "audio",
 
-        //6)
-        mimeType: 'audio/wav',
-        sampleRate: 48000,
-        // used by StereoAudioRecorder
-        // the range 22050 to 96000.
-        // let us force 16khz recording:
-        // desiredSampRate: 16000,
+          //6)
+          mimeType: "audio/wav",
+          // sampleRate: 48000,
+          // used by StereoAudioRecorder
+          // the range 22050 to 96000.
+          // let us force 16khz recording:
+          // desiredSampRate: 16000,
 
-        // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
-        // CanvasRecorder, GifRecorder, WhammyRecorder
-        recorderType: window.StereoAudioRecorder,
-        // Dialogflow / STT requires mono audio
-        numberOfAudioChannels: 1,
+          // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
+          // CanvasRecorder, GifRecorder, WhammyRecorder
+          recorderType: StereoAudioRecorder,
+          // Dialogflow / STT requires mono audio
+          numberOfAudioChannels: 1,
+        });
+
+        record.startRecording();
+
+        setRecordAudio(record);
+      })
+      .catch(function (e) {
+        console.error(e);
+        message.error(e.message);
       });
-
-      record.startRecording();
-
-      setRecordAudio(record)
-    }).catch(function (e) {
-      console.error(e)
-      message.error(e.message)
-    });
-  }
+  };
 
   const endRecording = () => {
-    if(!recording) return;
-    setRecording(false)
+    if (!recording) return;
+    setRecording(false);
     if (!recordAudio || !ws) return;
     recordAudio.stopRecording(function () {
       let blob = recordAudio.getBlob();
-      ws.send(blob)
-      message.success('发送语音')
+      ws.send(blob);
+      message.success("发送语音");
     });
-  }
+  };
 
-  const gamepadPress = ({ detail: { index, value }}) => {
-    if(index === 2) {
-      if(value > 0.5) {
-       startRecording()
+  const gamepadPress = ({ detail: { index, value } }) => {
+    if (index === 2) {
+      if (value > 0.5) {
+        startRecording();
       } else {
-        endRecording()
+        endRecording();
       }
     }
-  }
+  };
 
-  useKeyPress('space', startRecording);
-  useKeyPress('space', endRecording, { events: ['keyup'] });
+  useKeyPress("space", startRecording);
+  useKeyPress("space", endRecording, { events: ["keyup"] });
 
-  useEventListener('gamepadpress', gamepadPress)
+  useEventListener("gamepadpress", gamepadPress);
 
   return (
-    <Popover 
+    <Popover
       visible={recording}
       placement="leftBottom"
-      content={<img className="select-disabled recording-img" src={recording ? gif : ''} alt="录音中" />}
+      content={
+        <img className="select-disabled recording-img" src={gif} alt="录音中" />
+      }
     >
       <Button
         className="record-button"
@@ -105,5 +114,5 @@ export default function Microphone({ url }) {
         icon={<AudioOutlined />}
       />
     </Popover>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Slider, Form, Button, Input, Tabs, Switch } from "antd";
-import Shared from "./Shared"
+import Shared from "./Shared";
 import { layout, tailLayout } from "../unit";
 import store from "store";
 const { TabPane } = Tabs;
@@ -13,12 +13,19 @@ export default function Setting({
   saveServerConfig,
   cameraList,
   fixedController,
+  changeVolume,
+  changeMicVolume,
+  clearAudioTemp,
+  volume,
+  micVolume,
   ...form
 }) {
   const clearCameraSetting = () => {
-    cameraList.forEach((_, index) => store.remove(`camera-${form.wsAddress}/video${index}`));
-    window.location.reload()
-  }
+    cameraList.forEach((_, index) =>
+      store.remove(`camera-${form.wsAddress}/video${index}`)
+    );
+    window.location.reload();
+  };
 
   return (
     <Tabs defaultActiveKey="1">
@@ -35,12 +42,16 @@ export default function Setting({
           <Form.Item {...tailLayout}>
             <Button type="primary" htmlType="submit">
               保存并刷新
-          </Button>
+            </Button>
           </Form.Item>
         </Form>
       </TabPane>
       <TabPane tab="基本设置" key="2">
-        <Form {...layout} onFinish={saveServerConfig} initialValues={serverConfig}>
+        <Form
+          {...layout}
+          onFinish={saveServerConfig}
+          initialValues={serverConfig}
+        >
           <Form.Item label="最大速度" name="maxSpeed">
             <Slider disabled={!wsConnected} min={0} max={100} />
           </Form.Item>
@@ -48,40 +59,70 @@ export default function Setting({
           <Form.Item label="自动刹车的延迟时间" name="autoLockTime">
             <Slider disabled={!wsConnected} min={500} max={5000} />
           </Form.Item>
-          <Form.Item valuePropName="checked" label="手柄左摇杆控制油门" name="enabledAxis1Controal">
+          <Form.Item
+            valuePropName="checked"
+            label="手柄左摇杆控制油门"
+            name="enabledAxis1Controal"
+          >
             <Switch disabled={!wsConnected} />
           </Form.Item>
           <Form.Item {...tailLayout}>
             <Button type="primary" disabled={!wsConnected} htmlType="submit">
               保存
-          </Button>
+            </Button>
           </Form.Item>
         </Form>
       </TabPane>
-      <TabPane tab="通道设置" key="3">
-      </TabPane>
+      <TabPane tab="通道设置" key="3"></TabPane>
       <TabPane tab="摄像头设置" key="camera">
-        <Form {...layout} onFinish={saveServerConfig} initialValues={serverConfig}>
+        <Form
+          {...layout}
+          onFinish={saveServerConfig}
+          initialValues={serverConfig}
+        >
           <Form.Item label="摄像头采集分辨率最大宽度" name="cameraMaxWidth">
-            <Slider disabled={!wsConnected} min={0} max={1920} />
+            <Slider disabled={!wsConnected} min={0} max={1024} />
           </Form.Item>
           <Form.Item {...tailLayout}>
-            <Button onClick={clearCameraSetting}>
-              重置摄像头
-          </Button>
+            <Button onClick={clearCameraSetting}>重置摄像头</Button>
           </Form.Item>
           <Form.Item {...tailLayout}>
             <Button type="primary" disabled={!wsConnected} htmlType="submit">
               保存
-          </Button>
+            </Button>
+          </Form.Item>
+        </Form>
+      </TabPane>
+      <TabPane tab="声音设置" key="sound">
+        <Form {...layout} initialValues={{ volume, micVolume }}>
+          <Form.Item label="喇叭音量" name="volume">
+            <Slider
+              disabled={!wsConnected}
+              min={0}
+              max={100}
+              onAfterChange={changeVolume}
+            />
+          </Form.Item>
+          <Form.Item label="麦克风灵敏度" name="micVolume">
+            <Slider
+              disabled
+              min={0}
+              max={100}
+              onAfterChange={changeMicVolume}
+            />
+          </Form.Item>
+          <Form.Item {...tailLayout}>
+            <Button onClick={clearAudioTemp}>清除缓存</Button>
           </Form.Item>
         </Form>
       </TabPane>
       <TabPane tab="分享设置" key="shared">
-        <Shared wsConnected={wsConnected} saveServerConfig={saveServerConfig} sharedCode={serverConfig.sharedCode} />
+        <Shared
+          wsConnected={wsConnected}
+          saveServerConfig={saveServerConfig}
+          sharedCode={serverConfig.sharedCode}
+        />
       </TabPane>
     </Tabs>
-
-
   );
 }

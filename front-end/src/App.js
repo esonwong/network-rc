@@ -1,19 +1,12 @@
 import React, { Component, createRef, Fragment } from "react";
 import store from "store";
-import {
-  message,
-  Modal,
-  Button,
-} from "antd";
+import { message, Modal, Button } from "antd";
 import "./App.css";
 import { Router, navigate } from "@reach/router";
 import Controller from "./components/Controller";
 import CameraContainer from "./components/CameraContainer";
 import Setting from "./components/Setting";
-import {
-  PoweroffOutlined,
-  ReloadOutlined
-} from "@ant-design/icons";
+import { PoweroffOutlined, ReloadOutlined } from "@ant-design/icons";
 import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
@@ -48,7 +41,9 @@ export default class App extends Component {
         direction: 0,
       },
       ttsPlaying: false,
-      isLogin: true
+      isLogin: true,
+      volume: 0,
+      micVolume: 0,
     };
 
     const { changeLight, changePower, changeSteering } = this;
@@ -60,9 +55,7 @@ export default class App extends Component {
       speed: (v) => {
         const {
           changeSpeed,
-          state: {
-            action,
-          },
+          state: { action },
         } = this;
         action.speed = v;
         this.setState({ action: { ...action } });
@@ -78,13 +71,12 @@ export default class App extends Component {
         this.setState({ action: { ...action } });
       },
     };
-    this.saveServerConfig = debounce(this._saveServerConfig, 300)
+    this.saveServerConfig = debounce(this._saveServerConfig, 300);
   }
 
   componentDidMount() {
     const { connect } = this;
     connect();
-
 
     document.body.addEventListener("fullscreenchange", () => {
       if (document.fullscreenElement) {
@@ -98,25 +90,26 @@ export default class App extends Component {
   connect = () => {
     const { wsAddress } = this.state.setting;
     let pingTime, heartbeatTime;
-    const socket = this.socket = new WebSocket(
-      `${window.location.protocol === "https:" ? "wss://" : "ws://"
+    const socket = (this.socket = new WebSocket(
+      `${
+        window.location.protocol === "https:" ? "wss://" : "ws://"
       }${wsAddress}/control`
-    );
-    socket.binaryType = "arraybuffer"
+    ));
+    socket.binaryType = "arraybuffer";
 
     socket.addEventListener("open", () => {
       this.setState({ wsConnected: true });
       socket.sendData = (action, payload) => {
         socket.send(JSON.stringify({ action, payload }));
-      }
+      };
       pingTime = setInterval(() => {
         const sendTime = new Date().getTime();
         socket.sendData("ping", { sendTime });
-      }, 1000)
+      }, 1000);
 
       heartbeatTime = setInterval(() => {
         socket.sendData("heartbeat");
-      }, 200)
+      }, 200);
     });
 
     socket.addEventListener("message", async ({ data }) => {
@@ -133,7 +126,13 @@ export default class App extends Component {
             this.onLogin(payload);
             break;
           case "config":
-            this.setState({ serverConfig: payload })
+            this.setState({ serverConfig: payload });
+            break;
+          case "volume":
+            this.setState({ volume: payload });
+            break;
+          case "micVolume":
+            this.setState({ micVolume: payload });
             break;
           case "light enabled":
             this.setState({ lightEnabled: payload });
@@ -145,7 +144,9 @@ export default class App extends Component {
             this.setState({ ttsPlaying: payload });
             break;
           case "pong":
-            this.setState({ delay: (new Date().getTime() - payload.sendTime) / 2 });
+            this.setState({
+              delay: (new Date().getTime() - payload.sendTime) / 2,
+            });
             break;
           case "info":
             message.info(payload.message);
@@ -170,12 +171,12 @@ export default class App extends Component {
       clearInterval(pingTime);
       clearInterval(heartbeatTime);
       this.setState({ wsConnected: false });
-    })
+    });
   };
 
   sendData(action, payload) {
     if (this.socket) {
-      this.socket.sendData(action, payload)
+      this.socket.sendData(action, payload);
     } else {
       console.error("未连接！");
     }
@@ -183,10 +184,10 @@ export default class App extends Component {
 
   onInit({ needPassword }) {
     if (needPassword) {
-      if (window.location.pathname !== '/login') {
+      if (window.location.pathname !== "/login") {
         navigate(`${pubilcUrl}/login`);
       }
-      this.setState({ isLogin: false })
+      this.setState({ isLogin: false });
     } else {
       this.onLogin();
     }
@@ -194,9 +195,8 @@ export default class App extends Component {
 
   onLogin = ({ message: m = "无密码" } = {}) => {
     message.success(m);
-    this.setState({ isLogin: true })
+    this.setState({ isLogin: true });
     navigate(`${pubilcUrl}/controller`, { replace: true });
-
 
     // video 标签
     // const time = setInterval(() => {
@@ -221,7 +221,7 @@ export default class App extends Component {
     //     this.changeCamera(true);
     //   })
     // }, 100)
-  }
+  };
 
   // loadPacket = (data) => {
   //   if (this.sourceBuffer1.updating) {
@@ -237,7 +237,6 @@ export default class App extends Component {
   //     data && this.sourceBuffer1.appendBuffer(data);
   //   }
   // }
-
 
   disconnect = (e) => {
     e && e.preventDefault();
@@ -255,8 +254,6 @@ export default class App extends Component {
     });
   };
 
-
-
   changeLight = (enable) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
@@ -269,7 +266,6 @@ export default class App extends Component {
     this.sendData("open power", enable);
   };
 
-
   piPowerOff = () => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
@@ -277,20 +273,33 @@ export default class App extends Component {
       autoFocusButton: "cancel",
       icon: <PoweroffOutlined />,
       title: "确定要关闭 Pi 酱系统？",
-      content: <Fragment>
-        <Button type="danger"
-          icon={<PoweroffOutlined />}
-          onClick={() => { this.sendData("pi power off"); modal.destroy() }}
-        >关机</Button>
-        &nbsp;
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={() => { this.sendData("pi reboot"); modal.destroy() }}
-        >重启</Button>
-      </Fragment>,
+      content: (
+        <Fragment>
+          <Button
+            type="danger"
+            icon={<PoweroffOutlined />}
+            onClick={() => {
+              this.sendData("pi power off");
+              modal.destroy();
+            }}
+          >
+            关机
+          </Button>
+          &nbsp;
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={() => {
+              this.sendData("pi reboot");
+              modal.destroy();
+            }}
+          >
+            重启
+          </Button>
+        </Fragment>
+      ),
       maskClosable: true,
       okText: "取消",
-    })
+    });
   };
 
   changeSetting = (setting) => {
@@ -317,27 +326,36 @@ export default class App extends Component {
     this.sendData("direction rate", directionRate);
   };
 
-
   changeSteering = (index, rate) => {
     if (!this.state.wsConnected) return;
     this.sendData("steering rate", { index, rate });
-  }
+  };
 
   tts = (text = "一起玩网络遥控车") => {
     if (!this.state.wsConnected) return;
     this.setState({ ttsPlaying: true });
     this.sendData("tts", { text });
-  }
+  };
 
-  playAudio = (path) => {
+  playAudio = ({ path, stop = true } = {}) => {
     if (!this.state.wsConnected) return;
-    this.sendData("play audio", { path });
-  }
+    this.sendData("play audio", { path, stop });
+  };
+
+  changeVolume = (v) => {
+    if (!this.state.wsConnected) return;
+    this.sendData("volume", v);
+  };
+
+  changeMicVolume = (v) => {
+    if (!this.state.wsConnected) return;
+    this.sendData("micVolume", v);
+  };
 
   _saveServerConfig = (config) => {
     if (!this.state.wsConnected) return;
     this.sendData("save config", config);
-  }
+  };
 
   render() {
     const {
@@ -350,6 +368,8 @@ export default class App extends Component {
       piPowerOff,
       login,
       saveServerConfig,
+      changeVolume,
+      changeMicVolume,
       state: {
         cameraList,
         setting,
@@ -363,10 +383,12 @@ export default class App extends Component {
         powerEnabled,
         localMicrphoneEnabled,
         isLogin,
-        ttsPlaying
+        ttsPlaying,
+        volume,
+        micVolume,
       },
       tts,
-      playAudio
+      playAudio,
     } = this;
 
     return (
@@ -385,53 +407,55 @@ export default class App extends Component {
             connect,
             disconnect,
             setting,
-            isLogin
+            isLogin,
           }}
           disabled={!isLogin}
         />
         <Router className="app-page">
           <Home default />
-          { wsConnected && <Login path={`${pubilcUrl}/login`} onSubmit={login} /> }
-          {
-            isLogin ?
-              <>
-                <Setting
-                  path={`setting`}
-                  {...setting}
+          {wsConnected && (
+            <Login path={`${pubilcUrl}/login`} onSubmit={login} />
+          )}
+          {isLogin ? (
+            <>
+              <Setting
+                path={`setting`}
+                {...setting}
+                cameraList={cameraList}
+                wsConnected={wsConnected}
+                onDisconnect={disconnect}
+                onSubmit={changeSetting}
+                saveServerConfig={saveServerConfig}
+                serverConfig={serverConfig}
+                changeVolume={changeVolume}
+                changeMicVolume={changeMicVolume}
+                volume={volume}
+                micVolume={micVolume}
+              />
+              <Controller
+                path={`${pubilcUrl}/controller`}
+                controller={controller}
+                lightEnabled={lightEnabled}
+                cameraEnabled={cameraEnabled}
+                action={action}
+                powerEnabled={powerEnabled}
+                onTTS={tts}
+                playAudio={playAudio}
+                ttsPlaying={ttsPlaying}
+                setting={setting}
+                saveServerConfig={saveServerConfig}
+                serverConfig={serverConfig}
+              >
+                <CameraContainer
+                  path="/"
                   cameraList={cameraList}
-                  wsConnected={wsConnected}
-                  onDisconnect={disconnect}
-                  onSubmit={changeSetting}
-                  saveServerConfig={saveServerConfig}
-                  serverConfig={serverConfig}
-                />
-                <Controller
-                  path={`${pubilcUrl}/controller`}
-                  controller={controller}
-                  lightEnabled={lightEnabled}
-                  cameraEnabled={cameraEnabled}
-                  action={action}
-                  powerEnabled={powerEnabled}
-                  onTTS={tts}
-                  playAudio={playAudio}
-                  ttsPlaying={ttsPlaying}
                   setting={setting}
-                  saveServerConfig={saveServerConfig}
-                  serverConfig={serverConfig}
-                >
-                  <CameraContainer
-                    path="/"
-                    cameraList={cameraList}
-                    setting={setting}
-                  />
-                </Controller>
-              </>
-              :
-              undefined
-          }
-
+                />
+              </Controller>
+            </>
+          ) : undefined}
         </Router>
-      </div >
+      </div>
     );
   }
 }

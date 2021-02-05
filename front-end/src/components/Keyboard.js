@@ -4,10 +4,9 @@ export default class Keybord extends Component {
   constructor(props) {
     super(props);
     this.ref = createRef();
-
   }
 
-  holdKeyList = []
+  holdKeyList = [];
 
   makeTimer() {
     this.timer = setInterval(() => {
@@ -17,29 +16,29 @@ export default class Keybord extends Component {
           controller: { steering },
         },
       } = this;
-      this.holdKeyList.forEach(key => {
+      this.holdKeyList.forEach((key) => {
         switch (key) {
-          case 'j':
+          case "j":
             steering(0, s0 + 0.1);
             break;
-          case 'l':
+          case "l":
             steering(0, s0 - 0.1);
             break;
-          case 'i':
+          case "i":
             steering(1, s1 - 0.1);
             break;
-          case 'k':
+          case "k":
             steering(1, s1 + 0.1);
             break;
-          case 'p':
+          case "p":
             steering(1, 0);
             steering(0, 0);
-            break
+            break;
           default:
             break;
         }
-      })
-    }, 100)
+      });
+    }, 100);
   }
 
   componentDidMount() {
@@ -51,7 +50,7 @@ export default class Keybord extends Component {
     const { handleKeyDown, handleKeyUp } = this;
     window.document.removeEventListener("keydown", handleKeyDown, false);
     window.document.removeEventListener("keyup", handleKeyUp, false);
-    clearInterval(this.timer)
+    clearInterval(this.timer);
   }
 
   handleKeyDown = (event) => {
@@ -62,11 +61,11 @@ export default class Keybord extends Component {
         onControl,
         onEnter,
         serverConfig,
-        playAudio
+        playAudio,
       },
     } = this;
     const keyName = event.key;
-    this.holdKeyList.push(keyName)
+    this.holdKeyList.push(keyName);
 
     if (keyName === "Enter") {
       onEnter && onEnter();
@@ -85,22 +84,21 @@ export default class Keybord extends Component {
     }
 
     if (keyName === "1") {
-      playAudio(serverConfig.audio1)
+      playAudio({ path: serverConfig.audio1 });
     }
 
     if (keyName === "2") {
-      playAudio(serverConfig.audio2)
+      playAudio({ path: serverConfig.audio1 });
     }
 
     if (keyName === "3") {
-      playAudio(serverConfig.audio3)
+      playAudio({ path: serverConfig.audio1 });
     }
 
     if (keyName === "4") {
-      playAudio(serverConfig.audio4)
+      playAudio();
     }
 
-   
     onControl && onControl();
   };
 
@@ -114,7 +112,7 @@ export default class Keybord extends Component {
     } = this;
     const keyName = event.key;
 
-    this.holdKeyList = this.holdKeyList.filter(key => keyName !== key)
+    this.holdKeyList = this.holdKeyList.filter((key) => keyName !== key);
     if (keyName === "w") {
       speed(0);
     }

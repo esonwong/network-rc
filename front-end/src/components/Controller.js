@@ -1,11 +1,8 @@
 import React, { Component, Fragment } from "react";
+import store from "store";
 import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
-import {
-  AimOutlined,
-  SendOutlined ,
-  SoundOutlined
-} from "@ant-design/icons";
+import { AimOutlined, SendOutlined, SoundOutlined } from "@ant-design/icons";
 import Keybord from "./Keyboard";
 import Icon from "./Icon";
 import Ai from "./Ai";
@@ -14,11 +11,10 @@ import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
 import NSlider from "./Slider";
 import { createRef } from "react";
-import Microphone from './Microphone'
+import Microphone from "./Microphone";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
-
 
 const deviceorientation = (e) => {
   const { alpha, beta, gamma } = e;
@@ -38,18 +34,18 @@ export default class Controller extends Component {
     this.state = {
       text: "",
       zeroOrientation: undefined,
-      backwardPower: 50,
-      forwardPower: 50,
+      backwardPower: store.get("backward-power") || 50,
+      forwardPower: store.get("forward-power") || 50,
       isShowButton: mobile(),
       gamepadEnabled: false,
       ttsInputVisible: false,
       fixedAction: {
         direction: 0,
         speed: 0,
-        steering: []
+        steering: [],
       },
     };
-    this.steeringStatus = []
+    this.steeringStatus = [];
   }
 
   componentDidMount() {
@@ -64,7 +60,7 @@ export default class Controller extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.serverConfig !== this.props.serverConfig) {
-      this.fixedController.direction(0)
+      this.fixedController.direction(0);
     }
   }
 
@@ -122,8 +118,12 @@ export default class Controller extends Component {
       speed(value);
     }
     if (index === 10 && value === 1) {
-      message[!zeroOrientation ? "success" : "info"](zeroOrientation ? "关闭重力感应控制!" : "重力感应已校准!");
-      this.setState({ zeroOrientation: zeroOrientation ? undefined : { ...curentOrientation } })
+      message[!zeroOrientation ? "success" : "info"](
+        zeroOrientation ? "关闭重力感应控制!" : "重力感应已校准!"
+      );
+      this.setState({
+        zeroOrientation: zeroOrientation ? undefined : { ...curentOrientation },
+      });
     }
     if (index === 9 && value === 1) {
       changeCamera(!cameraEnabled);
@@ -131,7 +131,7 @@ export default class Controller extends Component {
 
     if (index === 11 && value === 1) {
       steering(0, 0);
-      steering(1, 0)
+      steering(1, 0);
     }
 
     if ((index === 4 || index === 2) && value === 1) {
@@ -145,24 +145,24 @@ export default class Controller extends Component {
       this.setState({ forwardPower });
     }
 
-    if (index === 12 ) {
-      playAudio(serverConfig.audio1)
+    if (index === 12 && value === 1) {
+      playAudio({ path: serverConfig.audio1 });
     }
-    if (index === 13 ) {
-      playAudio(serverConfig.audio2)
+    if (index === 13 && value === 1) {
+      playAudio({ path: serverConfig.audio2 });
     }
-    if (index === 14) {
-      playAudio(serverConfig.audio3)
+    if (index === 14 && value === 1) {
+      playAudio({ path: serverConfig.audio3 });
     }
-    if (index === 15) {
-      playAudio(serverConfig.audio4)
+    if (index === 15 && value === 1) {
+      playAudio();
     }
   };
 
   gamepadaxisLoop = ({ detail: { index, value } }) => {
     const {
       fixedController: { steering },
-      steeringStatus: [s0 = 0, s1 = 0]
+      steeringStatus: [s0 = 0, s1 = 0],
     } = this;
 
     if (index === 2) {
@@ -171,14 +171,14 @@ export default class Controller extends Component {
     if (index === 3) {
       steering(1, s1 + value / 5);
     }
-  }
+  };
 
   gamepadAxis = ({ detail: { index, value } }) => {
     const {
       fixedController: { direction, speed },
       props: {
-        serverConfig: { enabledAxis1Controal }
-      }
+        serverConfig: { enabledAxis1Controal },
+      },
     } = this;
     if (index === 0) {
       direction(-value);
@@ -195,8 +195,8 @@ export default class Controller extends Component {
       const gamepadList = navigator.getGamepads
         ? navigator.getGamepads()
         : navigator.webkitGetGamepads
-          ? navigator.webkitGetGamepads
-          : [];
+        ? navigator.webkitGetGamepads
+        : [];
       for (
         let gamePadIndex = 0;
         gamePadIndex < gamepadList.length;
@@ -224,7 +224,7 @@ export default class Controller extends Component {
         });
         axes.forEach((value, index) => {
           if (Math.abs(value) < 0.05) {
-            value = 0
+            value = 0;
           }
           if (!axesStatus[`${gamePadIndex}-${index}`]) {
             axesStatus[`${gamePadIndex}-${index}`] = { value };
@@ -252,7 +252,7 @@ export default class Controller extends Component {
   deviceorientation = ({ alpha, beta, gamma }) => {
     const {
       state: { isAiControlling, zeroOrientation },
-      fixedController
+      fixedController,
     } = this;
     if (!zeroOrientation) return;
     if (isAiControlling) return;
@@ -268,22 +268,22 @@ export default class Controller extends Component {
       const {
         props: {
           controller: { speed },
-          serverConfig: { speedReverse }
+          serverConfig: { speedReverse },
         },
         state: { forwardPower, backwardPower, fixedAction },
       } = this;
       this.setState({ fixedAction: { ...fixedAction, speed: v } });
       speed(
         v *
-        (speedReverse ? -1 : 1) *
-        ((v > 0 ? forwardPower : backwardPower) / 100)
+          (speedReverse ? -1 : 1) *
+          ((v > 0 ? forwardPower : backwardPower) / 100)
       );
     },
     direction: (v) => {
       const {
         props: {
           controller: { direction },
-          serverConfig: { directionReverse, directionFix }
+          serverConfig: { directionReverse, directionFix },
         },
         state: { fixedAction },
       } = this;
@@ -297,14 +297,17 @@ export default class Controller extends Component {
       if (v > 2) v = 2;
       if (v < -2) v = -2;
       fixedAction.steering[index] = v;
-      this.steeringStatus = fixedAction.steering
+      this.steeringStatus = fixedAction.steering;
       this.setState({ fixedAction });
-      this.props.controller.changeSteering(index, v)
+      this.props.controller.changeSteering(index, v);
     },
   };
 
   fixContent = () => {
-    const { serverConfig: { directionReverse, directionFix, speedReverse }, saveServerConfig } = this.props
+    const {
+      serverConfig: { directionReverse, directionFix, speedReverse },
+      saveServerConfig,
+    } = this.props;
 
     return (
       <Form>
@@ -333,7 +336,7 @@ export default class Controller extends Component {
           <Switch
             checked={directionReverse}
             onChange={(v) => {
-              saveServerConfig({ directionReverse: v })
+              saveServerConfig({ directionReverse: v });
             }}
           />
         </Form.Item>
@@ -341,7 +344,7 @@ export default class Controller extends Component {
           <Switch
             checked={speedReverse}
             onChange={(v) => {
-              saveServerConfig({ speedReverse: v })
+              saveServerConfig({ speedReverse: v });
             }}
           />
         </Form.Item>
@@ -353,7 +356,7 @@ export default class Controller extends Component {
             included={false}
             onChange={(v) => {
               const directionFix = v / 50 - 1;
-              saveServerConfig({ directionFix })
+              saveServerConfig({ directionFix });
             }}
             style={{ width: "50vw" }}
           />
@@ -367,7 +370,17 @@ export default class Controller extends Component {
       fixContent,
       fixedController,
       ttsInput,
-      props: { action, cameraEnabled, videoEl, onTTS, ttsPlaying, setting, children, playAudio, serverConfig },
+      props: {
+        action,
+        cameraEnabled,
+        videoEl,
+        onTTS,
+        ttsPlaying,
+        setting,
+        children,
+        playAudio,
+        serverConfig,
+      },
     } = this;
     const {
       gamepadEnabled,
@@ -377,7 +390,7 @@ export default class Controller extends Component {
       zeroOrientation,
       fixedAction,
       ttsInputVisible,
-      text
+      text,
     } = this.state;
     const { speed, direction } = fixedController;
     return (
@@ -424,7 +437,7 @@ export default class Controller extends Component {
                 value={fixedAction.speed}
                 onChange={(v) => speed(v)}
                 className="speed-slider"
-              // style={{ display: !zeroOrientation ? undefined : "none" }}
+                // style={{ display: !zeroOrientation ? undefined : "none" }}
               />
             </Fragment>
           )}
@@ -438,6 +451,7 @@ export default class Controller extends Component {
                   max={100}
                   onChange={(forwardPower) => {
                     this.setState({ forwardPower });
+                    store.set("forward-power", forwardPower);
                   }}
                   arrowPointAtCenter
                   style={{ width: "30vw" }}
@@ -458,6 +472,7 @@ export default class Controller extends Component {
                   style={{ width: "30vw" }}
                   onChange={(backwardPower) => {
                     this.setState({ backwardPower });
+                    store.set("backward-power", backwardPower);
                   }}
                 />
               }
@@ -510,11 +525,11 @@ export default class Controller extends Component {
               trigger="click"
               placement="topRight"
               visible={ttsInputVisible}
-              onVisibleChange={ttsInputVisible => {
+              onVisibleChange={(ttsInputVisible) => {
                 this.setState({ ttsInputVisible });
                 setTimeout(() => {
                   ttsInput.current && ttsInput.current.focus();
-                }, 200)
+                }, 200);
               }}
               content={
                 <form>
@@ -523,15 +538,18 @@ export default class Controller extends Component {
                     name="tts"
                     style={{ width: "60vw" }}
                     placeholder="发送语音"
-                    enterButton="发送" 
+                    enterButton="发送"
                     value={text}
-                    onChange={e => this.setState({ text: e.target.value })}
-                    onSearch={text => {  onTTS(text); this.setState({ text: "" })  }}
+                    onChange={(e) => this.setState({ text: e.target.value })}
+                    onSearch={(text) => {
+                      onTTS(text);
+                      this.setState({ text: "" });
+                    }}
                     loading={ttsPlaying}
                     onKeyDown={(e) => {
-                      e.stopPropagation()
+                      e.stopPropagation();
                       if (e.key === "Escape") {
-                        this.setState({ ttsInputVisible: false })
+                        this.setState({ ttsInputVisible: false });
                       }
                     }}
                   />
@@ -545,32 +563,36 @@ export default class Controller extends Component {
           </Form.Item>
 
           <Form.Item>
-            <Button shape="round" onClick={() => playAudio(serverConfig.audio1)}>
+            <Button
+              shape="round"
+              onClick={() => playAudio({ path: serverConfig.audio1 })}
+            >
               <SoundOutlined />
             </Button>
           </Form.Item>
 
-
           <Form.Item>
             <Microphone
-              url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/audio`}
+              url={`${
+                window.location.protocol === "https:" ? "wss://" : "ws://"
+              }${setting.wsAddress}/audio`}
             />
           </Form.Item>
-
         </Form>
         <Keybord
-          controller={fixedController} 
-          currentAction={fixedAction} steeringStatus={this.steeringStatus} 
+          controller={fixedController}
+          currentAction={fixedAction}
+          steeringStatus={this.steeringStatus}
           playAudio={playAudio}
           serverConfig={serverConfig}
           onEnter={() => {
-            this.setState({ ttsInputVisible: true })
+            this.setState({ ttsInputVisible: true });
             setTimeout(() => {
               ttsInput.current && ttsInput.current.focus();
-            }, 200)
-          }} 
+            }, 200);
+          }}
         />
-        { children}
+        {children}
       </div>
     );
   }

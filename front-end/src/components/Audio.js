@@ -1,33 +1,28 @@
-import React, { useEffect, useRef } from 'react'
-import { useState } from 'react';
-import { Switch, message } from 'antd';
+import React, { useEffect, useRef } from "react";
+import { useState } from "react";
+import { Switch, message } from "antd";
 
-import {
-  AudioOutlined,
-  AudioMutedOutlined,
-} from "@ant-design/icons"
+import { AudioOutlined, AudioMutedOutlined } from "@ant-design/icons";
 
-export default function Audio({
-  url,
-}) {
-
+export default function Audio({ url }) {
   const audioEl = useRef(null);
-  const [enabled, setEnabled] = useState(window.MediaSource ? true :false);
+  const [enabled, setEnabled] = useState(window.MediaSource ? true : false);
   const [src, setSrc] = useState(null);
-
 
   useEffect(() => {
     if (!audioEl.current || !enabled) return;
-    if(!window.MediaSource) {
-      message.warn('移动版的 safari 浏览器暂不支持收听声音 😢')
-      setTimeout(() => { setEnabled(false) }, 1000)
-      return
+    if (!window.MediaSource) {
+      message.warn("移动版的 safari 浏览器暂不支持收听声音 😢");
+      setTimeout(() => {
+        setEnabled(false);
+      }, 1000);
+      return;
     }
     const mediaSource = new MediaSource();
     let ws;
     let buffer = [];
     function sourceopen() {
-      var sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+      var sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
       setInterval(() => {
         if (buffer.length && !sourceBuffer.updating) {
           sourceBuffer.appendBuffer(buffer.shift());
@@ -36,41 +31,46 @@ export default function Audio({
 
       function onAudioLoaded({ data }) {
         buffer.push(data);
+        if (audioEl.current.buffered.length) {
+          const bufferTime =
+            audioEl.current.buffered.end(0) - audioEl.current.currentTime;
+          const playbackRate = 1 + (bufferTime - 0.8) * 1.2;
+          audioEl.current.playbackRate = playbackRate < 0 ? 1 : playbackRate;
+        }
       }
 
       ws = new WebSocket(url);
       ws.binaryType = "arraybuffer";
       ws.addEventListener("message", onAudioLoaded);
 
-      ws.addEventListener('open', () => { 
-        message.success('已连接到麦克风')
-        setEnabled(true)
-      })
-      ws.addEventListener('close', () => { setEnabled(false) })
-      
+      ws.addEventListener("open", () => {
+        message.success("已连接到麦克风");
+        setEnabled(true);
+      });
+      ws.addEventListener("close", () => {
+        setEnabled(false);
+      });
     }
 
-    mediaSource.addEventListener('sourceopen', sourceopen);
+    mediaSource.addEventListener("sourceopen", sourceopen);
     setSrc(URL.createObjectURL(mediaSource));
     return function () {
       ws && ws.close();
-      mediaSource.removeEventListener("sourceopen",sourceopen);
-    }
-  }, [audioEl, enabled, url])
-
-
+      mediaSource.removeEventListener("sourceopen", sourceopen);
+    };
+  }, [audioEl, enabled, url]);
 
   return (
     <div>
       <audio ref={audioEl} src={src} autoPlay></audio>
       <Switch
         checked={enabled}
-        onChange={v => {
+        onChange={(v) => {
           setEnabled(v);
         }}
         checkedChildren={<AudioOutlined />}
         unCheckedChildren={<AudioMutedOutlined />}
       />
     </div>
-  )
+  );
 }

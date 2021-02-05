@@ -9418,6 +9418,11 @@ realpath-native@^1.1.0:
   dependencies:
     util.promisify "^1.0.0"
 
+recordrtc@^5.6.1:
+  version "5.6.1"
+  resolved "https://registry.npm.taobao.org/recordrtc/download/recordrtc-5.6.1.tgz#da876700fa149bbb230df7591a020e2c43de01c8"
+  integrity sha1-2odnAPoUm7sjDfdZGgIOLEPeAcg=
+
 recursive-readdir@2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/recursive-readdir/-/recursive-readdir-2.2.2.tgz#9946fb3274e1628de6e36b2f6714953b4845094f"
