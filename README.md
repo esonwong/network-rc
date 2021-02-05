@@ -107,6 +107,10 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
+### 0.9.33
+
+- 修复音量调整
+
 ### 0.9.32
 
 - 添加音量控制
@@ -116,9 +120,9 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ### 0.9.31
 
-- 减小车子端的延迟
+- 减小车子端拾音的延迟
 - 修复无法加载 RecordRTC 造成的无法发送录音
-- 修复手柄按键播放音频会触发两次的 bug
+- 修复手柄按键播放音频会触发两次的问题
 
 ### 0.9.30
 

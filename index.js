@@ -217,11 +217,12 @@ wss.on("connection", async function (socket) {
   });
 
   const volume = await audioPlayer.getVolume();
-  const sendVolume = function () {
+  const sendVolume = function (volume) {
+    console.log("音量同步", volume);
     socket.sendData("volume", volume);
   };
 
-  sendVolume();
+  sendVolume(volume);
   audioPlayer.on("volume", sendVolume);
 
   socket.sendData(
