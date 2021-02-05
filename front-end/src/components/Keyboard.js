@@ -88,11 +88,11 @@ export default class Keybord extends Component {
     }
 
     if (keyName === "2") {
-      playAudio({ path: serverConfig.audio1 });
+      playAudio({ path: serverConfig.audio2 });
     }
 
     if (keyName === "3") {
-      playAudio({ path: serverConfig.audio1 });
+      playAudio({ path: serverConfig.audio3 });
     }
 
     if (keyName === "4") {
