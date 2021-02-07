@@ -11,7 +11,6 @@ import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
 import Status from "./components/Status";
-import Home from "./components/Home";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -422,14 +421,13 @@ export default class App extends Component {
           disabled={!isLogin}
         />
         <Router className="app-page">
-          <Home default />
           {wsConnected && (
             <Login path={`${pubilcUrl}/login`} onSubmit={login} />
           )}
           {isLogin ? (
             <>
               <Setting
-                path={`setting`}
+                path={`${pubilcUrl}/setting`}
                 {...setting}
                 cameraList={cameraList}
                 wsConnected={wsConnected}

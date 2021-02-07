@@ -14,7 +14,7 @@ export default function Login({ onSubmit }) {
       onSubmit({ sharedCode });
       return;
     }
-    const { id } = store.get("network-rc-session");
+    const { id } = store.get("network-rc-session") || {};
     if (id) {
       onSubmit({ sessionId: id });
       return;

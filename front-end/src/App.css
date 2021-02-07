@@ -1,6 +1,7 @@
 @import "~antd/dist/antd.css";
 
-html, body {
+html,
+body {
   background-color: #fff;
   width: 100%;
   height: 100%;
@@ -15,7 +16,7 @@ html, body {
 
 .app-status {
   padding: 0.5em;
-  width: 100%;  
+  width: 100%;
 }
 
 .app-status .ant-form-item {
@@ -48,13 +49,12 @@ html, body {
   z-index: -1;
 }
 
-
 .controller-form {
   padding: 0.5em;
 }
 
 .controller-form .ant-form-item {
-  z-index:10;
+  z-index: 10;
 }
 
 .direction-slider {
@@ -99,8 +99,6 @@ html, body {
   /* transition: all 0.036s cubic-bezier(0.78, 0.14, 0.15, 0.86); */
 }
 
-
-
 .controller-form .backward-button,
 .controller-form .left-button,
 .controller-form .forward-button,
@@ -110,8 +108,6 @@ html, body {
   min-width: 3em;
   min-height: 3em;
 }
-
-
 
 .ai {
   height: 80vh;
@@ -158,11 +154,21 @@ html, body {
   flex-shrink: 1;
 }
 .camera-rnd {
-  border: 2px solid #1890ff;
   /* overflow: hidden; */
-}
-.camera-rnd.disabled {
   border: none;
+  outline: none;
+}
+.camera-rnd:focus {
+  border: 2px solid #1890ff;
+  outline: none;
+}
+
+.camera-rnd.react-draggable {
+  border: 2px solid #1890ff;
+}
+
+.camera-rnd.disabled {
+  outline: none;
 }
 
 .camera-rnd .button-box {
@@ -180,7 +186,8 @@ html, body {
   transform: translate(0, -50%);
   /* opacity: 0.5; */
 }
-.camera-rnd .edit button{
+
+.camera-rnd .edit button {
   margin-bottom: 0.5em;
 }
 
@@ -213,7 +220,7 @@ html, body {
 }
 
 .select-disabled {
-  user-select:none; 
+  user-select: none;
 }
 
 .record-button {
