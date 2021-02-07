@@ -219,3 +219,5 @@ network-rc.service
 users.yml
 lib/tts/*.pcm
 deploy.js
+
+assets/*.mp3
