@@ -111,6 +111,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 - 兼容 ios 平台手柄控制
 - 优化云台控制
+- 保存摄像头开关状态
 
 ### 0.9.33
 
