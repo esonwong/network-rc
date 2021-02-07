@@ -1,11 +1,5 @@
-import React from 'react'
-import {
-  Form,
-  Switch,
-  Dropdown,
-  Button,
-  Tag,
-} from "antd";
+import React from "react";
+import { Form, Switch, Dropdown, Button, Tag } from "antd";
 import {
   HomeOutlined,
   FullscreenOutlined,
@@ -14,10 +8,10 @@ import {
   FullscreenExitOutlined,
   ThunderboltOutlined,
   PoweroffOutlined,
-} from "@ant-design/icons"
+} from "@ant-design/icons";
 import { Location } from "@reach/router";
-import Nav from './Nav';
-import Audio from './Audio'
+import Nav from "./Nav";
+import Audio from "./Audio";
 
 export default function Status({
   piPowerOff,
@@ -32,7 +26,8 @@ export default function Status({
   isFullscreen,
   disabled,
   setting,
-  isLogin
+  isLogin,
+  session,
 }) {
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -79,18 +74,16 @@ export default function Status({
           disabled={disabled}
         />
       </Form.Item>
-      
-      {isLogin &&
+
+      {isLogin && (
         <Form.Item>
           <Audio
-            url={`${window.location.protocol === "https:" ? "wss://" : "ws://"}${setting.wsAddress}/microphone`}
+            url={`${
+              window.location.protocol === "https:" ? "wss://" : "ws://"
+            }${setting.wsAddress}/microphone`}
           />
         </Form.Item>
-      }
-
-
-
-
+      )}
 
       {document.body.requestFullscreen && (
         <Form.Item>
@@ -98,12 +91,7 @@ export default function Status({
             type="primary"
             shape="circle"
             icon={
-              isFullscreen ? (
-
-                <FullscreenExitOutlined />
-              ) : (
-                  <FullscreenOutlined />
-                )
+              isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />
             }
             onClick={() => {
               if (isFullscreen) {
@@ -115,22 +103,32 @@ export default function Status({
           ></Button>
         </Form.Item>
       )}
-      {wsConnected &&
+      {wsConnected && (
         <Form.Item>
           <Button
             type="danger"
             shape="circle"
-            icon={
-              <PoweroffOutlined />
-            }
+            icon={<PoweroffOutlined />}
             onClick={piPowerOff}
           ></Button>
-        </Form.Item>}
+        </Form.Item>
+      )}
       {wsConnected && delay && (
         <Form.Item>
-          <Tag color={delay > 80 ? "red" : "green"}>ping:{delay.toFixed(0)}</Tag>
-        </Form.Item>)}
+          <Tag color={delay > 80 ? "red" : "green"}>
+            ping:{delay.toFixed(0)}
+          </Tag>
+        </Form.Item>
+      )}
 
+      {wsConnected && session && session.endTime && (
+        <Form.Item>
+          <Tag>
+            剩余:
+            {((session.endTime - new Date().getTime()) / 1000).toFixed(0)}秒
+          </Tag>
+        </Form.Item>
+      )}
     </Form>
-  )
+  );
 }

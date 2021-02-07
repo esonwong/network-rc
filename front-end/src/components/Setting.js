@@ -121,6 +121,8 @@ export default function Setting({
           wsConnected={wsConnected}
           saveServerConfig={saveServerConfig}
           sharedCode={serverConfig.sharedCode}
+          sharedDuration={serverConfig.sharedDuration}
+          sharedEndTime={serverConfig.sharedEndTime}
         />
       </TabPane>
     </Tabs>

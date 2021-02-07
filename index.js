@@ -113,6 +113,7 @@ const {
   changePower,
   changeSteering,
 } = require("./lib/controller.js");
+const sessionManager = require("./lib/session");
 
 const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
@@ -206,7 +207,7 @@ if (userList) {
 
 wss.on("connection", async function (socket) {
   console.log("客户端连接！");
-  TTS("已建立神经连接，同步率百分之九十");
+  TTS("已建立神经连接，同步率百分之九十五");
   console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
@@ -341,6 +342,17 @@ wss.on("connection", async function (socket) {
         status.saveConfig(payload);
         socket.sendData("success", { message: "设置已保存！" });
         broadcast("config", status.config);
+        if (!payload.sharedCode) {
+          clients.forEach((socket) => {
+            if (socket.session.sharedCode) {
+              socket.sendData("error", { message: "分享已关闭！" });
+              socket.close();
+            }
+          });
+          status.saveConfig({ sharedEndTime: undefined });
+          sessionManager.clearSharedCodeSession();
+          broadcast("config", status.config);
+        }
         break;
       case "volume":
         if (!check(socket)) break;
@@ -362,8 +374,7 @@ wss.on("connection", async function (socket) {
   });
 });
 
-const login = (socket, { uid, token, sharedCode }) => {
-  console.log("login token", token);
+const login = (socket, { sessionId, token, sharedCode }) => {
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
   }
@@ -372,11 +383,13 @@ const login = (socket, { uid, token, sharedCode }) => {
     if (md5(password + "eson") == token) {
       socket.isLogin = true;
       const userType = "admin";
-      socket.userType = userType;
+      const session = sessionManager.add({ userType });
+      socket.session = session;
+
       socket.sendData("login", {
+        session,
         status: 0,
         message: "OMG 你登录啦！",
-        userType,
       });
       return;
     } else {
@@ -384,17 +397,42 @@ const login = (socket, { uid, token, sharedCode }) => {
       return;
     }
   }
-  if (status.config.sharedCode) {
+  if (status.config.sharedCode && sharedCode) {
     console.log("login shared code", sharedCode);
     if (status.config.sharedCode === sharedCode) {
       socket.isLogin = true;
       const userType = "guest";
-      socket.userType = userType;
+      const nowTime = new Date().getTime();
+      if (!status.config.sharedEndTime) {
+        status.saveConfig({
+          sharedEndTime:
+            nowTime +
+            (status.config.sharedDuration ||
+              status.defaultConfig.sharedDuration),
+        });
+        broadcast("config", status.config);
+      }
+      const endTime = status.config.sharedEndTime;
+      const session = sessionManager.add({ userType, sharedCode, endTime });
+      socket.session = session;
       socket.sendData("login", {
+        session,
         status: 0,
         message: "🏎️ 分享链接登陆成功 ！",
-        userType,
       });
+
+      socket.endTimerId = setTimeout(() => {
+        socket.sendData("error", {
+          status: 1,
+          message: "时间结束！",
+        });
+        if (status.config.sharedCode === sharedCode) {
+          status.saveConfig({ sharedCode: undefined });
+          broadcast("config", status.config);
+        }
+        socket.close();
+      }, endTime - nowTime);
+
       return;
     } else {
       socket.sendData("error", {
@@ -402,6 +440,53 @@ const login = (socket, { uid, token, sharedCode }) => {
         message: "哎呦喂，分享链接已失效！",
       });
       return;
+    }
+  }
+  if (sessionId) {
+    console.log("login with session", sessionId);
+    const session = status.config.sessionList.find((i) => i.id === sessionId);
+    if (session) {
+      const { sharedCode, endTime, userType } = session;
+      if (userType === "guest") {
+        const nowTime = new Date().getTime();
+        if (nowTime - endTime > 3000) {
+          socket.sendData("error", {
+            status: 1,
+            message: "哎呦喂，登录过期了！",
+          });
+          if (status.config.sharedCode === sharedCode) {
+            status.saveConfig({ sharedCode: undefined });
+            broadcast("config", status.config);
+          }
+          return;
+        }
+
+        socket.endTimerId = setTimeout(() => {
+          socket.sendData("error", {
+            status: 1,
+            message: "时间结束！",
+          });
+          socket.close();
+          if (status.config.sharedCode === sharedCode) {
+            status.saveConfig({ sharedCode: undefined });
+            broadcast("config", status.config);
+          }
+        }, endTime - nowTime);
+      }
+
+      socket.isLogin = true;
+      socket.session = session;
+      socket.sendData("login", {
+        session,
+        status: 0,
+        message: "已登录！",
+      });
+      return;
+    } else {
+      socket.sendData("error", {
+        status: 1,
+        message: "哎呦喂，登录过期了！",
+      });
     }
   }
 };
@@ -499,6 +584,7 @@ const disconnect = (socket) => {
   console.log("客户端断开连接！");
   TTS("神经连接已断开");
   if (socket.webrtc) socket.webrtc.close();
+  if (socket.endTimerId) clearTimeout(socket.endTimerId);
   clearTimeout(socket.timeout);
   clients.delete(socket);
   let num = 0;

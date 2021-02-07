@@ -35,7 +35,13 @@ export default function Audio({ url }) {
           const bufferTime =
             audioEl.current.buffered.end(0) - audioEl.current.currentTime;
           const playbackRate = 1 + (bufferTime - 0.8) * 1.2;
-          audioEl.current.playbackRate = playbackRate < 0 ? 1 : playbackRate;
+          if (playbackRate < 0) {
+            audioEl.current.playbackRate = 0.5;
+          } else if (playbackRate > 3) {
+            audioEl.current.playbackRate = 3;
+          } else {
+            audioEl.current.playbackRate = playbackRate;
+          }
         }
       }
 

@@ -44,6 +44,7 @@ export default class App extends Component {
       isLogin: true,
       volume: 0,
       micVolume: 0,
+      session: {},
     };
 
     const { changeLight, changePower, changeSteering } = this;
@@ -193,10 +194,15 @@ export default class App extends Component {
     }
   }
 
-  onLogin = ({ message: m = "无密码" } = {}) => {
+  onLogin = ({ message: m = "无密码", session } = {}) => {
     message.success(m);
-    this.setState({ isLogin: true });
-    navigate(`${pubilcUrl}/controller`, { replace: true });
+    this.setState({ isLogin: true, session });
+    store.set("network-rc-session", session);
+    if (document.referrer.indexOf(window.location.host) > -1) {
+      navigate(-1);
+    } else {
+      navigate(`${pubilcUrl}/controller`, { replace: true });
+    }
 
     // video 标签
     // const time = setInterval(() => {
@@ -248,9 +254,11 @@ export default class App extends Component {
   login = ({ password, sharedCode }) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
+    const session = store.get("network-rc-session") || {};
     this.socket.sendData("login", {
       token: password ? md5(`${password}eson`) : undefined,
       sharedCode,
+      sessionId: session.id,
     });
   };
 
@@ -305,7 +313,7 @@ export default class App extends Component {
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
-    navigate(`${pubilcUrl}/`);
+    navigate(`${pubilcUrl}/controller`);
 
     // this.connect();
   };
@@ -386,6 +394,7 @@ export default class App extends Component {
         ttsPlaying,
         volume,
         micVolume,
+        session,
       },
       tts,
       playAudio,
@@ -408,6 +417,7 @@ export default class App extends Component {
             disconnect,
             setting,
             isLogin,
+            session,
           }}
           disabled={!isLogin}
         />
