@@ -166,10 +166,10 @@ export default class Controller extends Component {
     } = this;
 
     if (index === 2) {
-      steering(0, s0 - value / 5);
+      steering(0, s0 - value / 10);
     }
     if (index === 3) {
-      steering(1, s1 + value / 5);
+      steering(1, s1 + value / 10);
     }
   };
 
@@ -208,7 +208,7 @@ export default class Controller extends Component {
         if (!connected) continue;
         buttons.forEach((status, index) => {
           if (!buttonsStatus[`${gamePadIndex}-${index}`]) {
-            buttonsStatus[`${gamePadIndex}-${index}`] = status;
+            buttonsStatus[`${gamePadIndex}-${index}`] = { value: status.value };
             return;
           }
           if (
@@ -220,7 +220,7 @@ export default class Controller extends Component {
               })
             );
           }
-          buttonsStatus[`${gamePadIndex}-${index}`] = status;
+          buttonsStatus[`${gamePadIndex}-${index}`] = { value: status.value };
         });
         axes.forEach((value, index) => {
           if (Math.abs(value) < 0.05) {
@@ -293,13 +293,11 @@ export default class Controller extends Component {
 
     changeCamera: (v) => this.props.controller.changeCamera(v),
     steering: (index, v) => {
-      const { fixedAction } = this.state;
       if (v > 2) v = 2;
       if (v < -2) v = -2;
-      fixedAction.steering[index] = v;
-      this.steeringStatus = fixedAction.steering;
-      this.setState({ fixedAction });
+      if (this.steeringStatus[index] === v) return;
       this.props.controller.changeSteering(index, v);
+      this.steeringStatus[index] = v;
     },
   };
 

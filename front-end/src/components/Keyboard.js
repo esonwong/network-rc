@@ -38,7 +38,7 @@ export default class Keybord extends Component {
             break;
         }
       });
-    }, 100);
+    }, 50);
   }
 
   componentDidMount() {
