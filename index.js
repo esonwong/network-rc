@@ -61,12 +61,12 @@ const argv = require("yargs")
       type: "number",
     },
     frpServer: {
-      default: "home.esonwong.com",
+      default: "gz.esonwong.com",
       describe: "frp 服务器, server_addr",
       type: "string",
     },
     frpServerPort: {
-      default: 9910,
+      default: 9099,
       describe: "frp 服务器连接端口, server_port",
       type: "number",
     },
@@ -226,10 +226,14 @@ wss.on("connection", async function (socket) {
   sendVolume(volume);
   audioPlayer.on("volume", sendVolume);
 
-  socket.sendData(
-    "camera list",
-    cameraList.map(({ name, size }, index) => ({ name, size, index }))
-  );
+  if (socket.isLogin) {
+    if (socket.isLogin) {
+      socket.sendData(
+        "camera list",
+        cameraList.map(({ name, size }, index) => ({ name, size, index }))
+      );
+    }
+  }
 
   socket.sendData("light enabled", lightEnabled);
 
@@ -309,6 +313,14 @@ wss.on("connection", async function (socket) {
         break;
       case "login":
         login(socket, payload);
+        if (socket.isLogin) {
+          if (socket.isLogin) {
+            socket.sendData(
+              "camera list",
+              cameraList.map(({ name, size }, index) => ({ name, size, index }))
+            );
+          }
+        }
         break;
       case "open light":
         openLight(socket, payload);
@@ -377,6 +389,7 @@ wss.on("connection", async function (socket) {
 const login = (socket, { sessionId, token, sharedCode }) => {
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
+    return;
   }
 
   if (token) {
