@@ -418,10 +418,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
       const nowTime = new Date().getTime();
       if (!status.config.sharedEndTime) {
         status.saveConfig({
-          sharedEndTime:
-            nowTime +
-            (status.config.sharedDuration ||
-              status.defaultConfig.sharedDuration),
+          sharedEndTime: nowTime + status.config.sharedDuration,
         });
         broadcast("config", status.config);
       }

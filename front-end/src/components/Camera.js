@@ -74,7 +74,7 @@ export default function Camera({ url, index = 0 }) {
 
     w.on("connected", function () {
       setEnabled(true);
-      open(enabled, pause, wsavc, { inputFormatIndex, fps, ..._size });
+      open(true, pause, wsavc, { inputFormatIndex, fps, size });
     });
 
     w.on("info", ({ cameraName, size: { width, height }, formatList }) => {
