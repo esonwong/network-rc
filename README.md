@@ -107,6 +107,11 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 更新记录
 
+### 0.9.35
+
+- 内置云服务替换为云服务器
+- 优化摄像头安全性
+
 ### 0.9.34
 
 - 兼容 ios 平台手柄控制
