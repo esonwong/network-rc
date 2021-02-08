@@ -111,9 +111,9 @@ const {
   changeSpeed,
   closeController,
   changePower,
-  changeSteering,
 } = require("./lib/controller.js");
 const sessionManager = require("./lib/session");
+const { changePwmPin, closeChannel } = require("./lib/channel");
 
 const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
@@ -335,9 +335,6 @@ wss.on("connection", async function (socket) {
       case "direction rate":
         directionRate(socket, payload);
         break;
-      case "steering rate":
-        steeringRate(socket, payload);
-        break;
       case "tts":
         speak(socket, payload);
         break;
@@ -379,6 +376,10 @@ wss.on("connection", async function (socket) {
         if (path) {
           audioPlayer.push({ type: "mp3 file path", data: { path } });
         }
+        break;
+      case "change channel":
+        if (!check(socket)) break;
+        changePwmPin(payload.pin, payload.value);
         break;
       default:
         console.log("怎么了？");
@@ -567,13 +568,6 @@ const directionRate = (socket, v) => {
   broadcast("direction", v);
 };
 
-const steeringRate = (socket, { index, rate }) => {
-  console.log(`steering index: ${index}, rate: ${rate}`);
-  if (!check(socket)) return;
-  changeSteering(index, rate);
-  broadcast("steering", { rate, index });
-};
-
 const openLight = (socket, enabled) => {
   if (!check(socket)) return;
   console.log("open light", enabled);
@@ -604,6 +598,7 @@ const disconnect = (socket) => {
   console.log("已连接客户端", num);
   if (num < 1) {
     closeController();
+    closeChannel();
     lightEnabled = false;
     powerEnabled = false;
   }

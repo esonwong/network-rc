@@ -12,6 +12,7 @@ import ObjectDetection from "./ObjectDetection";
 import NSlider from "./Slider";
 import { createRef } from "react";
 import Microphone from "./Microphone";
+import ControlUI from "./ControlUI";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -301,6 +302,8 @@ export default class Controller extends Component {
     },
   };
 
+  onControl() {}
+
   fixContent = () => {
     const {
       serverConfig: { directionReverse, directionFix, speedReverse },
@@ -378,6 +381,7 @@ export default class Controller extends Component {
         children,
         playAudio,
         serverConfig,
+        changeChannel,
       },
     } = this;
     const {
@@ -589,6 +593,12 @@ export default class Controller extends Component {
               ttsInput.current && ttsInput.current.focus();
             }, 200);
           }}
+        />
+        <ControlUI
+          uiComponentList={serverConfig.uiComponentList}
+          channelList={serverConfig.channelList}
+          changeChannel={changeChannel}
+          path="/"
         />
         {children}
       </div>

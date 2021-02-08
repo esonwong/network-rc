@@ -3,6 +3,7 @@ import { Slider, Form, Button, Input, Tabs, Switch } from "antd";
 import Shared from "./Shared";
 import { layout, tailLayout } from "../unit";
 import store from "store";
+import UISetting from "./UISetting";
 const { TabPane } = Tabs;
 
 export default function Setting({
@@ -72,6 +73,9 @@ export default function Setting({
             </Button>
           </Form.Item>
         </Form>
+      </TabPane>
+      <TabPane tab="UI 设置" key="ui">
+        <UISetting />
       </TabPane>
       <TabPane tab="通道设置" key="3"></TabPane>
       <TabPane tab="摄像头设置" key="camera">

@@ -359,6 +359,11 @@ export default class App extends Component {
     this.sendData("micVolume", v);
   };
 
+  changeChannel = (plyload) => {
+    if (!this.state.wsConnected) return;
+    this.sendData("change channel", plyload);
+  };
+
   _saveServerConfig = (config) => {
     if (!this.state.wsConnected) return;
     this.sendData("save config", config);
@@ -369,6 +374,7 @@ export default class App extends Component {
       connect,
       disconnect,
       controller,
+      changeChannel,
       changeSetting,
       changeLight,
       changePower,
@@ -453,6 +459,7 @@ export default class App extends Component {
                 setting={setting}
                 saveServerConfig={saveServerConfig}
                 serverConfig={serverConfig}
+                changeChannel={changeChannel}
               >
                 <CameraContainer
                   path="/"
