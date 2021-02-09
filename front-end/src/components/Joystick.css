@@ -1,5 +1,5 @@
 .joytick {
-  position: fixed;
+  position: relative;
   width: 18vw;
   height: 18vw;
   border-radius: 50%;
@@ -27,4 +27,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }

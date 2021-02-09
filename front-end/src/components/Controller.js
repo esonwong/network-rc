@@ -378,10 +378,11 @@ export default class Controller extends Component {
         onTTS,
         ttsPlaying,
         setting,
-        children,
         playAudio,
         serverConfig,
         changeChannel,
+        editabled,
+        cameraList,
       },
     } = this;
     const {
@@ -598,9 +599,10 @@ export default class Controller extends Component {
           uiComponentList={serverConfig.uiComponentList}
           channelList={serverConfig.channelList}
           changeChannel={changeChannel}
-          path="/"
+          editabled={editabled}
+          cameraList={cameraList}
+          setting={setting}
         />
-        {children}
       </div>
     );
   }

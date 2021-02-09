@@ -8,7 +8,7 @@ export default function Slider({
 }) {
   const silder = useRef(null);
   const rail = useRef(null);
-  // const [startPostion, setStartPostion] = useState("startPostion");
+  // const [startPosition, setStartPosition] = useState("startPosition");
   const change = (x, y) => {
     if (!x) {
       onChange(0);
@@ -38,7 +38,7 @@ export default function Slider({
         vertical === false ? "" : "ant-slider-vertical"
       }`}
       onTouchStart={({ targetTouches: [{ clientX, clientY }] }) => {
-        // setStartPostion({ clientX, clientY });
+        // setStartPosition({ clientX, clientY });
         change(clientX, clientY);
       }}
       onTouchMove={({ targetTouches: [{ clientX, clientY }] }) => {
@@ -54,7 +54,9 @@ export default function Slider({
         tabIndex="0"
         className="ant-slider-handle"
         style={{
-          [`${vertical === false ? "right" : "bottom"}`]: `${(value + 1) * 50}%`,
+          [`${vertical === false ? "right" : "bottom"}`]: `${
+            (value + 1) * 50
+          }%`,
           [`${vertical === false ? "left" : "top"}`]: "auto",
           transform: `translate${vertical === false ? "X(" : "Y("}50%)`,
         }}

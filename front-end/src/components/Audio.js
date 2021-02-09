@@ -50,7 +50,7 @@ export default function Audio({ url }) {
       ws.addEventListener("message", onAudioLoaded);
 
       ws.addEventListener("open", () => {
-        message.success("已连接到麦克风");
+        // message.success("已连接到麦克风");
         setEnabled(true);
       });
       ws.addEventListener("close", () => {

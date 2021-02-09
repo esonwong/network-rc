@@ -4,7 +4,6 @@ import { message, Modal, Button } from "antd";
 import "./App.css";
 import { Router, navigate } from "@reach/router";
 import Controller from "./components/Controller";
-import CameraContainer from "./components/CameraContainer";
 import Setting from "./components/Setting";
 import { PoweroffOutlined, ReloadOutlined } from "@ant-design/icons";
 import Login from "./components/Login";
@@ -19,6 +18,7 @@ export default class App extends Component {
     super(props);
     this.appRef = createRef();
     this.state = {
+      editabled: false,
       cameraList: [],
       setting: {
         wsAddress: window.location.host,
@@ -309,6 +309,10 @@ export default class App extends Component {
     });
   };
 
+  changeEditabled = (editabled) => {
+    this.setState({ editabled });
+  };
+
   changeSetting = (setting) => {
     this.setState({ setting });
     store.set("setting", setting);
@@ -383,6 +387,7 @@ export default class App extends Component {
       saveServerConfig,
       changeVolume,
       changeMicVolume,
+      changeEditabled,
       state: {
         cameraList,
         setting,
@@ -400,6 +405,7 @@ export default class App extends Component {
         volume,
         micVolume,
         session,
+        editabled,
       },
       tts,
       playAudio,
@@ -423,6 +429,8 @@ export default class App extends Component {
             setting,
             isLogin,
             session,
+            changeEditabled,
+            editabled,
           }}
           disabled={!isLogin}
         />
@@ -460,13 +468,9 @@ export default class App extends Component {
                 saveServerConfig={saveServerConfig}
                 serverConfig={serverConfig}
                 changeChannel={changeChannel}
-              >
-                <CameraContainer
-                  path="/"
-                  cameraList={cameraList}
-                  setting={setting}
-                />
-              </Controller>
+                editabled={editabled}
+                cameraList={cameraList}
+              />
             </>
           ) : undefined}
         </Router>

@@ -1,7 +1,12 @@
 import React, { useRef, useState } from "react";
 import "./Joystick.css";
 
-export default function Joystick({ onChange, postion, size, name }) {
+export default function Joystick({
+  onChange,
+  name,
+  audoReset = true,
+  disabled,
+}) {
   const joytick = useRef(null);
   const rail = useRef(null);
   const [value, setValue] = useState({ x: 0, y: 0 });
@@ -32,20 +37,25 @@ export default function Joystick({ onChange, postion, size, name }) {
     <div
       className="joytick"
       onTouchStart={({ targetTouches: [{ clientX, clientY }] }) => {
+        if (disabled) return;
         change({ x: clientX, y: clientY });
       }}
       onTouchMove={({ targetTouches: [{ clientX, clientY }] }) => {
+        if (disabled) return;
         change({ x: clientX, y: clientY });
       }}
       onTouchEnd={() => {
+        if (disabled) return;
+        if (!audoReset) return;
         setValue({ x: 0, y: 0 });
+        onChange({ x: 0, y: 0 });
       }}
       ref={joytick}
-      style={{
-        top: `${postion.y}px`,
-        left: `${postion.x}px`,
-        transform: `transform: scale(${size});`,
-      }}
+      // style={{
+      //   top: `${position.y}px`,
+      //   left: `${position.x}px`,
+      //   transform: `transform: scale(${size});`,
+      // }}
     >
       <div ref={rail} className="rail"></div>
 

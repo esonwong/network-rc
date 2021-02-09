@@ -8,6 +8,7 @@ import {
   FullscreenExitOutlined,
   ThunderboltOutlined,
   PoweroffOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
 import { Location } from "@reach/router";
 import Nav from "./Nav";
@@ -28,6 +29,7 @@ export default function Status({
   setting,
   isLogin,
   session,
+  changeEditabled,
 }) {
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -85,6 +87,14 @@ export default function Status({
         </Form.Item>
       )}
 
+      <Form.Item>
+        <Switch
+          checkedChildren={<FormOutlined />}
+          unCheckedChildren={<FormOutlined />}
+          onChange={changeEditabled}
+        ></Switch>
+      </Form.Item>
+
       {document.body.requestFullscreen && (
         <Form.Item>
           <Button
@@ -103,6 +113,7 @@ export default function Status({
           ></Button>
         </Form.Item>
       )}
+
       {wsConnected && (
         <Form.Item>
           <Button

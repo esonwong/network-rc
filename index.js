@@ -379,7 +379,20 @@ wss.on("connection", async function (socket) {
         break;
       case "change channel":
         if (!check(socket)) break;
-        changePwmPin(payload.pin, payload.value);
+        const channel = status.config.channelList.find(
+          (i) => i.pin === payload.pin
+        );
+        if (channel && channel.enabled) {
+          const { pin, value: inputValue } = payload;
+          const { valueReset, valuePostive, valueNegative } = channel;
+          const value =
+            inputValue > 0
+              ? inputValue * (valuePostive - valueReset) + valueReset
+              : inputValue == 0
+              ? valueReset
+              : inputValue * (valueReset - valueNegative) + valueReset;
+          changePwmPin(pin, value);
+        }
         break;
       default:
         console.log("怎么了？");

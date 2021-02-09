@@ -1,72 +1,46 @@
 import React, { useEffect, useRef } from "react";
 import WSAvcPlayer from "ws-avc-player";
-import { Rnd } from "react-rnd";
 import { useState } from "react";
 import { Button, Switch, message, Select } from "antd";
 import { useCreation, useEventListener } from "@umijs/hooks";
 import store from "store";
 import {
   BorderOutlined,
-  UpSquareOutlined,
+  ExpandAltOutlined,
   RotateRightOutlined,
-  FormOutlined,
-  LockOutlined,
 } from "@ant-design/icons";
 
 const { Option } = Select;
-
-const defaultStatus = [
-  {
-    size: {
-      width: window.innerWidth / 2,
-      height: (window.innerWidth * 0.75) / 2,
-    },
-    position: { x: window.innerWidth / 4, y: 0, z: 1 },
-  },
-  {
-    size: {
-      width: window.innerWidth / 4,
-      height: (window.innerWidth * 0.75) / 4,
-    },
-    position: { x: (window.innerWidth / 8) * 3, y: 0, z: 2 },
-  },
-  {
-    size: {
-      width: window.innerWidth / 4,
-      height: (window.innerWidth * 0.75) / 4,
-    },
-    position: { x: (window.innerWidth / 8) * 3, y: 0, z: 2 },
-  },
-];
 
 function open(enabled, pause, wsavc, payload) {
   enabled && !pause && wsavc && wsavc.ws && wsavc.send("open-request", payload);
 }
 
-export default function Camera({ url, index = 0 }) {
+export default function Camera({
+  url,
+  editabled,
+  size,
+  onChangeVideoRatio,
+  onClickFullScreen,
+  onClickCoverScreen,
+}) {
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
-
-  const [position, setPosition] = useState(defaultStatus[index].position); // 摄像头位置
-  const [size, setViewSize] = useState(defaultStatus[index].size); // 画布大小
-  const [rotate, setRotate] = useState(0);
-  const [videoRate, setVideoRate] = useState(4 / 3); // 视频宽高比
   const [enabled, setEnabled] = useState(false);
   const [pause, setPause] = useState(false);
-  const [editabled, setEditabled] = useState(false);
   const [cameraName, setCameraName] = useState("");
   const [formatList, setFormatList] = useState([]);
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined);
   const [fps, setFps] = useState();
+  const [rotate, setRotate] = useState(0); // 旋转
 
   const wsavc = useCreation(() => {
-    const { size: _size, position: _position, rotate, enabled } = store.get(
-      storeName
-    ) || { size, position, rotate: 0 };
-    setPosition(_position);
-    setViewSize(_size);
-    setRotate(rotate);
+    const { rotate, enabled } = store.get(storeName) || {
+      enabled: true,
+      rotate: 0,
+    };
     setEnabled(enabled);
+    setRotate(rotate);
     const w = new WSAvcPlayer({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
@@ -80,8 +54,8 @@ export default function Camera({ url, index = 0 }) {
     w.on("info", ({ cameraName, size: { width, height }, formatList }) => {
       setCameraName(cameraName);
       w.cameraName = cameraName;
-      setVideoRate(width / height);
       setFormatList(formatList);
+      onChangeVideoRatio(width / height);
     });
 
     w.on("open", ({ inputFormatIndex, fps }) => {
@@ -108,20 +82,20 @@ export default function Camera({ url, index = 0 }) {
     }
   }
 
-  function setFullScreen() {
-    const width = window.innerWidth;
-    const height = width / videoRate;
-    setViewSize({ width, height });
-    setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
-  }
+  // function setFullScreen() {
+  //   const width = window.innerWidth;
+  //   const height = width / videoRate;
+  //   setViewSize({ width, height });
+  //   setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
+  // }
 
-  function setCenterScreen() {
-    const height = window.innerHeight / 4;
-    const width = height * videoRate;
-    const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 };
-    setPosition(position);
-    setViewSize({ width, height });
-  }
+  // function setCenterScreen() {
+  //   const height = window.innerHeight / 4;
+  //   const width = height * videoRate;
+  //   const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 };
+  //   setPosition(position);
+  //   setViewSize({ width, height });
+  // }
 
   function start() {
     wsavc.connect(
@@ -166,69 +140,31 @@ export default function Camera({ url, index = 0 }) {
   }, [url, wsavc, enabled, pause]);
 
   useEffect(() => {
-    store.set(storeName, { size, position, rotate, enabled });
-  }, [storeName, size, position, rotate, enabled]);
+    store.set(storeName, { rotate, enabled });
+  }, [storeName, rotate, enabled]);
 
   return (
-    <Rnd
-      disableDragging={!editabled}
-      enableResizing={{
-        top: editabled,
-        right: editabled,
-        bottom: editabled,
-        left: editabled,
-        topRight: editabled,
-        bottomRight: editabled,
-        bottomLeft: editabled,
-        topLeft: editabled,
-      }}
-      className={editabled ? "camera-rnd" : "camera-rnd disabled"}
-      lockAspectRatio={videoRate}
-      tabIndex={1}
-      size={size}
-      position={position}
-      onDragStop={(e, { x, y }) => {
-        const p = { x, y, z: position.z };
-        setPosition(p);
-      }}
-      onResizeStop={(e, direction, ref, delta, { x, y }) => {
-        const p = { x, y, z: position.z };
-        setPosition(p);
-        const size = {
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-        };
-        setViewSize(size);
-      }}
-      style={{ zIndex: position.z }}
-    >
+    <div className="camera">
       {editabled ? (
         <div className="button-box transition-animation" title={cameraName}>
+          {<Switch size="small" checked={enabled} onChange={setEnabled} />}
           <Button
             size="small"
             shape="circle"
             icon={<BorderOutlined />}
-            onClick={setFullScreen}
+            onClick={onClickFullScreen}
           />
           <Button
             size="small"
             shape="circle"
-            icon={<UpSquareOutlined />}
-            onClick={setCenterScreen}
+            icon={<ExpandAltOutlined />}
+            onClick={onClickCoverScreen}
           />
           <Button
             size="small"
             shape="circle"
             icon={<RotateRightOutlined />}
             onClick={changeRotate}
-          />
-          <Button
-            type="primary"
-            size="small"
-            icon={<LockOutlined />}
-            onClick={() => {
-              setEditabled(false);
-            }}
           />
           <Select
             defaultValue={inputFormatIndex}
@@ -245,20 +181,7 @@ export default function Camera({ url, index = 0 }) {
             <Option value={60}>60 fps</Option>
           </Select>
         </div>
-      ) : (
-        <div className="edit">
-          <Button
-            size="small"
-            shape="circle"
-            icon={<FormOutlined />}
-            onClick={() => {
-              setEditabled(true);
-            }}
-          />
-          <br />
-          {<Switch size="small" checked={enabled} onChange={setEnabled} />}
-        </div>
-      )}
+      ) : undefined}
       <div
         className="camera-box"
         ref={boxEl}
@@ -266,6 +189,6 @@ export default function Camera({ url, index = 0 }) {
           transform: `rotate(${rotate}deg)`,
         }}
       ></div>
-    </Rnd>
+    </div>
   );
 }

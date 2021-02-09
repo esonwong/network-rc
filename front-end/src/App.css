@@ -34,10 +34,12 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
+  height: 100%;
   overflow-x: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow: hidden;
 }
 
 .camera-container {
@@ -51,6 +53,8 @@ body {
 
 .controller-form {
   padding: 0.5em;
+  position: absolute;
+  bottom: 0;
 }
 
 .controller-form .ant-form-item {
@@ -153,32 +157,23 @@ body {
   flex-grow: 1;
   flex-shrink: 1;
 }
-.camera-rnd {
-  /* overflow: hidden; */
-  border: none;
-  outline: none;
-}
-.camera-rnd:focus {
-  border: 2px solid #1890ff;
-  outline: none;
-}
 
-.camera-rnd.react-draggable {
-  border: 2px solid #1890ff;
+.camera {
+  position: relative;
+  width: 62vw;
+  height: 48vw;
 }
-
-.camera-rnd.disabled {
-  outline: none;
+.camera.has-ratio {
+  height: auto;
 }
-
-.camera-rnd .button-box {
+.camera .button-box {
   position: absolute;
   left: 50%;
   top: 50%;
   z-index: 99;
   transform: translate(-50%, -50%);
 }
-.camera-rnd .edit {
+.camera .edit {
   position: absolute;
   right: 0.5em;
   z-index: 99;
@@ -187,11 +182,11 @@ body {
   /* opacity: 0.5; */
 }
 
-.camera-rnd .edit button {
+.camera .edit button {
   margin-bottom: 0.5em;
 }
 
-.camera-rnd .button-box button {
+.camera .button-box button {
   margin-right: 0.5em;
   margin-bottom: 0.5em;
 }
