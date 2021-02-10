@@ -46,12 +46,11 @@ export default class App extends Component {
       session: {},
     };
 
-    const { changeLight, changePower, changeSteering } = this;
+    const { changeLight, changePower } = this;
 
     this.controller = {
       changeLight,
       changePower,
-      changeSteering,
       speed: (v) => {
         const {
           changeSpeed,
@@ -72,6 +71,7 @@ export default class App extends Component {
       },
     };
     this.saveServerConfig = debounce(this._saveServerConfig, 300);
+    this.resetChannel = debounce(this._resetChannel, 300);
   }
 
   componentDidMount() {
@@ -177,6 +177,7 @@ export default class App extends Component {
   };
 
   sendData(action, payload) {
+    if (!this.state.wsConnected) return;
     if (this.socket) {
       this.socket.sendData(action, payload);
     } else {
@@ -326,44 +327,36 @@ export default class App extends Component {
   };
 
   changeDirection = (directionRate) => {
-    if (!this.state.wsConnected) return;
     this.sendData("direction rate", directionRate);
   };
 
-  changeSteering = (index, rate) => {
-    if (!this.state.wsConnected) return;
-    this.sendData("steering rate", { index, rate });
-  };
-
   tts = (text = "一起玩网络遥控车") => {
-    if (!this.state.wsConnected) return;
     this.setState({ ttsPlaying: true });
     this.sendData("tts", { text });
   };
 
   playAudio = ({ path, stop = true } = {}) => {
-    if (!this.state.wsConnected) return;
     this.sendData("play audio", { path, stop });
   };
 
   changeVolume = (v) => {
-    if (!this.state.wsConnected) return;
     this.sendData("volume", v);
   };
 
   changeMicVolume = (v) => {
-    if (!this.state.wsConnected) return;
     this.sendData("micVolume", v);
   };
 
   changeChannel = (plyload) => {
-    if (!this.state.wsConnected) return;
     this.sendData("change channel", plyload);
   };
 
   _saveServerConfig = (config) => {
-    if (!this.state.wsConnected) return;
     this.sendData("save config", config);
+  };
+
+  _resetChannel = () => {
+    this.sendData("reset channel");
   };
 
   render() {
@@ -378,6 +371,7 @@ export default class App extends Component {
       piPowerOff,
       login,
       saveServerConfig,
+      resetChannel,
       changeVolume,
       changeMicVolume,
       changeEditabled,
@@ -441,6 +435,7 @@ export default class App extends Component {
                 onDisconnect={disconnect}
                 onSubmit={changeSetting}
                 saveServerConfig={saveServerConfig}
+                resetChannel={resetChannel}
                 serverConfig={serverConfig}
                 changeVolume={changeVolume}
                 changeMicVolume={changeMicVolume}

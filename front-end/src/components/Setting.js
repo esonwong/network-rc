@@ -4,6 +4,7 @@ import Shared from "./Shared";
 import { layout, tailLayout } from "../unit";
 import store from "store";
 import UISetting from "./UISetting";
+import ChannelSetting from "./ChannelSetting";
 const { TabPane } = Tabs;
 
 export default function Setting({
@@ -12,6 +13,7 @@ export default function Setting({
   onSubmit,
   serverConfig,
   saveServerConfig,
+  resetChannel,
   cameraList,
   fixedController,
   changeVolume,
@@ -77,7 +79,13 @@ export default function Setting({
       <TabPane tab="UI 设置" key="ui">
         <UISetting />
       </TabPane>
-      <TabPane tab="通道设置" key="3"></TabPane>
+      <TabPane tab="通道设置" key="3">
+        <ChannelSetting
+          resetChannel={resetChannel}
+          saveServerConfig={saveServerConfig}
+          serverConfig={serverConfig}
+        />
+      </TabPane>
       <TabPane tab="摄像头设置" key="camera">
         <Form
           {...layout}

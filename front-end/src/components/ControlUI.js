@@ -6,6 +6,7 @@ import store from "store";
 import { useEventListener, useUpdateEffect } from "@umijs/hooks";
 import "./ControlUI.scss";
 import classnames from "classnames";
+import JoystickSlider from "./JoystickSlider";
 
 const screenDirction = window.matchMedia("(orientation: portrait)");
 export default function ControlUI({
@@ -15,6 +16,7 @@ export default function ControlUI({
   editabled,
   cameraList,
   setting,
+  isShowButton,
 }) {
   const [orientation, setOrientation] = useState(
     screenDirction.matches ? "portrait" : "landscape"
@@ -53,7 +55,10 @@ export default function ControlUI({
       if (!enabled) return;
       ui.forEach(({ id: cId, positive, axis }) => {
         if (id === cId) {
-          changeChannel({ pin, value: positive ? v[axis] : -v[axis] });
+          changeChannel({
+            pin,
+            value: (positive ? 1 : -1) * (axis ? v[axis] : v),
+          });
         }
       });
     });
@@ -67,13 +72,16 @@ export default function ControlUI({
       i.enabled = true;
       return i;
     }),
-    ...uiComponentList,
+    ...(isShowButton ? uiComponentList : []),
   ];
 
   return (
     <>
       {list.map(
-        ({ id, name, enabled, type, audtoReset, cameraIndex }, index) => {
+        (
+          { id, name, enabled, type, audtoReset, cameraIndex, vertical },
+          index
+        ) => {
           const position = positionMap[id]?.[orientation] || {
             x: index * 50,
             y: index * 20,
@@ -117,7 +125,7 @@ export default function ControlUI({
               }}
               style={{ zIndex: positionMap[id]?.[orientation]?.z || index + 2 }}
             >
-              {type === "joystick" ? (
+              {type === "joystick" && (
                 <Joystick
                   disabled={editabled}
                   name={name}
@@ -125,7 +133,18 @@ export default function ControlUI({
                   audoReset={audtoReset}
                   position={position}
                 />
-              ) : type === "camera" ? (
+              )}
+              {type === "slider" && (
+                <JoystickSlider
+                  vertical={vertical}
+                  disabled={editabled}
+                  name={name}
+                  onChange={(v) => onControl(id, v)}
+                  audoReset={audtoReset}
+                  position={position}
+                />
+              )}
+              {type === "camera" && (
                 <Camera
                   editabled={editabled}
                   key={cameraIndex}
@@ -140,7 +159,7 @@ export default function ControlUI({
                   onClickCoverScreen={() => {}}
                   size={size}
                 />
-              ) : undefined}
+              )}
             </Rnd>
           ) : undefined;
         }

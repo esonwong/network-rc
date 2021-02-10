@@ -427,7 +427,7 @@ export default class Controller extends Component {
               <Button icon={<SlidersOutlined />}>修正</Button>
             </Popover>
           </Form.Item>
-          {isShowButton && (
+          {/* {isShowButton && (
             <Fragment>
               <NSlider
                 value={fixedAction.direction}
@@ -443,7 +443,7 @@ export default class Controller extends Component {
                 // style={{ display: !zeroOrientation ? undefined : "none" }}
               />
             </Fragment>
-          )}
+          )} */}
           <Form.Item>
             <Popover
               placement="topLeft"
@@ -596,6 +596,7 @@ export default class Controller extends Component {
           }}
         />
         <ControlUI
+          isShowButton={isShowButton}
           uiComponentList={serverConfig.uiComponentList}
           channelList={serverConfig.channelList}
           changeChannel={changeChannel}

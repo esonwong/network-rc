@@ -391,6 +391,9 @@ wss.on("connection", async function (socket) {
           changePwmPin(pin, value);
         }
         break;
+      case "reset channel":
+        status.resetChannelAndUI();
+        break;
       default:
         console.log("怎么了？");
     }

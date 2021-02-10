@@ -23,6 +23,8 @@ export default function Joystick({
   audoReset = true,
   disabled,
   position = { x: 0, y: 0 },
+  enabledX = true,
+  enabledY = true,
 }) {
   const joytick = useRef(null);
   const rail = useRef(null);
@@ -50,6 +52,7 @@ export default function Joystick({
     setValue({ x, y });
     onChange({ x, y });
   };
+
   return (
     <div
       className="joytick"
