@@ -33,6 +33,7 @@ export default function Camera({
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined);
   const [fps, setFps] = useState();
   const [rotate, setRotate] = useState(0); // 旋转
+  const [connected, setConneected] = useState(false);
 
   const wsavc = useCreation(() => {
     const { rotate, enabled } = store.get(storeName) || {
@@ -47,8 +48,8 @@ export default function Camera({
     });
 
     w.on("connected", function () {
-      setEnabled(true);
-      open(true, pause, wsavc, { inputFormatIndex, fps, size });
+      setConneected(connected);
+      open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
     });
 
     w.on("info", ({ cameraName, size: { width, height }, formatList }) => {
@@ -69,6 +70,7 @@ export default function Camera({
 
     w.on("disconnected", function () {
       // message.info(`${w.cameraName} 已断开`)
+      setConneected(false);
     });
 
     return w;
@@ -121,8 +123,8 @@ export default function Camera({
   );
 
   useEffect(() => {
-    open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
-  }, [enabled, pause, wsavc, fps, inputFormatIndex, size]);
+    connected && open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
+  }, [enabled, pause, wsavc, fps, inputFormatIndex, size, connected]);
 
   useEffect(() => {
     const box = boxEl.current;

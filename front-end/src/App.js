@@ -116,9 +116,6 @@ export default class App extends Component {
       if (typeof data === "string") {
         const { action, payload } = JSON.parse(data);
         switch (action) {
-          case "controller init":
-            this.onInit(payload);
-            break;
           case "camera list":
             this.setState({ cameraList: payload });
             break;
@@ -155,6 +152,11 @@ export default class App extends Component {
             message.warn(payload.message);
             break;
           case "error":
+            if (payload.type === "auth error") {
+              if (window.location.pathname !== "/login") {
+                navigate(`${pubilcUrl}/login`);
+              }
+            }
             message.error(payload.message);
             break;
           case "success":
@@ -182,23 +184,14 @@ export default class App extends Component {
     }
   }
 
-  onInit({ needPassword }) {
-    if (needPassword) {
-      if (window.location.pathname !== "/login") {
-        navigate(`${pubilcUrl}/login`);
-      }
-      this.setState({ isLogin: false });
-    } else {
-      this.onLogin();
-    }
-  }
-
   onLogin = ({ message: m = "无密码", session } = {}) => {
     message.success(m);
     this.setState({ isLogin: true, session });
     store.set("network-rc-session", session);
     if (document.referrer.indexOf(window.location.host) > -1) {
-      navigate(-1);
+      if (window.history.length > 1) {
+        navigate(-1);
+      }
     } else {
       navigate(`${pubilcUrl}/controller`, { replace: true });
     }

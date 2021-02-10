@@ -3,7 +3,7 @@ import Joystick from "./Joystick";
 import Camera from "./Camera";
 import { Rnd } from "react-rnd";
 import store from "store";
-import { useEventListener, useMount, useUpdateEffect } from "@umijs/hooks";
+import { useEventListener, useUpdateEffect } from "@umijs/hooks";
 import "./ControlUI.scss";
 import classnames from "classnames";
 
@@ -20,13 +20,15 @@ export default function ControlUI({
     screenDirction.matches ? "portrait" : "landscape"
   );
 
-  const [positionMap, setPositionMap] = useState({});
+  const [positionMap, setPositionMap] = useState(
+    store.get("ui-position") || {}
+  );
 
   const savePosition = (id, position) => {
     if (!positionMap[id]) {
       positionMap[id] = {};
     }
-    positionMap[id][orientation] = position;
+    positionMap[id][orientation] = { ...position };
     setPositionMap({ ...positionMap });
   };
 
@@ -34,11 +36,7 @@ export default function ControlUI({
     if (!editabled) {
       store.set("ui-position", positionMap);
     }
-  }, [editabled, positionMap]);
-
-  useMount(() => {
-    setPositionMap(store.get("ui-position") || {});
-  });
+  }, [editabled]);
 
   useEventListener(
     "change",
@@ -90,9 +88,19 @@ export default function ControlUI({
             <Rnd
               key={id}
               disableDragging={!editabled}
+              enableResizing={{
+                top: editabled,
+                right: editabled,
+                bottom: editabled,
+                left: editabled,
+                topRight: editabled,
+                bottomRight: editabled,
+                bottomLeft: editabled,
+                topLeft: editabled,
+              }}
               className={classnames("ui-rnd", {
                 disabled: !editabled,
-                resized: position.size,
+                resized: size,
               })}
               lockAspectRatio={ratio === undefined ? true : ratio}
               position={position}
@@ -115,6 +123,7 @@ export default function ControlUI({
                   name={name}
                   onChange={(v) => onControl(id, v)}
                   audoReset={audtoReset}
+                  position={position}
                 />
               ) : type === "camera" ? (
                 <Camera
@@ -122,9 +131,11 @@ export default function ControlUI({
                   key={cameraIndex}
                   index={cameraIndex}
                   url={`${setting.wsAddress}/video${cameraIndex}`}
-                  onChangeVideoRatio={(ratio) =>
-                    savePosition(id, { x, y, z, size, ratio })
-                  }
+                  onChangeVideoRatio={(v) => {
+                    if (ratio !== v) {
+                      savePosition(id, { x, y, z, size, ratio });
+                    }
+                  }}
                   onClickFullScreen={() => {}}
                   onClickCoverScreen={() => {}}
                   size={size}

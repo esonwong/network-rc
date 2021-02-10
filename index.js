@@ -213,9 +213,6 @@ wss.on("connection", async function (socket) {
   clients.add(socket);
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
-  socket.sendData("controller init", {
-    needPassword: password ? true : false,
-  });
 
   const volume = await audioPlayer.getVolume();
   const sendVolume = function (volume) {
@@ -557,7 +554,11 @@ const check = (socket) => {
     return true;
   } else {
     console.error("未登录！");
-    socket.sendData("error", { status: 1, message: "未登录！" });
+    socket.sendData("error", {
+      status: 1,
+      type: "auth error",
+      message: "未登录！",
+    });
     return false;
   }
 };

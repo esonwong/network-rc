@@ -1,20 +1,37 @@
 import React, { useRef, useState } from "react";
 import "./Joystick.css";
 
+const getOffsetLeft = (el) => {
+  if (el.offsetParent === null) {
+    return 0;
+  } else {
+    return el.offsetLeft + getOffsetLeft(el.offsetParent);
+  }
+};
+
+const getOffsetTop = (el) => {
+  if (el.offsetParent === null) {
+    return 0;
+  } else {
+    return el.offsetTop + getOffsetTop(el.offsetParent);
+  }
+};
+
 export default function Joystick({
   onChange,
   name,
   audoReset = true,
   disabled,
+  position = { x: 0, y: 0 },
 }) {
   const joytick = useRef(null);
   const rail = useRef(null);
   const [value, setValue] = useState({ x: 0, y: 0 });
   const change = ({ x, y } = { x: 0, y: 0 }) => {
-    const railLeft = joytick.current.offsetLeft + rail.current.offsetLeft;
+    const railLeft = getOffsetLeft(joytick.current) + position.x;
     x = ((x - railLeft) / rail.current.clientWidth) * 2 - 1;
     x = -x;
-    const railTop = joytick.current.offsetTop + rail.current.offsetTop;
+    const railTop = getOffsetTop(joytick.current) + position.y;
     y = ((y - railTop) / rail.current.clientHeight) * 2 - 1;
     y = -y;
     if (x > 1) {
