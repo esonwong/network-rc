@@ -77,7 +77,11 @@ export default function Setting({
         </Form>
       </TabPane>
       <TabPane tab="UI 设置" key="ui">
-        <UISetting />
+        <UISetting
+          resetChannel={resetChannel}
+          saveServerConfig={saveServerConfig}
+          serverConfig={serverConfig}
+        />
       </TabPane>
       <TabPane tab="通道设置" key="3">
         <ChannelSetting

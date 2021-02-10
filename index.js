@@ -211,6 +211,11 @@ wss.on("connection", async function (socket) {
   console.log("已经设置密码", password ? "是" : "否");
   socket.isLogin = password ? false : true;
   clients.add(socket);
+
+  socket.session = sessionManager.add({
+    userType: "admin",
+    endTime: new Date().getTime() + 1000 * 6000,
+  });
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
 
@@ -229,14 +234,13 @@ wss.on("connection", async function (socket) {
         "camera list",
         cameraList.map(({ name, size }, index) => ({ name, size, index }))
       );
+      socket.sendData("config", status.config);
     }
   }
 
   socket.sendData("light enabled", lightEnabled);
 
   socket.sendData("power enabled", powerEnabled);
-
-  socket.sendData("config", status.config);
 
   socket.sendData("info", { message: `Network RC v${package.version}` });
 
@@ -316,6 +320,7 @@ wss.on("connection", async function (socket) {
               "camera list",
               cameraList.map(({ name, size }, index) => ({ name, size, index }))
             );
+            socket.sendData("config", status.config);
           }
         }
         break;
@@ -325,13 +330,13 @@ wss.on("connection", async function (socket) {
       case "open power":
         openPower(socket, payload);
         break;
-      case "speed rate":
-        if (status.autoLocking === true) return;
-        speedRate(socket, payload);
-        break;
-      case "direction rate":
-        directionRate(socket, payload);
-        break;
+      // case "speed rate":
+      //   if (status.autoLocking === true) return;
+      //   speedRate(socket, payload);
+      //   break;
+      // case "direction rate":
+      //   directionRate(socket, payload);
+      //   break;
       case "tts":
         speak(socket, payload);
         break;

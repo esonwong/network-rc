@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
-import "./Joystick.css";
+import "./Joystick.scss";
+import classnames from "classnames";
 
 const getOffsetLeft = (el) => {
   if (el.offsetParent === null) {
@@ -30,24 +31,33 @@ export default function Joystick({
   const rail = useRef(null);
   const [value, setValue] = useState({ x: 0, y: 0 });
   const change = ({ x, y } = { x: 0, y: 0 }) => {
-    const railLeft = getOffsetLeft(joytick.current) + position.x;
-    x = ((x - railLeft) / rail.current.clientWidth) * 2 - 1;
-    x = -x;
-    const railTop = getOffsetTop(joytick.current) + position.y;
-    y = ((y - railTop) / rail.current.clientHeight) * 2 - 1;
-    y = -y;
-    if (x > 1) {
-      x = 1;
-    }
-    if (x < -1) {
-      x = -1;
+    if (enabledX) {
+      const railLeft = getOffsetLeft(joytick.current) + position.x;
+      x = ((x - railLeft) / rail.current.clientWidth) * 2 - 1;
+      x = -x;
+      if (x > 1) {
+        x = 1;
+      }
+      if (x < -1) {
+        x = -1;
+      }
+    } else {
+      x = 0;
     }
 
-    if (y > 1) {
-      y = 1;
-    }
-    if (y < -1) {
-      y = -1;
+    if (enabledY) {
+      const railTop = getOffsetTop(joytick.current) + position.y;
+      y = ((y - railTop) / rail.current.clientHeight) * 2 - 1;
+      y = -y;
+
+      if (y > 1) {
+        y = 1;
+      }
+      if (y < -1) {
+        y = -1;
+      }
+    } else {
+      y = 0;
     }
     setValue({ x, y });
     onChange({ x, y });
@@ -55,7 +65,10 @@ export default function Joystick({
 
   return (
     <div
-      className="joytick"
+      className={classnames("joytick", {
+        "enabled-x": enabledX,
+        "enabled-y": enabledY,
+      })}
       onTouchStart={({ targetTouches: [{ clientX, clientY }] }) => {
         if (disabled) return;
         change({ x: clientX, y: clientY });
