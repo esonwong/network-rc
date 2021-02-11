@@ -38,102 +38,106 @@ export default function ChannelSetting({
 }) {
   const [form] = Form.useForm();
 
-  const ui = (index, fields, { add, remove }) => (
-    <Space align="baseline" split={<Divider type="vertical" />} wrap>
-      {fields.map((field) => (
-        <Space key={field.key} align="baseline">
-          <Form.Item
-            label="UI"
-            {...field}
-            name={[field.name, "id"]}
-            fieldKey={[field.fieldKey, "id"]}
-            rules={[{ required: true, message: "客官！选一个！" }]}
-          >
-            <Select style={{ width: 80 }}>
-              {serverConfig.uiComponentList.map(({ id, name }) => (
-                <Option value={id}> {name} </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="轴"
-            {...field}
-            name={[field.name, "axis"]}
-            fieldKey={[field.fieldKey, "axis"]}
-            rules={[{ required: true, message: "客官！选一个！" }]}
-          >
-            <Select
-              style={{ width: 80 }}
-              disabled={
-                "step" !==
-                form.getFieldValue([
-                  "channelList",
-                  index,
-                  "ui",
-                  field.name,
-                  "axis",
-                ])
-              }
-            >
-              <Option value="x">x</Option>
-              <Option value="y">y</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="控制方向"
-            {...field}
-            name={[field.name, "positive"]}
-            fieldKey={[field.fieldKey, "positive"]}
-            valuePropName="checked"
-          >
-            <Switch checkedChildren="正向" unCheckedChildren="反向" />
-          </Form.Item>
-          <Form.Item
-            label="控制方式"
-            {...field}
-            name={[field.name, "method"]}
-            fieldKey={[field.fieldKey, "method"]}
-          >
-            <Select style={{ width: 80 }}>
-              <Option value="default">默认</Option>
-              <Option value="step">步进</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="步进速度"
-            {...field}
-            name={[field.name, "speed"]}
-            fieldKey={[field.fieldKey, "speed"]}
-            initialValue={0.5}
-          >
-            <InputNumber
-              step={0.1}
-              min={0}
-              disabled={
-                "step" !==
-                form.getFieldValue([
-                  "channelList",
-                  index,
-                  "ui",
-                  field.name,
-                  "method",
-                ])
-              }
-            />
-          </Form.Item>
-          <MinusCircleOutlined onClick={() => remove(field.name)} />
-        </Space>
-      ))}
-      <PlusCircleOutlined
-        onClick={() =>
-          add({
-            positive: true,
-            method: "default",
-          })
-        }
-      />
-    </Space>
-  );
+  const ui = (index, fields, { add, remove }) => {
+    return (
+      <Space align="baseline" split={<Divider type="vertical" />} wrap>
+        {fields.map((field) => {
+          const uiId = form.getFieldValue([
+            "channelList",
+            index,
+            "ui",
+            field.name,
+            "id",
+          ]);
+          const uiComponent = serverConfig.uiComponentList.find(
+            (i) => i.id === uiId
+          );
+          return (
+            <Space key={field.key} align="baseline">
+              <Form.Item
+                label="UI"
+                {...field}
+                name={[field.name, "id"]}
+                fieldKey={[field.fieldKey, "id"]}
+                rules={[{ required: true, message: "客官！选一个！" }]}
+              >
+                <Select style={{ width: 80 }}>
+                  {serverConfig.uiComponentList.map(({ id, name }) => (
+                    <Option value={id}> {name} </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              {uiComponent.type === "joystick" && (
+                <Form.Item
+                  label="轴"
+                  {...field}
+                  name={[field.name, "axis"]}
+                  fieldKey={[field.fieldKey, "axis"]}
+                  rules={[{ required: true, message: "客官！选一个！" }]}
+                >
+                  <Select style={{ width: 80 }}>
+                    <Option value="x">x</Option>
+                    <Option value="y">y</Option>
+                  </Select>
+                </Form.Item>
+              )}
+              <Form.Item
+                label="控制方向"
+                {...field}
+                name={[field.name, "positive"]}
+                fieldKey={[field.fieldKey, "positive"]}
+                valuePropName="checked"
+              >
+                <Switch checkedChildren="正向" unCheckedChildren="反向" />
+              </Form.Item>
+              <Form.Item
+                label="控制方式"
+                {...field}
+                name={[field.name, "method"]}
+                fieldKey={[field.fieldKey, "method"]}
+              >
+                <Select style={{ width: 80 }}>
+                  <Option value="default">默认</Option>
+                  <Option value="step">步进</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="步进速度"
+                {...field}
+                name={[field.name, "speed"]}
+                fieldKey={[field.fieldKey, "speed"]}
+                initialValue={0.5}
+              >
+                <InputNumber
+                  step={0.1}
+                  min={0}
+                  disabled={
+                    "step" !==
+                    form.getFieldValue([
+                      "channelList",
+                      index,
+                      "ui",
+                      field.name,
+                      "method",
+                    ])
+                  }
+                />
+              </Form.Item>
+              <MinusCircleOutlined onClick={() => remove(field.name)} />
+            </Space>
+          );
+        })}
+        <PlusCircleOutlined
+          onClick={() =>
+            add({
+              positive: true,
+              method: "default",
+            })
+          }
+        />
+      </Space>
+    );
+  };
 
   const keyboard = (fields, { add, remove }) => (
     <Space align="baseline" split={<Divider type="vertical" />} wrap>
