@@ -84,7 +84,7 @@ const argv = require("yargs")
   .env("NETWORK_RC")
   .help().argv;
 
-console.info("版本", package.version);
+console.info(`版本: ${package.version} 预览版`);
 
 const {
   frp,
@@ -209,13 +209,8 @@ wss.on("connection", async function (socket) {
   console.log("客户端连接！");
   TTS("已建立神经连接，同步率百分之九十五");
   console.log("已经设置密码", password ? "是" : "否");
-  socket.isLogin = password ? false : true;
   clients.add(socket);
 
-  socket.session = sessionManager.add({
-    userType: "admin",
-    endTime: new Date().getTime() + 1000 * 6000,
-  });
   socket.sendData = sendData;
   socket.sendBinary = sendBinary;
 
@@ -227,16 +222,6 @@ wss.on("connection", async function (socket) {
 
   sendVolume(volume);
   audioPlayer.on("volume", sendVolume);
-
-  if (socket.isLogin) {
-    if (socket.isLogin) {
-      socket.sendData(
-        "camera list",
-        cameraList.map(({ name, size }, index) => ({ name, size, index }))
-      );
-      socket.sendData("config", status.config);
-    }
-  }
 
   socket.sendData("light enabled", lightEnabled);
 
@@ -398,6 +383,7 @@ wss.on("connection", async function (socket) {
         break;
       case "reset channel":
         status.resetChannelAndUI();
+        broadcast("config", status.config);
         break;
       default:
         console.log("怎么了？");
@@ -408,6 +394,20 @@ wss.on("connection", async function (socket) {
 const login = (socket, { sessionId, token, sharedCode }) => {
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
+    return;
+  }
+
+  if (!password) {
+    socket.isLogin = true;
+    socket.session = sessionManager.add({
+      userType: "admin",
+      endTime: new Date().getTime() + 1000 * 60 * 60 * 24,
+    });
+    socket.sendData("login", {
+      session: socket.session,
+      status: 0,
+      message: "OMG 你登录啦！",
+    });
     return;
   }
 
@@ -647,6 +647,7 @@ const piReboot = () => {
 
 process.on("SIGINT", async function () {
   closeController();
+  closeChannel();
   changeLight(false);
   console.log("Goodbye!");
   await TTS("系统关闭");

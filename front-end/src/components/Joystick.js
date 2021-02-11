@@ -21,7 +21,7 @@ const getOffsetTop = (el) => {
 export default function Joystick({
   onChange,
   name,
-  audoReset = true,
+  autoReset = true,
   disabled,
   position = { x: 0, y: 0 },
   enabledX = true,
@@ -30,6 +30,7 @@ export default function Joystick({
   const joytick = useRef(null);
   const rail = useRef(null);
   const [value, setValue] = useState({ x: 0, y: 0 });
+  const [tochTime, setTochTime] = useState();
   const change = ({ x, y } = { x: 0, y: 0 }) => {
     if (enabledX) {
       const railLeft = getOffsetLeft(joytick.current) + position.x;
@@ -71,6 +72,13 @@ export default function Joystick({
       })}
       onTouchStart={({ targetTouches: [{ clientX, clientY }] }) => {
         if (disabled) return;
+        const now = new Date().getTime();
+        if (Math.abs(now - tochTime) < 200) {
+          setValue({ x: 0, y: 0 });
+          onChange({ x: 0, y: 0 });
+          return;
+        }
+        setTochTime(now);
         change({ x: clientX, y: clientY });
       }}
       onTouchMove={({ targetTouches: [{ clientX, clientY }] }) => {
@@ -79,16 +87,11 @@ export default function Joystick({
       }}
       onTouchEnd={() => {
         if (disabled) return;
-        if (!audoReset) return;
+        if (!autoReset) return;
         setValue({ x: 0, y: 0 });
         onChange({ x: 0, y: 0 });
       }}
       ref={joytick}
-      // style={{
-      //   top: `${position.y}px`,
-      //   left: `${position.x}px`,
-      //   transform: `transform: scale(${size});`,
-      // }}
     >
       <div ref={rail} className="rail"></div>
 

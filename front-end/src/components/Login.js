@@ -3,7 +3,6 @@ import { layout, tailLayout } from "../unit";
 import { Input, Button, Form } from "antd";
 import qs from "querystring";
 import { useMount } from "@umijs/hooks";
-import store from "store";
 
 export default function Login({ onSubmit }) {
   useMount(() => {
@@ -11,12 +10,9 @@ export default function Login({ onSubmit }) {
       window.location.search.replace("?", "")
     );
     if (sharedCode) {
-      onSubmit({ sharedCode });
-      return;
-    }
-    const { id } = store.get("network-rc-session") || {};
-    if (id) {
-      onSubmit({ sessionId: id });
+      setTimeout(() => {
+        onSubmit({ sharedCode });
+      }, 2000);
       return;
     }
   });

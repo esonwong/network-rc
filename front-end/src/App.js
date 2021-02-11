@@ -110,6 +110,8 @@ export default class App extends Component {
       heartbeatTime = setInterval(() => {
         socket.sendData("heartbeat");
       }, 200);
+
+      this.login();
     });
 
     socket.addEventListener("message", async ({ data }) => {
@@ -192,6 +194,8 @@ export default class App extends Component {
     if (document.referrer.indexOf(window.location.host) > -1) {
       if (window.history.length > 1) {
         navigate(-1);
+      } else {
+        navigate(`${pubilcUrl}/controller`, { replace: true });
       }
     } else {
       navigate(`${pubilcUrl}/controller`, { replace: true });
@@ -244,11 +248,11 @@ export default class App extends Component {
     this.socket.close();
   };
 
-  login = ({ password, sharedCode }) => {
+  login = ({ password, sharedCode } = {}) => {
     const { wsConnected } = this.state;
     if (!wsConnected) return;
     const session = store.get("network-rc-session") || {};
-    this.socket.sendData("login", {
+    this.sendData("login", {
       token: password ? md5(`${password}eson`) : undefined,
       sharedCode,
       sessionId: session.id,

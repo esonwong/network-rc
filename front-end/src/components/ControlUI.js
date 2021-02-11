@@ -79,7 +79,7 @@ export default function ControlUI({
     <>
       {list.map(
         (
-          { id, name, enabled, type, audtoReset, cameraIndex, vertical },
+          { id, name, enabled, type, autoReset, cameraIndex, vertical },
           index
         ) => {
           const position = positionMap[id]?.[orientation] || {
@@ -130,7 +130,7 @@ export default function ControlUI({
                   disabled={editabled}
                   name={name}
                   onChange={(v) => onControl(id, v)}
-                  audoReset={audtoReset}
+                  autoReset={autoReset}
                   position={position}
                 />
               )}
@@ -140,7 +140,7 @@ export default function ControlUI({
                   disabled={editabled}
                   name={name}
                   onChange={(v) => onControl(id, v)}
-                  audoReset={audtoReset}
+                  audoReset={autoReset}
                   position={position}
                 />
               )}

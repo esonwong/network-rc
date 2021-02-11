@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import store from "store";
 import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
@@ -9,7 +9,6 @@ import Ai from "./Ai";
 import mobile from "is-mobile";
 import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
-import NSlider from "./Slider";
 import { createRef } from "react";
 import Microphone from "./Microphone";
 import ControlUI from "./ControlUI";
@@ -37,7 +36,7 @@ export default class Controller extends Component {
       zeroOrientation: undefined,
       backwardPower: store.get("backward-power") || 50,
       forwardPower: store.get("forward-power") || 50,
-      isShowButton: mobile(),
+      isShowButton: store.get("is-show-button") || mobile(),
       gamepadEnabled: false,
       ttsInputVisible: false,
       fixedAction: {
@@ -390,12 +389,10 @@ export default class Controller extends Component {
       forwardPower,
       backwardPower,
       isShowButton,
-      zeroOrientation,
       fixedAction,
       ttsInputVisible,
       text,
     } = this.state;
-    const { speed, direction } = fixedController;
     return (
       <div className="controller">
         <Router className="controller-router">
@@ -427,23 +424,6 @@ export default class Controller extends Component {
               <Button icon={<SlidersOutlined />}>修正</Button>
             </Popover>
           </Form.Item>
-          {/* {isShowButton && (
-            <Fragment>
-              <NSlider
-                value={fixedAction.direction}
-                onChange={(v) => direction(v)}
-                className="direction-slider"
-                style={{ display: !zeroOrientation ? undefined : "none" }}
-              />
-              <NSlider
-                vertical
-                value={fixedAction.speed}
-                onChange={(v) => speed(v)}
-                className="speed-slider"
-                // style={{ display: !zeroOrientation ? undefined : "none" }}
-              />
-            </Fragment>
-          )} */}
           <Form.Item>
             <Popover
               placement="topLeft"
@@ -486,7 +466,10 @@ export default class Controller extends Component {
           <Form.Item>
             <Switch
               checked={isShowButton}
-              onChange={(isShowButton) => this.setState({ isShowButton })}
+              onChange={(isShowButton) => {
+                store.set("is-show-button", isShowButton);
+                this.setState({ isShowButton });
+              }}
               checkedChildren={<DragOutlined />}
               unCheckedChildren={<DragOutlined />}
             />
@@ -511,8 +494,6 @@ export default class Controller extends Component {
               placement="topLeft"
               content={
                 <p>
-                  移动：wsad <br />
-                  云台：ikjl,p <br />
                   发送文字转语音： 回车 <br />
                   发送语音: 空格 <br />
                   播放声音：1234 <br />
