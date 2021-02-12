@@ -67,7 +67,7 @@ export default function ChannelSetting({
                   ))}
                 </Select>
               </Form.Item>
-              {uiComponent.type === "joystick" && (
+              {uiComponent && uiComponent.type === "joystick" && (
                 <Form.Item
                   label="轴"
                   {...field}
