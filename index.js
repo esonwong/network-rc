@@ -299,6 +299,7 @@ wss.on("connection", async function (socket) {
         break;
       case "login":
         login(socket, payload);
+        if (!check(socket)) break;
         if (socket.isLogin) {
           if (socket.isLogin) {
             socket.sendData(
