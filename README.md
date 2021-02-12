@@ -1,17 +1,20 @@
-# 树莓派网络遥控车
+# 树莓派网络遥控车软件 Network RC
 
-基于树莓派的网络遥控车软件。具备以下特性：
+Network RC 是运行在树莓派和浏览器上的网络遥控车软件。具备以下特性：
 
 - 低延迟控制和网络图传
 - 通道自定义（27 个通道）
 - 支持触屏操作、游戏手柄、枪控、板控
 - 支持实时语音收听和语音喊话
 - 内置网络穿透
+- 系统语音播报
 
 ## 依赖
 
 - ffmpeg: 运行前请确保树莓派上安装了 ffmpeg，安装方法 `sudo apt install ffmpeg -y`
 - nodejs
+
+> **注意：在最新树莓派系统上存在兼通性问题， 使用此版本系统<http://downloads.raspberrypi.org/raspbian/images/raspbian-2020-02-07/>**
 
 ## 使用教程
 
@@ -22,7 +25,7 @@
   - 视频教程：[4G 5G 网络 RC 遥控车 03 - 无限距离远程遥控？](https://www.bilibili.com/video/BV1Xp4y1X7fa)
   - 图文教程：[网络遥控车互联网控制教程](https://blog.esonwong.com/%E7%BD%91%E7%BB%9C%E9%81%A5%E6%8E%A7%E8%BD%A6%E4%BA%92%E8%81%94%E7%BD%91%E6%8E%A7%E5%88%B6%E6%95%99%E7%A8%8B/)
 
-## 开始
+## 代码贡献指引
 
 ```bash
 git clone https://github.com/itiwll/network-rc.git
@@ -46,7 +49,7 @@ node index.js
 node index.js -p password
 
 # 启用网络穿透
-node index.js -f -o 9088
+node index.js -f -o 9088 --tsl
 
 # 自定义网络穿透服务器
 node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerToken xxxxx
