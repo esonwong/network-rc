@@ -30,6 +30,7 @@ export default function Joystick({
   const joytick = useRef(null);
   const rail = useRef(null);
   const [value, setValue] = useState({ x: 0, y: 0 });
+  const [mouseStarting, setMouseStarting] = useState(false);
   const [tochTime, setTochTime] = useState();
   const change = ({ x, y } = { x: 0, y: 0 }) => {
     if (enabledX) {
@@ -64,34 +65,56 @@ export default function Joystick({
     onChange({ x, y });
   };
 
+  const start = ({ x, y }) => {
+    if (disabled) return;
+    const now = new Date().getTime();
+    if (Math.abs(now - tochTime) < 200) {
+      setValue({ x: 0, y: 0 });
+      onChange({ x: 0, y: 0 });
+      return;
+    }
+    setTochTime(now);
+    change({ x, y });
+  };
+
+  const move = ({ x, y }) => {
+    if (disabled) return;
+    change({ x, y });
+  };
+
+  const end = () => {
+    if (disabled) return;
+    if (!autoReset) return;
+    setValue({ x: 0, y: 0 });
+    onChange({ x: 0, y: 0 });
+  };
+
   return (
     <div
       className={classnames("joytick", {
         "enabled-x": enabledX,
         "enabled-y": enabledY,
       })}
-      onTouchStart={({ targetTouches: [{ clientX, clientY }] }) => {
-        if (disabled) return;
-        const now = new Date().getTime();
-        if (Math.abs(now - tochTime) < 200) {
-          setValue({ x: 0, y: 0 });
-          onChange({ x: 0, y: 0 });
-          return;
-        }
-        setTochTime(now);
-        change({ x: clientX, y: clientY });
-      }}
-      onTouchMove={({ targetTouches: [{ clientX, clientY }] }) => {
-        if (disabled) return;
-        change({ x: clientX, y: clientY });
-      }}
-      onTouchEnd={() => {
-        if (disabled) return;
-        if (!autoReset) return;
-        setValue({ x: 0, y: 0 });
-        onChange({ x: 0, y: 0 });
-      }}
+      onTouchStart={({ targetTouches: [{ clientX: x, clientY: y }] }) =>
+        start({ x, y })
+      }
+      onTouchMove={({ targetTouches: [{ clientX: x, clientY: y }] }) =>
+        move({ x, y })
+      }
+      onTouchEnd={end}
       ref={joytick}
+      onMouseDown={({ clientX: x, clientY: y }) => {
+        setMouseStarting(true);
+        start({ x, y });
+      }}
+      onMouseMove={({ clientX: x, clientY: y }) => {
+        if (!mouseStarting) return;
+        move({ x, y });
+      }}
+      onMouseUp={() => {
+        setMouseStarting(false);
+        end();
+      }}
     >
       <div ref={rail} className="rail"></div>
 
