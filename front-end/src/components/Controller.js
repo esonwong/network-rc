@@ -4,14 +4,13 @@ import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
 import { AimOutlined, SendOutlined, SoundOutlined } from "@ant-design/icons";
 import Keybord from "./Keyboard";
-import Icon from "./Icon";
 import Ai from "./Ai";
-import mobile from "is-mobile";
 import { Router } from "@reach/router";
 import ObjectDetection from "./ObjectDetection";
 import { createRef } from "react";
 import Microphone from "./Microphone";
 import ControlUI from "./ControlUI";
+import Gamepad from "./Gamepad";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -36,7 +35,7 @@ export default class Controller extends Component {
       zeroOrientation: undefined,
       backwardPower: store.get("backward-power") || 50,
       forwardPower: store.get("forward-power") || 50,
-      isShowButton: store.get("is-show-button") || mobile(),
+      isShowButton: store.get("is-show-button") || true,
       gamepadEnabled: false,
       ttsInputVisible: false,
       fixedAction: {
@@ -50,12 +49,11 @@ export default class Controller extends Component {
 
   componentDidMount() {
     window.addEventListener("deviceorientation", this.deviceorientation);
-    window.addEventListener("gamepadconnected", this.gamepadConnected);
-    window.addEventListener("gamepaddisconnected", this.gamepadDisconnected);
-    window.addEventListener("gamepadpress", this.gamepadPress);
-    window.addEventListener("gamepadaxis", this.gamepadAxis);
-    window.addEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
-    this.gamePadsLoop();
+    // window.addEventListener("gamepaddisconnected", this.gamepadDisconnected);
+    // window.addEventListener("gamepadpress", this.gamepadPress);
+    // window.addEventListener("gamepadaxis", this.gamepadAxis);
+    // window.addEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
+    // this.gamePadsLoop();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -67,24 +65,16 @@ export default class Controller extends Component {
   componentWillUnmount() {
     clearInterval(this.gamePadsTime);
     window.removeEventListener("deviceorientation", this.deviceorientation);
-    window.removeEventListener("gamepadconnected", this.gamepadConnected);
-    window.removeEventListener("gamepaddisconnected", this.gamepadDisconnected);
-    window.removeEventListener("gamepadpress", this.gamepadPress);
-    window.removeEventListener("gamepadaxis", this.gamepadAxis);
-    window.removeEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
+    // window.removeEventListener("gamepaddisconnected", this.gamepadDisconnected);
+    // window.removeEventListener("gamepadpress", this.gamepadPress);
+    // window.removeEventListener("gamepadaxis", this.gamepadAxis);
+    // window.removeEventListener("gamepadaxisLoop", this.gamepadaxisLoop);
     window.removeEventListener(
       "deviceorientation",
       this.handleSetZeroOrientation
     );
   }
 
-  gamepadConnected = (e) => {
-    const {
-      gamepad: { index, id },
-    } = e;
-    message.success(`控制器已连接于 ${index} 位: ${id}。`);
-    this.setState({ gamepadEnabled: true });
-  };
   gamepadDisconnected(e) {
     const {
       gamepad: { index, id },
@@ -186,67 +176,6 @@ export default class Controller extends Component {
     if (index === 1 && enabledAxis1Controal) {
       speed(value);
     }
-  };
-
-  gamePadsLoop = () => {
-    const buttonsStatus = {},
-      axesStatus = {};
-    this.gamePadsTime = setInterval(() => {
-      const gamepadList = navigator.getGamepads
-        ? navigator.getGamepads()
-        : navigator.webkitGetGamepads
-        ? navigator.webkitGetGamepads
-        : [];
-      for (
-        let gamePadIndex = 0;
-        gamePadIndex < gamepadList.length;
-        gamePadIndex++
-      ) {
-        const gamepad = gamepadList[gamePadIndex];
-        if (!gamepad) continue;
-        const { axes, buttons, connected } = gamepad;
-        if (!connected) continue;
-        buttons.forEach((status, index) => {
-          if (!buttonsStatus[`${gamePadIndex}-${index}`]) {
-            buttonsStatus[`${gamePadIndex}-${index}`] = { value: status.value };
-            return;
-          }
-          if (
-            buttonsStatus[`${gamePadIndex}-${index}`].value !== status.value
-          ) {
-            window.dispatchEvent(
-              new CustomEvent("gamepadpress", {
-                detail: { index, value: status.value },
-              })
-            );
-          }
-          buttonsStatus[`${gamePadIndex}-${index}`] = { value: status.value };
-        });
-        axes.forEach((value, index) => {
-          if (Math.abs(value) < 0.05) {
-            value = 0;
-          }
-          if (!axesStatus[`${gamePadIndex}-${index}`]) {
-            axesStatus[`${gamePadIndex}-${index}`] = { value };
-            return;
-          }
-          if (axesStatus[`${gamePadIndex}-${index}`].value !== value) {
-            window.dispatchEvent(
-              new CustomEvent("gamepadaxis", {
-                detail: { index, value },
-              })
-            );
-          }
-
-          window.dispatchEvent(
-            new CustomEvent("gamepadaxisLoop", {
-              detail: { index, value },
-            })
-          );
-          axesStatus[`${gamePadIndex}-${index}`] = { value };
-        });
-      }
-    }, 50);
   };
 
   deviceorientation = ({ alpha, beta, gamma }) => {
@@ -475,18 +404,9 @@ export default class Controller extends Component {
             />
           </Form.Item>
           <Form.Item>
-            <Switch
-              checked={gamepadEnabled}
-              onChange={(gamepadEnabled) => {
-                if (gamepadEnabled) {
-                  this.gamePadsLoop();
-                } else {
-                  clearInterval(this.gamePadsTime);
-                }
-                this.setState({ gamepadEnabled });
-              }}
-              unCheckedChildren={<Icon type="icon-game-" />}
-              checkedChildren={<Icon type="icon-game-" />}
+            <Gamepad
+              changeChannel={changeChannel}
+              channelList={serverConfig.channelList}
             />
           </Form.Item>
           <Form.Item>

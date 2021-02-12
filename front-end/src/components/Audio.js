@@ -1,12 +1,19 @@
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import { Switch, message } from "antd";
+import store from "store";
 
 import { AudioOutlined, AudioMutedOutlined } from "@ant-design/icons";
 
 export default function Audio({ url }) {
   const audioEl = useRef(null);
-  const [enabled, setEnabled] = useState(window.MediaSource ? true : false);
+  const [enabled, setEnabled] = useState(
+    window.MediaSource
+      ? store.get("audio-enabled") === undefined
+        ? true
+        : false
+      : false
+  );
   const [src, setSrc] = useState(null);
 
   useEffect(() => {
@@ -73,6 +80,7 @@ export default function Audio({ url }) {
         checked={enabled}
         onChange={(v) => {
           setEnabled(v);
+          store.set("audio-enabled", v);
         }}
         checkedChildren={<AudioOutlined />}
         unCheckedChildren={<AudioMutedOutlined />}

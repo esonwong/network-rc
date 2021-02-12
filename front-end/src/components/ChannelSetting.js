@@ -31,6 +31,14 @@ for (let index = 0; index < 27; index++) {
 
 const types = [{ label: "PWM", value: "pwm" }];
 
+const gamePadInputList = [];
+for (let index = 0; index < 8; index++) {
+  gamePadInputList.push({ value: `axis-${index}`, name: `AXIS ${index}` });
+}
+for (let index = 0; index < 28; index++) {
+  gamePadInputList.push({ value: `button-${index}`, name: `B${index}` });
+}
+
 export default function ChannelSetting({
   saveServerConfig,
   serverConfig,
@@ -139,38 +147,39 @@ export default function ChannelSetting({
     );
   };
 
-  const keyboard = (fields, { add, remove }) => (
-    <Space align="baseline" split={<Divider type="vertical" />} wrap>
-      {fields.map((field) => (
-        <Space key={field.key} align="baseline">
-          <Form.Item
-            {...field}
-            name={[field.name, "name"]}
-            fieldKey={[field.fieldKey, "name"]}
-            rules={[{ required: true, message: "客官！选一个按键！" }]}
-          >
-            <Input style={{ width: 80 }} />
-          </Form.Item>
-          <Form.Item
-            {...field}
-            name={[field.name, "positive"]}
-            fieldKey={[field.fieldKey, "positive"]}
-            valuePropName="checked"
-          >
-            <Switch checkedChildren="正向" unCheckedChildren="反向" />
-          </Form.Item>
-          <MinusCircleOutlined onClick={() => remove(field.name)} />
-        </Space>
-      ))}
-      <PlusCircleOutlined
-        onClick={() =>
-          add({
-            positive: true,
-          })
-        }
-      />
-    </Space>
-  );
+  const keyboard = (fields, { add, remove }) =>
+    "暂不支持" || (
+      <Space align="baseline" split={<Divider type="vertical" />} wrap>
+        {fields.map((field) => (
+          <Space key={field.key} align="baseline">
+            <Form.Item
+              {...field}
+              name={[field.name, "name"]}
+              fieldKey={[field.fieldKey, "name"]}
+              rules={[{ required: true, message: "客官！选一个按键！" }]}
+            >
+              <Input style={{ width: 80 }} />
+            </Form.Item>
+            <Form.Item
+              {...field}
+              name={[field.name, "positive"]}
+              fieldKey={[field.fieldKey, "positive"]}
+              valuePropName="checked"
+            >
+              <Switch checkedChildren="正向" unCheckedChildren="反向" />
+            </Form.Item>
+            <MinusCircleOutlined onClick={() => remove(field.name)} />
+          </Space>
+        ))}
+        <PlusCircleOutlined
+          onClick={() =>
+            add({
+              positive: true,
+            })
+          }
+        />
+      </Space>
+    );
 
   const gamepad = (fields, { add, remove }) => (
     <Space align="baseline" split={<Divider type="vertical" />} wrap>
@@ -182,7 +191,11 @@ export default function ChannelSetting({
             fieldKey={[field.fieldKey, "name"]}
             rules={[{ required: true, message: "客官！选一个按键！" }]}
           >
-            <Input style={{ width: 80 }} />
+            <Select style={{ width: 100 }}>
+              {gamePadInputList.map(({ value, name }) => (
+                <Option value={value}> {name} </Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
             {...field}
@@ -209,11 +222,11 @@ export default function ChannelSetting({
     <Form form={form} onFinish={saveServerConfig} initialValues={serverConfig}>
       <Form.List name="channelList">
         {(fields, { add, remove }) => (
-          <Space direction="vertical">
+          <Space direction="vertical" style={{ width: "100%" }}>
             {fields.map((field) => (
               <Card
                 title={
-                  <Space key={field.key} align="baseline">
+                  <Space key={field.key} align="baseline" wrap>
                     <Form.Item
                       {...field}
                       name={[field.name, "enabled"]}
@@ -237,7 +250,7 @@ export default function ChannelSetting({
                 }
               >
                 <Row>
-                  <Space key={field.key} align="baseline">
+                  <Space key={field.key} align="baseline" wrap>
                     <Form.Item
                       {...field}
                       label="pin"

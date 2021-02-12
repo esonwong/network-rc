@@ -384,6 +384,7 @@ wss.on("connection", async function (socket) {
       case "reset channel":
         status.resetChannelAndUI();
         broadcast("config", status.config);
+        broadcast("success", { message: "通道已重置！！！！！" });
         break;
       default:
         console.log("怎么了？");
@@ -581,13 +582,6 @@ const speedRate = (socket, v) => {
   changeSpeed(v);
   broadcast("speed", v);
   status.currentSpeedRateValue = v;
-};
-
-const directionRate = (socket, v) => {
-  console.log("direction", v);
-  if (!check(socket)) return;
-  changeDirection(v);
-  broadcast("direction", v);
 };
 
 const openLight = (socket, enabled) => {
