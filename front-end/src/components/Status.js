@@ -43,6 +43,7 @@ export default function Status({
               overlay={<Nav />}
               onClick={() => navigate(`${process.env.PUBLIC_URL}/controller`)}
               type="primary"
+              trigger="click"
             >
               <HomeOutlined /> 控制
             </Dropdown.Button>

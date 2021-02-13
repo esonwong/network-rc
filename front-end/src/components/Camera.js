@@ -36,19 +36,21 @@ export default function Camera({
   const [connected, setConneected] = useState(false);
 
   const wsavc = useCreation(() => {
-    const { rotate, enabled } = store.get(storeName) || {
+    const { rotate, enabled, inputFormatIndex } = store.get(storeName) || {
       enabled: true,
       rotate: 0,
+      inputFormatIndex: 0,
     };
     setEnabled(enabled);
     setRotate(rotate);
+    setInputFormatIndex(inputFormatIndex);
     const w = new WSAvcPlayer({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
     });
 
     w.on("connected", function () {
-      setConneected(connected);
+      setConneected(true);
       open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
     });
 
@@ -64,12 +66,11 @@ export default function Camera({
       setFps(fps);
     });
 
-    w.on("resized", ({ width, height }) => {
-      message.success(`${w.cameraName} 开启 ${width}x${height}`);
-    });
+    // w.on("resized", ({ width, height }) => {
+    // message.success(`${w.cameraName} 开启 ${width}x${height}`);
+    // });
 
     w.on("disconnected", function () {
-      // message.info(`${w.cameraName} 已断开`)
       setConneected(false);
     });
 
@@ -142,8 +143,8 @@ export default function Camera({
   }, [url, wsavc, enabled, pause]);
 
   useEffect(() => {
-    store.set(storeName, { rotate, enabled });
-  }, [storeName, rotate, enabled]);
+    store.set(storeName, { rotate, enabled, inputFormatIndex });
+  }, [storeName, rotate, enabled, inputFormatIndex]);
 
   return (
     <div className="camera">

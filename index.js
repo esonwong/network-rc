@@ -484,7 +484,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
   }
   if (sessionId) {
     console.log("login with session", sessionId);
-    const session = status.config.sessionList.find((i) => i.id === sessionId);
+    const session = sessionManager.list.find((i) => i.id === sessionId);
     if (session) {
       const { sharedCode, endTime, userType } = session;
       if (userType === "guest") {
