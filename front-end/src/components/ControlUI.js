@@ -17,6 +17,7 @@ export default function ControlUI({
   cameraList,
   setting,
   isShowButton,
+  channelStatus,
 }) {
   const [orientation, setOrientation] = useState(
     screenDirction.matches ? "portrait" : "landscape"

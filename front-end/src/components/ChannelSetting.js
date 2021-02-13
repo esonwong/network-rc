@@ -1,5 +1,5 @@
 import store from "store";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Form,
   Button,
@@ -29,7 +29,10 @@ for (let index = 0; index < 27; index++) {
   pins.push(index + 1);
 }
 
-const types = [{ label: "PWM", value: "pwm" }];
+const types = [
+  { label: "PWM", value: "pwm" },
+  { label: "电平", value: "switch" },
+];
 
 const gamePadInputList = [];
 for (let index = 0; index < 8; index++) {
@@ -45,6 +48,10 @@ export default function ChannelSetting({
   resetChannel,
 }) {
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.resetFields();
+  }, [serverConfig]);
 
   const ui = (index, fields, { add, remove }) => {
     return (
@@ -253,7 +260,7 @@ export default function ChannelSetting({
                   <Space key={field.key} align="baseline" wrap>
                     <Form.Item
                       {...field}
-                      label="pin"
+                      label="GPIO"
                       name={[field.name, "pin"]}
                       fieldKey={[field.fieldKey, "pin"]}
                       rules={[{ required: true, message: "仔细想想" }]}
@@ -281,59 +288,66 @@ export default function ChannelSetting({
                         ))}
                       </Select>
                     </Form.Item>
-
-                    <Form.Item
-                      {...field}
-                      label="最大值"
-                      name={[field.name, "valuePostive"]}
-                      fieldKey={[field.fieldKey, "valuePostive"]}
-                    >
-                      <InputNumber
-                        step={0.1}
-                        max={2}
-                        min={form.getFieldValue([
-                          "channelList",
-                          field.fieldKey,
-                          "valueReset",
-                        ])}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      label="复位值"
-                      name={[field.name, "valueReset"]}
-                      fieldKey={[field.fieldKey, "valueReset"]}
-                    >
-                      <InputNumber
-                        step={0.1}
-                        min={form.getFieldValue([
-                          "channelList",
-                          field.fieldKey,
-                          "valueNegative",
-                        ])}
-                        max={form.getFieldValue([
-                          "channelList",
-                          field.fieldKey,
-                          "valuePostive",
-                        ])}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      label="最小值"
-                      name={[field.name, "valueNegative"]}
-                      fieldKey={[field.fieldKey, "valueNegative"]}
-                    >
-                      <InputNumber
-                        step={0.1}
-                        min={-2}
-                        max={form.getFieldValue([
-                          "channelList",
-                          field.fieldKey,
-                          "valueNegative",
-                        ])}
-                      />
-                    </Form.Item>
+                    {form.getFieldValue([
+                      "channelList",
+                      field.fieldKey,
+                      "type",
+                    ]) === "pwm" && (
+                      <>
+                        <Form.Item
+                          {...field}
+                          label="最大值"
+                          name={[field.name, "valuePostive"]}
+                          fieldKey={[field.fieldKey, "valuePostive"]}
+                        >
+                          <InputNumber
+                            step={0.1}
+                            max={2}
+                            min={form.getFieldValue([
+                              "channelList",
+                              field.fieldKey,
+                              "valueReset",
+                            ])}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...field}
+                          label="复位值"
+                          name={[field.name, "valueReset"]}
+                          fieldKey={[field.fieldKey, "valueReset"]}
+                        >
+                          <InputNumber
+                            step={0.1}
+                            min={form.getFieldValue([
+                              "channelList",
+                              field.fieldKey,
+                              "valueNegative",
+                            ])}
+                            max={form.getFieldValue([
+                              "channelList",
+                              field.fieldKey,
+                              "valuePostive",
+                            ])}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...field}
+                          label="最小值"
+                          name={[field.name, "valueNegative"]}
+                          fieldKey={[field.fieldKey, "valueNegative"]}
+                        >
+                          <InputNumber
+                            step={0.1}
+                            min={-2}
+                            max={form.getFieldValue([
+                              "channelList",
+                              field.fieldKey,
+                              "valueNegative",
+                            ])}
+                          />
+                        </Form.Item>
+                      </>
+                    )}
                   </Space>
                 </Row>
 

@@ -107,13 +107,17 @@ process.env.TTS = tts;
 
 const {
   changeLight,
-  changeDirection,
   changeSpeed,
   closeController,
   changePower,
 } = require("./lib/controller.js");
 const sessionManager = require("./lib/session");
-const { changePwmPin, closeChannel } = require("./lib/channel");
+const {
+  changePwmPin,
+  closeChannel,
+  changeSwitchPin,
+  channelStatus,
+} = require("./lib/channel");
 
 const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
@@ -372,6 +376,11 @@ wss.on("connection", async function (socket) {
         );
         if (channel && channel.enabled) {
           const { pin, value: inputValue } = payload;
+          broadcast("channel status", { pin, value: inputValue });
+          if (channel.type === "switch") {
+            changeSwitchPin(pin, inputValue > 0 ? true : false);
+            break;
+          }
           const { valueReset, valuePostive, valueNegative } = channel;
           const value =
             inputValue > 0

@@ -31,6 +31,7 @@ const gamePadsLoop = ({ index }) => {
 export default function Gamepad({
   channelList = [],
   changeChannel = function () {},
+  channelStatus = {},
 }) {
   const [enabled, setEnabled] = useState(false);
   const [gamepadList, setGamepadList] = useState([]);
@@ -50,7 +51,13 @@ export default function Gamepad({
       gamePadIndex++
     ) {
       const gamepad = gamepadList[gamePadIndex];
-      gamepad && list.push(gamepad);
+      if (gamepad) {
+        list.push(gamepad);
+        if (!current) {
+          setCurrent(gamepad);
+          setEnabled(true);
+        }
+      }
     }
     setGamepadList([...list]);
   });
@@ -64,24 +71,32 @@ export default function Gamepad({
   });
 
   useEventListener("gamepadchange", ({ detail: { buttons, axes } }) => {
-    channelList.forEach(({ gamepad = [], pin }) => {
+    channelList.forEach(({ gamepad = [], pin, type: pinType }) => {
       gamepad.forEach(({ name, positive, method, speed }) => {
         const [type, index] = name.split("-");
         const coefficient = positive ? 1 : -1;
-        let value;
+        let value =
+          type === "button" ? buttons[index - 0].value : axes[index - 0];
+        if (status[name] === value) return;
+        status[name] = value;
         switch (type) {
           case "button":
-            value = coefficient * buttons[index - 0].value;
+            if (pinType === "switch") {
+              if (value > 0) {
+                value = !channelStatus[pin];
+              } else {
+                return;
+              }
+            } else {
+              value = coefficient * buttons[index - 0].value;
+            }
             break;
           case "axis":
             value = coefficient * axes[index - 0];
             break;
-
           default:
             return;
         }
-        if (status[name] === value) return;
-        status[name] = value;
         changeChannel({ pin, value });
       });
     });
@@ -106,25 +121,29 @@ export default function Gamepad({
         unCheckedChildren={<Icon type="icon-game-" />}
         checkedChildren={<Icon type="icon-game-" />}
       />
-      <Popover
-        placement="topLeft"
-        content={
-          <Select
-            value={current && current.id}
-            onChange={(id) => setCurrent(gamepadList.find((i) => i.id === id))}
-          >
-            {gamepadList.map((gamepad) => {
-              return (
-                <Option key={gamepad.id} value={gamepad.id}>
-                  {gamepad.id}
-                </Option>
-              );
-            })}
-          </Select>
-        }
-      >
-        <Button shape="round">选择手柄</Button>
-      </Popover>
+      {gamepadList.length > 1 && (
+        <Popover
+          placement="topLeft"
+          content={
+            <Select
+              value={current && current.id}
+              onChange={(id) =>
+                setCurrent(gamepadList.find((i) => i.id === id))
+              }
+            >
+              {gamepadList.map((gamepad) => {
+                return (
+                  <Option key={gamepad.id} value={gamepad.id}>
+                    {gamepad.id}
+                  </Option>
+                );
+              })}
+            </Select>
+          }
+        >
+          <Button shape="round">选择手柄</Button>
+        </Popover>
+      )}
     </Space>
   );
 }

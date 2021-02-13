@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Switch, Dropdown, Button, Tag } from "antd";
+import { Form, Switch, Dropdown, Button, Tag, Space } from "antd";
 import {
   HomeOutlined,
   FullscreenOutlined,
@@ -30,6 +30,9 @@ export default function Status({
   isLogin,
   session,
   changeEditabled,
+  channelStatus,
+  changeChannel,
+  serverConfig,
 }) {
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -57,26 +60,20 @@ export default function Status({
           checkedChildren={<ApiOutlined />}
         />
       </Form.Item>
-      <Form.Item>
-        <Switch
-          checked={powerEnabled}
-          onChange={changePower}
-          checkedChildren={<ThunderboltOutlined />}
-          unCheckedChildren={<ThunderboltOutlined />}
-          disabled={disabled}
-        />
-      </Form.Item>
-
-      <Form.Item>
-        <Switch
-          checked={lightEnabled}
-          onChange={changeLight}
-          checkedChildren={<BulbOutlined />}
-          unCheckedChildren={<BulbOutlined />}
-          disabled={disabled}
-        />
-      </Form.Item>
-
+      <Space>
+        {(serverConfig.channelList || [])
+          .filter(({ enabled, type }) => enabled && type === "switch")
+          .map(({ pin, name }) => (
+            <Form.Item>
+              <Switch
+                checked={channelStatus[pin] || false}
+                checkedChildren={name}
+                unCheckedChildren={name}
+                onChange={(value) => changeChannel({ pin, value })}
+              />
+            </Form.Item>
+          ))}
+      </Space>
       {isLogin && (
         <Form.Item>
           <Audio

@@ -19,7 +19,8 @@ body {
   width: 100%;
 }
 
-.app-status .ant-form-item {
+.app-status .ant-form-item,
+.app-status .ant-space {
   z-index: 10;
 }
 

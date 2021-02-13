@@ -25,6 +25,7 @@ export default class App extends Component {
         ...store.get("setting"),
       },
       serverConfig: {},
+      channelStatus: {},
       wsConnected: false,
       cameraEnabled: false,
       lightEnabled: false,
@@ -115,6 +116,7 @@ export default class App extends Component {
     });
 
     socket.addEventListener("message", async ({ data }) => {
+      const { channelStatus } = this.state;
       if (typeof data === "string") {
         const { action, payload } = JSON.parse(data);
         switch (action) {
@@ -133,11 +135,11 @@ export default class App extends Component {
           case "micVolume":
             this.setState({ micVolume: payload });
             break;
-          case "light enabled":
-            this.setState({ lightEnabled: payload });
-            break;
-          case "power enabled":
-            this.setState({ powerEnabled: payload });
+          case "channel status":
+            const { pin, value } = payload;
+            this.setState({
+              channelStatus: { ...channelStatus, [pin]: value },
+            });
             break;
           case "tts playing":
             this.setState({ ttsPlaying: payload });
@@ -315,8 +317,6 @@ export default class App extends Component {
     this.setState({ setting });
     store.set("setting", setting);
     navigate(`${pubilcUrl}/controller`);
-
-    // this.connect();
   };
 
   changeZeroSpeedRate = (speedZeroRate) => {
@@ -397,6 +397,7 @@ export default class App extends Component {
         micVolume,
         session,
         editabled,
+        channelStatus,
       },
       tts,
       playAudio,
@@ -422,6 +423,9 @@ export default class App extends Component {
             session,
             changeEditabled,
             editabled,
+            channelStatus,
+            changeChannel,
+            serverConfig,
           }}
           disabled={!isLogin}
         />
@@ -462,6 +466,7 @@ export default class App extends Component {
                 changeChannel={changeChannel}
                 editabled={editabled}
                 cameraList={cameraList}
+                channelStatus={channelStatus}
               />
             </>
           ) : undefined}
