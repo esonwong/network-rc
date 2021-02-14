@@ -47,7 +47,7 @@ export default function ControlUI({
       setOrientation(matches ? "portrait" : "landscape");
     },
     {
-      dom: screenDirction,
+      target: screenDirction,
     }
   );
 
