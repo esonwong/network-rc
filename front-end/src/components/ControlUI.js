@@ -80,16 +80,26 @@ export default function ControlUI({
     <>
       {list.map(
         (
-          { id, name, enabled, type, autoReset, cameraIndex, vertical },
+          {
+            id,
+            name,
+            enabled,
+            type,
+            autoReset,
+            cameraIndex,
+            vertical,
+            defaultPosition,
+          },
           index
         ) => {
-          const position = positionMap[id]?.[orientation] || {
-            x: index * 50,
-            y: index * 20,
-            z: positionMap[id]?.[orientation]?.z || index + 2,
-            size: undefined,
-            ratio: undefined,
-          };
+          const position = positionMap[id]?.[orientation] ||
+            defaultPosition?.[orientation] || {
+              x: index * 70,
+              y: index * 30,
+              z: positionMap[id]?.[orientation]?.z || index + 2,
+              size: undefined,
+              ratio: undefined,
+            };
 
           const { size, z, x, y, ratio } = position;
 

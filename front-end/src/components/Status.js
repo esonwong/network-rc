@@ -4,9 +4,7 @@ import {
   HomeOutlined,
   FullscreenOutlined,
   ApiOutlined,
-  BulbOutlined,
   FullscreenExitOutlined,
-  ThunderboltOutlined,
   PoweroffOutlined,
   FormOutlined,
 } from "@ant-design/icons";
@@ -19,13 +17,8 @@ export default function Status({
   wsConnected,
   connect,
   disconnect,
-  powerEnabled,
-  changePower,
-  lightEnabled,
-  changeLight,
   delay,
   isFullscreen,
-  disabled,
   setting,
   isLogin,
   session,
@@ -34,6 +27,7 @@ export default function Status({
   changeChannel,
   serverConfig,
 }) {
+  const { sharedDuration, sharedEndTime } = serverConfig;
   return (
     <Form layout="inline" className="app-status" size="small">
       <Form.Item>
@@ -130,11 +124,11 @@ export default function Status({
         </Form.Item>
       )}
 
-      {wsConnected && session && session.endTime && (
+      {wsConnected && sharedEndTime && (
         <Form.Item>
-          <Tag>
+          <Tag color={session && session.endTime && "orange"}>
             剩余:
-            {((session.endTime - new Date().getTime()) / 1000).toFixed(0)}秒
+            {((sharedEndTime - new Date().getTime()) / 1000).toFixed(0)}s
           </Tag>
         </Form.Item>
       )}

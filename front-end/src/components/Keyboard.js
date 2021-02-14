@@ -13,7 +13,6 @@ export default function Keyboard({
   useKeyPress(
     () => true,
     ({ type: keyType, key }) => {
-      debugger;
       channelList.forEach(({ pin, keyboard = [], type }) => {
         keyboard.forEach(({ name, positive, method, speed }) => {
           if (name === key.toLocaleLowerCase()) {
@@ -21,9 +20,10 @@ export default function Keyboard({
               const value = !channelStatus[pin];
               changeChannel({ pin, value });
               return;
+            } else {
+              const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
+              changeChannel({ pin, value });
             }
-            const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
-            changeChannel({ pin, value });
           }
         });
       });
