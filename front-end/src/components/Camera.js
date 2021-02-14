@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import WSAvcPlayer from "ws-avc-player";
 import { useState } from "react";
 import { Button, Switch, message, Select } from "antd";
-import { useCreation, useEventListener } from "@umijs/hooks";
+import { useCreation, useEventListener } from "ahooks";
 import store from "store";
 import {
   BorderOutlined,

@@ -1,8 +1,37 @@
-import { useKeyPress } from "@umijs/hooks";
+import { useKeyPress } from "ahooks";
 import React from "react";
 import { Popover, Button } from "antd";
 
-export default function Keyboard({ playAudio, serverConfig, onEnter }) {
+export default function Keyboard({
+  playAudio,
+  serverConfig,
+  onEnter,
+  changeChannel,
+  channelList = [],
+  channelStatus = {},
+}) {
+  useKeyPress(
+    () => true,
+    ({ type: keyType, key }) => {
+      debugger;
+      channelList.forEach(({ pin, keyboard = [], type }) => {
+        keyboard.forEach(({ name, positive, method, speed }) => {
+          if (name === key.toLocaleLowerCase()) {
+            if (type === "switch" && keyType == "keydown") {
+              const value = !channelStatus[pin];
+              changeChannel({ pin, value });
+              return;
+            }
+            const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
+            changeChannel({ pin, value });
+          }
+        });
+      });
+    },
+    {
+      events: ["keydown", "keyup"],
+    }
+  );
   useKeyPress("1", () => {
     playAudio({ path: serverConfig.audio1 });
   });

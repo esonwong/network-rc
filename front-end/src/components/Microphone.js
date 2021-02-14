@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { useKeyPress, useEventListener } from "@umijs/hooks";
+import { useKeyPress, useEventListener } from "ahooks";
 import { Button, message, Popover } from "antd";
 import RecordRTC, { StereoAudioRecorder } from "recordrtc";
 

@@ -154,39 +154,38 @@ export default function ChannelSetting({
     );
   };
 
-  const keyboard = (fields, { add, remove }) =>
-    "暂不支持" || (
-      <Space align="baseline" split={<Divider type="vertical" />} wrap>
-        {fields.map((field) => (
-          <Space key={field.key} align="baseline">
-            <Form.Item
-              {...field}
-              name={[field.name, "name"]}
-              fieldKey={[field.fieldKey, "name"]}
-              rules={[{ required: true, message: "客官！选一个按键！" }]}
-            >
-              <Input style={{ width: 80 }} />
-            </Form.Item>
-            <Form.Item
-              {...field}
-              name={[field.name, "positive"]}
-              fieldKey={[field.fieldKey, "positive"]}
-              valuePropName="checked"
-            >
-              <Switch checkedChildren="正向" unCheckedChildren="反向" />
-            </Form.Item>
-            <MinusCircleOutlined onClick={() => remove(field.name)} />
-          </Space>
-        ))}
-        <PlusCircleOutlined
-          onClick={() =>
-            add({
-              positive: true,
-            })
-          }
-        />
-      </Space>
-    );
+  const keyboard = (fields, { add, remove }) => (
+    <Space align="baseline" split={<Divider type="vertical" />} wrap>
+      {fields.map((field) => (
+        <Space key={field.key} align="baseline">
+          <Form.Item
+            {...field}
+            name={[field.name, "name"]}
+            fieldKey={[field.fieldKey, "name"]}
+            rules={[{ required: true, message: "客官！选一个按键！" }]}
+          >
+            <Input style={{ width: 80 }} />
+          </Form.Item>
+          <Form.Item
+            {...field}
+            name={[field.name, "positive"]}
+            fieldKey={[field.fieldKey, "positive"]}
+            valuePropName="checked"
+          >
+            <Switch checkedChildren="正向" unCheckedChildren="反向" />
+          </Form.Item>
+          <MinusCircleOutlined onClick={() => remove(field.name)} />
+        </Space>
+      ))}
+      <PlusCircleOutlined
+        onClick={() =>
+          add({
+            positive: true,
+          })
+        }
+      />
+    </Space>
+  );
 
   const gamepad = (fields, { add, remove }) => (
     <Space align="baseline" split={<Divider type="vertical" />} wrap>

@@ -3,7 +3,7 @@ import Joystick from "./Joystick";
 import Camera from "./Camera";
 import { Rnd } from "react-rnd";
 import store from "store";
-import { useEventListener, useUpdateEffect } from "@umijs/hooks";
+import { useEventListener, useUpdateEffect } from "ahooks";
 import "./ControlUI.scss";
 import classnames from "classnames";
 import JoystickSlider from "./JoystickSlider";
@@ -52,7 +52,7 @@ export default function ControlUI({
   );
 
   const onControl = (id, v) => {
-    channelList.forEach(({ enabled, ui, pin }) => {
+    channelList.forEach(({ enabled, ui = [], pin }) => {
       if (!enabled) return;
       ui.forEach(({ id: cId, positive, axis }) => {
         if (id === cId) {

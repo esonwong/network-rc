@@ -4,7 +4,7 @@ import Qrcode from "qrcode.react";
 import { Form, Switch, Input, message, Button, InputNumber } from "antd";
 import { layout } from "../unit";
 import copy from "copy-to-clipboard";
-import { useUpdateEffect } from "@umijs/hooks";
+import { useUpdateEffect } from "ahooks";
 
 function Shared({
   saveServerConfig,

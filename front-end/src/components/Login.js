@@ -2,7 +2,7 @@ import React from "react";
 import { layout, tailLayout } from "../unit";
 import { Input, Button, Form } from "antd";
 import qs from "querystring";
-import { useMount } from "@umijs/hooks";
+import { useMount } from "ahooks";
 
 export default function Login({ onSubmit }) {
   useMount(() => {

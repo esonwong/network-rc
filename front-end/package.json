@@ -11,7 +11,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
-    "@umijs/hooks": "^1.9.3",
+    "ahooks": "^2.9.6",
     "antd": "^4.1.0",
     "axios": "^0.21.0",
     "copy-to-clipboard": "^3.3.1",

@@ -247,6 +247,7 @@ export default class Controller extends Component {
           <Form.Item>
             <Keybord
               playAudio={playAudio}
+              channelStatus={channelStatus}
               channelList={serverConfig.channelList}
               changeChannel={changeChannel}
               serverConfig={serverConfig}
