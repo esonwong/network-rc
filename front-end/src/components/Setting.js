@@ -5,6 +5,7 @@ import { layout, tailLayout } from "../unit";
 import store from "store";
 import UISetting from "./UISetting";
 import ChannelSetting from "./ChannelSetting";
+import BasicSetting from "./BasicSetting";
 const { TabPane } = Tabs;
 
 export default function Setting({
@@ -50,6 +51,12 @@ export default function Setting({
         </Form>
       </TabPane>
 
+      <TabPane tab="基本设置" key="basic">
+        <BasicSetting
+          saveServerConfig={saveServerConfig}
+          serverConfig={serverConfig}
+        />
+      </TabPane>
       <TabPane tab="UI 设置" key="ui">
         <UISetting
           resetChannel={resetChannel}

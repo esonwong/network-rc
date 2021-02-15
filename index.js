@@ -105,13 +105,16 @@ status.enabledHttps = tsl;
 
 process.env.TTS = tts;
 
-const {
-  changeLight,
-  changeSpeed,
-  closeController,
-  changePower,
-} = require("./lib/controller.js");
 const sessionManager = require("./lib/session");
+
+sessionManager.clearTimeoutSession();
+if (
+  status.config.sharedEndTime &&
+  status.config.sharedEndTime < new Date().getTime()
+) {
+  status.saveConfig({ sharedEndTime: undefined });
+}
+
 const {
   changePwmPin,
   closeChannel,
@@ -294,8 +297,6 @@ wss.on("connection", async function (socket) {
     //   return;
     // }
 
-    makeHeartbeatTimer(socket);
-
     switch (action) {
       case "heartbeat":
         makeHeartbeatTimer(socket);
@@ -316,19 +317,6 @@ wss.on("connection", async function (socket) {
           }
         }
         break;
-      case "open light":
-        openLight(socket, payload);
-        break;
-      case "open power":
-        openPower(socket, payload);
-        break;
-      // case "speed rate":
-      //   if (status.autoLocking === true) return;
-      //   speedRate(socket, payload);
-      //   break;
-      // case "direction rate":
-      //   directionRate(socket, payload);
-      //   break;
       case "tts":
         speak(socket, payload);
         break;
@@ -346,7 +334,6 @@ wss.on("connection", async function (socket) {
         socket.sendData("success", { message: "设置已保存！" });
         broadcast("config", status.config);
         if (!payload.sharedCode) {
-          broadcast("info", { message: "分享关闭" });
           clients.forEach((socket) => {
             if (socket.session && socket.session.sharedCode) {
               socket.close();
@@ -534,28 +521,38 @@ const receivePing = (socket, { sendTime }) => {
 /** 清除、创建心跳超时计时器 */
 const makeHeartbeatTimer = (socket) => {
   socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId);
-  if (status.autoLocking) {
-    status.unlockHearbertCount++;
-    if (status.unlockHearbertCount > 5) {
-      status.autoLocking = false;
-      status.unlockHearbertCount = 0;
+  if (socket.autoLocking) {
+    /** 刹车锁定后 正常心跳统计， 大于 5 就解锁 */
+    socket.unlockHearbertCount++;
+    console.log("socket.unlockHearbertCount", socket.unlockHearbertCount);
+    if (socket.unlockHearbertCount > 10) {
+      socket.autoLocking = false;
+      socket.unlockHearbertCount = 0;
       console.info("网络恢复");
-      broadcast("success", {
+      socket.sendData("success", {
         message: `网络恢复 (￣︶￣)↗  ，解除锁定 !`,
       });
     }
   }
   socket.heartbeatTimeoutId = setTimeout(async () => {
-    status.unlockHearbertCount = 0;
-    if (status.autoLocking === true) return;
-    status.autoLocking = true;
+    socket.unlockHearbertCount = 0;
+    console.log("socket.unlockHearbertCount", socket.unlockHearbertCount);
+    if (socket.autoLocking === true) return;
+    socket.autoLocking = true;
     console.warn("网络连接不稳定，自动刹车");
-    broadcast("info", {
+    socket.sendData("success", {
       message: `网络连接不稳定，自动刹车, 并锁定`,
     });
-    speedRate(socket, -status.currentSpeedRateValue);
-    await sleep(200);
-    speedRate(socket, 0);
+    const { channelList = [], specialChannel } = status.config;
+    const speedChannel = channelList.find(
+      ({ id }) => id === specialChannel.speed
+    );
+    if (speedChannel) {
+      const { pin } = speedChannel;
+      changePwmPin(pin, -(channelStatus[pin] || 0));
+      await sleep(200);
+      changePwmPin(pin, 0);
+    }
   }, status.config.autoLockTime * 2);
 };
 
@@ -573,34 +570,6 @@ const check = (socket) => {
   }
 };
 
-const speedRate = (socket, v) => {
-  const { maxSpeed } = status.config;
-  console.log("speed", v);
-  if (!check(socket)) return;
-  if (Math.abs(v) * 100 > maxSpeed) {
-    v = v > 0 ? maxSpeed / 100 : -maxSpeed / 100;
-  }
-  changeSpeed(v);
-  broadcast("speed", v);
-  status.currentSpeedRateValue = v;
-};
-
-const openLight = (socket, enabled) => {
-  if (!check(socket)) return;
-  console.log("open light", enabled);
-  lightEnabled = enabled;
-  changeLight(enabled);
-  broadcast("light enabled", enabled);
-};
-
-const openPower = (socket, enabled) => {
-  if (!check(socket)) return;
-  console.log("open power", enabled);
-  powerEnabled = enabled;
-  changePower(enabled);
-  broadcast("power enabled", enabled);
-};
-
 const disconnect = (socket) => {
   console.log("客户端断开连接！");
   TTS("神经连接已断开");
@@ -613,7 +582,6 @@ const disconnect = (socket) => {
   });
   console.log("已连接客户端", num);
   if (num < 1) {
-    closeController();
     closeChannel();
     lightEnabled = false;
     powerEnabled = false;
@@ -640,9 +608,7 @@ const piReboot = () => {
 };
 
 process.on("SIGINT", async function () {
-  closeController();
   closeChannel();
-  changeLight(false);
   console.log("Goodbye!");
   await TTS("系统关闭");
   process.exit();

@@ -72,9 +72,13 @@ export default class Controller extends Component {
 
   fixContent = () => {
     const {
-      serverConfig: { directionReverse, directionFix, speedReverse },
+      serverConfig: { changeChannel, channelList = [], specialChannel },
       saveServerConfig,
     } = this.props;
+
+    const direction = channelList.find(
+      ({ id }) => id === specialChannel.direction
+    );
 
     return (
       <Form>
@@ -99,35 +103,24 @@ export default class Controller extends Component {
             关闭重力感应
           </Button>
         </Form.Item>
-        <Form.Item label="舵机反向">
-          <Switch
-            checked={directionReverse}
-            onChange={(v) => {
-              saveServerConfig({ directionReverse: v });
-            }}
-          />
-        </Form.Item>
-        <Form.Item label="油门反向">
-          <Switch
-            checked={speedReverse}
-            onChange={(v) => {
-              saveServerConfig({ speedReverse: v });
-            }}
-          />
-        </Form.Item>
-        <Form.Item label="舵机微调">
-          <Slider
-            defaultValue={directionFix * 50 + 50}
-            min={0}
-            max={100}
-            included={false}
-            onChange={(v) => {
-              const directionFix = v / 50 - 1;
-              saveServerConfig({ directionFix });
-            }}
-            style={{ width: "50vw" }}
-          />
-        </Form.Item>
+
+        {direction && (
+          <Form.Item label="舵机微调">
+            <Slider
+              defaultValue={direction.valueReset * 50 + 50}
+              min={0}
+              max={100}
+              included={false}
+              onChange={(v) => {
+                direction.valueReset = v / 50 - 1;
+                saveServerConfig({
+                  channelList,
+                });
+              }}
+              style={{ width: "50vw" }}
+            />
+          </Form.Item>
+        )}
       </Form>
     );
   };

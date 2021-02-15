@@ -16,10 +16,13 @@ export default function Keyboard({
       channelList.forEach(({ pin, keyboard = [], type }) => {
         keyboard.forEach(({ name, positive, method, speed }) => {
           if (name === key.toLocaleLowerCase()) {
-            if (type === "switch" && keyType == "keydown") {
-              const value = !channelStatus[pin];
-              changeChannel({ pin, value });
-              return;
+            console.log(keyType, key);
+            if (type === "switch") {
+              if (keyType == "keydown") {
+                const value = !channelStatus[pin];
+                changeChannel({ pin, value });
+                return;
+              }
             } else {
               const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
               changeChannel({ pin, value });
