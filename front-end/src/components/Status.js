@@ -59,7 +59,7 @@ export default function Status({
         {(serverConfig.channelList || [])
           .filter(({ enabled, type }) => enabled && type === "switch")
           .map(({ pin, name }) => (
-            <Form.Item>
+            <Form.Item key={pin}>
               <Switch
                 checked={channelStatus[pin] || false}
                 checkedChildren={name}

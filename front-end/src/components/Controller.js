@@ -40,40 +40,44 @@ export default class Controller extends Component {
       ttsInputVisible: false,
     };
     this.steeringStatus = [];
-  }
-
-  componentDidMount() {
+    debugger;
     window.addEventListener("deviceorientation", this.deviceorientation);
   }
 
   componentWillUnmount() {
-    clearInterval(this.gamePadsTime);
     window.removeEventListener("deviceorientation", this.deviceorientation);
-    window.removeEventListener(
-      "deviceorientation",
-      this.handleSetZeroOrientation
-    );
   }
 
   deviceorientation = ({ alpha, beta, gamma }) => {
+    debugger;
     const {
       state: { isAiControlling, zeroOrientation },
+      props: {
+        serverConfig: { channelList = [], specialChannel = {} } = {},
+        changeChannel,
+      },
     } = this;
+    const directionChannel = channelList.find(
+      ({ id }) => id === specialChannel.direction
+    );
+    if (!directionChannel) return;
     if (!zeroOrientation) return;
     if (isAiControlling) return;
+    const { pin } = directionChannel;
     const { beta: baseBeta } = zeroOrientation;
     let bateDegree = beta - baseBeta;
     bateDegree = bateDegree < -30 ? -30 : bateDegree;
     bateDegree = bateDegree > 30 ? 30 : bateDegree;
-    // fixedController.direction(bateDegree / 30);
+    changeChannel({ pin, value: bateDegree / 30 });
   };
 
   onControl() {}
 
   fixContent = () => {
     const {
-      serverConfig: { changeChannel, channelList = [], specialChannel },
+      serverConfig: { channelList = [], specialChannel },
       saveServerConfig,
+      changeChannel,
     } = this.props;
 
     const direction = channelList.find(
