@@ -127,7 +127,7 @@ export default function Gamepad({
         playAudio({ path: serverConfig.audio3 });
         break;
       case 13:
-        playAudio({ path: serverConfig.audio1 });
+        playAudio({ stop: true });
         break;
       default:
         break;

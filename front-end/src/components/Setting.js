@@ -34,7 +34,7 @@ export default function Setting({
   };
 
   return (
-    <Tabs defaultActiveKey="channel">
+    <Tabs defaultActiveKey="basic">
       <TabPane tab="连接设置" key="1">
         <Form {...layout} onFinish={onSubmit} initialValues={form}>
           <br />

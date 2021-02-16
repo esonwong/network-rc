@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import WSAvcPlayer from "ws-avc-player";
 import { useState } from "react";
 import { Button, Switch, message, Select } from "antd";
-import { useCreation, useEventListener } from "ahooks";
+import { useCreation, useDebounceEffect, useEventListener } from "ahooks";
 import store from "store";
 import {
   BorderOutlined,
@@ -31,19 +31,17 @@ export default function Camera({
   const [cameraName, setCameraName] = useState("");
   const [formatList, setFormatList] = useState([]);
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined);
-  const [fps, setFps] = useState();
+  const [fps, setFps] = useState(30);
   const [rotate, setRotate] = useState(0); // 旋转
   const [connected, setConneected] = useState(false);
 
   const wsavc = useCreation(() => {
-    const { rotate, enabled, inputFormatIndex } = store.get(storeName) || {
-      enabled: true,
-      rotate: 0,
-      inputFormatIndex: 0,
-    };
+    const { rotate = 0, enabled = true, inputFormatIndex = 0, fps = 30 } =
+      store.get(storeName) || {};
     setEnabled(enabled);
     setRotate(rotate);
     setInputFormatIndex(inputFormatIndex);
+    setFps(fps);
     const w = new WSAvcPlayer({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
@@ -51,7 +49,6 @@ export default function Camera({
 
     w.on("connected", function () {
       setConneected(true);
-      open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
     });
 
     w.on("info", ({ cameraName, size: { width, height }, formatList }) => {
@@ -123,24 +120,36 @@ export default function Camera({
     { dom: document }
   );
 
-  useEffect(() => {
-    connected && open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
-  }, [enabled, pause, wsavc, fps, inputFormatIndex, size, connected]);
-
-  useEffect(() => {
-    const box = boxEl.current;
-
-    if (!enabled || pause) {
-      end();
-    } else {
-      start();
-      box.appendChild(wsavc.AvcPlayer.canvas);
+  useDebounceEffect(
+    () => {
+      connected && open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
+    },
+    [enabled, pause, wsavc, fps, inputFormatIndex, size, connected],
+    {
+      wait: 500,
     }
-    return function () {
-      end();
-    };
-    // eslint-disable-next-line
-  }, [url, wsavc, enabled, pause]);
+  );
+
+  useDebounceEffect(
+    () => {
+      const box = boxEl.current;
+
+      if (!enabled || pause) {
+        end();
+      } else {
+        start();
+        box.appendChild(wsavc.AvcPlayer.canvas);
+      }
+      return function () {
+        end();
+      };
+      // eslint-disable-next-line
+    },
+    [url, wsavc, enabled, pause],
+    {
+      wait: 500,
+    }
+  );
 
   useEffect(() => {
     store.set(storeName, { rotate, enabled, inputFormatIndex });

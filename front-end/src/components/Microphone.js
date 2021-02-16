@@ -16,18 +16,19 @@ export default function Microphone({ url }) {
   useEffect(() => {
     if (!url) return;
     const ws = new WebSocket(url);
-
-    ws.addEventListener("open", () => {
-      setEnabled(true);
-    });
-    ws.addEventListener("close", () => {
-      setEnabled(false);
-    });
+    const open = () => setEnabled(true);
+    const close = () => setEnabled(false);
+    ws.addEventListener("open", open);
+    ws.addEventListener("close", close);
 
     setWs(ws);
 
     return function () {
-      ws && ws.close();
+      if (ws) {
+        ws.close();
+        ws.removeEventListener("open", open);
+        ws.removeEventListener("close", close);
+      }
       setWs(undefined);
     };
   }, [url]);

@@ -161,9 +161,9 @@ const wss = new WebSocketServer(
   }
 );
 
-wss.on('error', (err) => {
-  console.error('Websocket 服务器错误', err)
- })
+wss.on("error", (err) => {
+  console.error("Websocket 服务器错误", err);
+});
 
 server.on("upgrade", (request, socket, head) => {
   if (request.url === "/control")
@@ -318,6 +318,7 @@ wss.on("connection", async function (socket) {
               cameraList.map(({ name, size }, index) => ({ name, size, index }))
             );
             socket.sendData("config", status.config);
+            socket.sendData("channel status", channelStatus);
           }
         }
         break;
@@ -348,6 +349,7 @@ wss.on("connection", async function (socket) {
           sessionManager.clearSharedCodeSession();
           broadcast("config", status.config);
         }
+
         break;
       case "volume":
         if (!check(socket)) break;
@@ -370,7 +372,7 @@ wss.on("connection", async function (socket) {
         );
         if (channel && channel.enabled) {
           const { pin, value: inputValue } = payload;
-          broadcast("channel status", { pin, value: inputValue });
+          broadcast("channel status", { [pin]: inputValue });
           if (channel.type === "switch") {
             changeSwitchPin(pin, inputValue > 0 ? true : false);
             break;

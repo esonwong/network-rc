@@ -136,9 +136,8 @@ export default class App extends Component {
             this.setState({ micVolume: payload });
             break;
           case "channel status":
-            const { pin, value } = payload;
             this.setState({
-              channelStatus: { ...channelStatus, [pin]: value },
+              channelStatus: { ...channelStatus, ...payload },
             });
             break;
           case "tts playing":

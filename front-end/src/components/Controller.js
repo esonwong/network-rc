@@ -316,12 +316,14 @@ export default class Controller extends Component {
               <SoundOutlined />
             </Button>
           </Form.Item>
-
           <Form.Item>
             <Microphone
-              url={`${
-                window.location.protocol === "https:" ? "wss://" : "ws://"
-              }${setting.wsAddress}/audio`}
+              url={
+                setting.wsAddress &&
+                `${window.location.protocol === "https:" ? "wss://" : "ws://"}${
+                  setting.wsAddress
+                }/audio`
+              }
             />
           </Form.Item>
         </Form>
