@@ -151,7 +151,7 @@ export default function ControlUI({
                   disabled={editabled}
                   name={name}
                   onChange={(v) => onControl(id, v)}
-                  audoReset={autoReset}
+                  autoReset={autoReset}
                   position={position}
                 />
               )}

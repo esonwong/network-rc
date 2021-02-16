@@ -228,9 +228,14 @@ export default function ChannelSetting({
     <Form form={form} onFinish={saveServerConfig} initialValues={serverConfig}>
       <Form.List name="channelList">
         {(fields, { add, remove }) => (
-          <Space direction="vertical" style={{ width: "100%" }}>
+          <Space
+            key={fields.key}
+            direction="vertical"
+            style={{ width: "100%" }}
+          >
             {fields.map((field) => (
               <Card
+                key={field.key}
                 title={
                   <Space key={field.key} align="baseline" wrap>
                     <Form.Item

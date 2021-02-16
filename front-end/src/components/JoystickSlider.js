@@ -1,7 +1,7 @@
 import React from "react";
 import Joystick from "./Joystick";
 
-export default function JoystickSlider({ vertical, onChange, ...other }) {
+export default function JoystickSlider({ onChange, vertical, ...other }) {
   return (
     <Joystick
       onChange={({ x, y }) => {

@@ -40,7 +40,6 @@ export default class Controller extends Component {
       ttsInputVisible: false,
     };
     this.steeringStatus = [];
-    debugger;
     window.addEventListener("deviceorientation", this.deviceorientation);
   }
 
@@ -49,7 +48,6 @@ export default class Controller extends Component {
   }
 
   deviceorientation = ({ alpha, beta, gamma }) => {
-    debugger;
     const {
       state: { isAiControlling, zeroOrientation },
       props: {
@@ -146,6 +144,7 @@ export default class Controller extends Component {
         editabled,
         cameraList,
         channelStatus,
+        saveServerConfig,
       },
     } = this;
     const {
@@ -155,6 +154,11 @@ export default class Controller extends Component {
       ttsInputVisible,
       text,
     } = this.state;
+    const { channelList = [], specialChannel = {} } = serverConfig;
+    const speedChannel = channelList.find(
+      ({ id }) => id === specialChannel.speed
+    );
+
     return (
       <div className="controller">
         <Router className="controller-router">
@@ -184,45 +188,57 @@ export default class Controller extends Component {
               <Button icon={<SlidersOutlined />}>修正</Button>
             </Popover>
           </Form.Item>
-          <Form.Item>
-            <Popover
-              placement="topLeft"
-              content={
-                <Slider
-                  value={forwardPower}
-                  min={0}
-                  max={100}
-                  onChange={(forwardPower) => {
-                    this.setState({ forwardPower });
-                    store.set("forward-power", forwardPower);
-                  }}
-                  arrowPointAtCenter
-                  style={{ width: "30vw" }}
-                />
-              }
-            >
-              <Button shape="round">前进油门:{forwardPower}</Button>
-            </Popover>
-          </Form.Item>
-          <Form.Item>
-            <Popover
-              placement="topLeft"
-              content={
-                <Slider
-                  value={backwardPower}
-                  min={0}
-                  max={100}
-                  style={{ width: "30vw" }}
-                  onChange={(backwardPower) => {
-                    this.setState({ backwardPower });
-                    store.set("backward-power", backwardPower);
-                  }}
-                />
-              }
-            >
-              <Button shape="round">倒退油门:{backwardPower}</Button>
-            </Popover>
-          </Form.Item>
+          {speedChannel && (
+            <>
+              <Form.Item>
+                <Popover
+                  placement="topLeft"
+                  content={
+                    <Slider
+                      defaultValue={speedChannel.valuePostive * 100}
+                      min={0}
+                      max={100}
+                      onChange={(v) => {
+                        speedChannel.valuePostive = v / 100;
+                        saveServerConfig({
+                          channelList,
+                        });
+                      }}
+                      arrowPointAtCenter
+                      style={{ width: "30vw" }}
+                    />
+                  }
+                >
+                  <Button shape="round">
+                    前进油门:{Math.round(speedChannel.valuePostive * 100)}
+                  </Button>
+                </Popover>
+              </Form.Item>
+              <Form.Item>
+                <Popover
+                  placement="topLeft"
+                  content={
+                    <Slider
+                      defaultValue={speedChannel.valueNegative * -100}
+                      min={0}
+                      max={100}
+                      style={{ width: "30vw" }}
+                      onChange={(v) => {
+                        speedChannel.valueNegative = (v / 100) * -1;
+                        saveServerConfig({
+                          channelList,
+                        });
+                      }}
+                    />
+                  }
+                >
+                  <Button shape="round">
+                    倒退油门:{Math.round(speedChannel.valueNegative * -100)}
+                  </Button>
+                </Popover>
+              </Form.Item>
+            </>
+          )}
           <Form.Item>
             <Switch
               checked={isShowButton}

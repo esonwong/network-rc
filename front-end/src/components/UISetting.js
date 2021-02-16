@@ -60,29 +60,25 @@ export default function UISetting({ saveServerConfig, serverConfig }) {
                   >
                     <Switch />
                   </Form.Item>
-
-                  <Form.Item
-                    {...field}
-                    label="方向"
-                    name={[field.name, "vertical"]}
-                    fieldKey={[field.fieldKey, "vertical"]}
-                    shouldUpdate
-                  >
-                    <Select
-                      style={{ width: 80 }}
-                      disabled={
-                        "slider" !==
-                        form.getFieldValue([
-                          "uiComponentList",
-                          field.fieldKey,
-                          "type",
-                        ])
-                      }
+                  {form.getFieldValue([
+                    "uiComponentList",
+                    field.fieldKey,
+                    "type",
+                  ]) === "slider" && (
+                    <Form.Item
+                      {...field}
+                      label="方向"
+                      name={[field.name, "vertical"]}
+                      fieldKey={[field.fieldKey, "vertical"]}
+                      shouldUpdate
+                      rules={[{ required: true, message: "你还没选" }]}
                     >
-                      <Option value={false}> 横向 </Option>
-                      <Option value={true}> 垂直 </Option>
-                    </Select>
-                  </Form.Item>
+                      <Select style={{ width: 80 }}>
+                        <Option value={false}> 横向 </Option>
+                        <Option value={true}> 垂直 </Option>
+                      </Select>
+                    </Form.Item>
+                  )}
                   <MinusCircleOutlined onClick={() => remove(field.name)} />
                 </Space>
               </Row>

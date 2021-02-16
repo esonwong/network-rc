@@ -21,7 +21,7 @@ const getOffsetTop = (el) => {
 export default function Joystick({
   onChange,
   name,
-  autoReset = true,
+  autoReset,
   disabled,
   position = { x: 0, y: 0 },
   enabledX = true,
@@ -32,6 +32,7 @@ export default function Joystick({
   const [value, setValue] = useState({ x: 0, y: 0 });
   const [mouseStarting, setMouseStarting] = useState(false);
   const [tochTime, setTochTime] = useState();
+  const [mode, setMode] = useState(undefined);
   const change = ({ x, y } = { x: 0, y: 0 }) => {
     if (enabledX) {
       const railLeft = getOffsetLeft(joytick.current) + position.x;
@@ -83,8 +84,10 @@ export default function Joystick({
   };
 
   const end = () => {
+    debugger;
     if (disabled) return;
     if (!autoReset) return;
+    debugger;
     setValue({ x: 0, y: 0 });
     onChange({ x: 0, y: 0 });
   };
@@ -95,23 +98,33 @@ export default function Joystick({
         "enabled-x": enabledX,
         "enabled-y": enabledY,
       })}
-      onTouchStart={({ targetTouches: [{ clientX: x, clientY: y }] }) =>
-        start({ x, y })
-      }
-      onTouchMove={({ targetTouches: [{ clientX: x, clientY: y }] }) =>
-        move({ x, y })
-      }
-      onTouchEnd={end}
+      onTouchStart={({ targetTouches: [{ clientX: x, clientY: y }] }) => {
+        !mode && setMode("touch");
+        if (mode === "mouse") return;
+        start({ x, y });
+      }}
+      onTouchMove={({ targetTouches: [{ clientX: x, clientY: y }] }) => {
+        if (mode === "mouse") return;
+        move({ x, y });
+      }}
+      onTouchEnd={() => {
+        if (mode === "mouse") return;
+        end();
+      }}
       ref={joytick}
       onMouseDown={({ clientX: x, clientY: y }) => {
+        !mode && setMode("mouse");
+        if (mode === "touch") return;
         setMouseStarting(true);
         start({ x, y });
       }}
       onMouseMove={({ clientX: x, clientY: y }) => {
+        if (mode === "touch") return;
         if (!mouseStarting) return;
         move({ x, y });
       }}
       onMouseUp={() => {
+        if (mode === "touch") return;
         setMouseStarting(false);
         end();
       }}

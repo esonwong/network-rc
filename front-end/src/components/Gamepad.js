@@ -25,6 +25,16 @@ const gamePadsLoop = ({ index }) => {
         detail: gamepad,
       })
     );
+    gamepad.buttons.forEach(({ value }, index) => {
+      if (status[`button-${index}`] !== value) {
+        status[`button-${index}`] = value;
+        window.dispatchEvent(
+          new CustomEvent("gamepadpress", {
+            detail: { index, value },
+          })
+        );
+      }
+    });
   }, 10);
 };
 

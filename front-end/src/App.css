@@ -223,6 +223,7 @@ body {
   position: fixed;
   right: 5vw;
   bottom: 5vw;
+  user-select: none;
 }
 .recording-img {
   width: 10vw;

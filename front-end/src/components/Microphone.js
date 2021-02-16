@@ -34,12 +34,12 @@ export default function Microphone({ url }) {
 
   const startRecording = () => {
     if (recording) return;
-    setRecording(true);
     navigator.mediaDevices
       .getUserMedia({
         audio: true,
       })
       .then(function (audioStream) {
+        setRecording(true);
         const record = new RecordRTC(audioStream, {
           type: "audio",
 
@@ -107,8 +107,6 @@ export default function Microphone({ url }) {
         size="large"
         disabled={!enabled}
         shape="circle"
-        onMouseDown={startRecording}
-        onMouseUp={endRecording}
         onTouchStart={startRecording}
         onTouchEnd={endRecording}
         icon={<AudioOutlined />}
