@@ -27,7 +27,7 @@ export default function Status({
   changeChannel,
   serverConfig,
 }) {
-  const { sharedDuration, sharedEndTime } = serverConfig;
+  const { sharedEndTime } = serverConfig;
   return (
     <Form layout="inline" className="app-status" size="small">
       <Form.Item>

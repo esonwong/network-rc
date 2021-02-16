@@ -161,6 +161,10 @@ const wss = new WebSocketServer(
   }
 );
 
+wss.on('error', (err) => {
+  console.error('Websocket 服务器错误', err)
+ })
+
 server.on("upgrade", (request, socket, head) => {
   if (request.url === "/control")
     wss.handleUpgrade(request, socket, head, (ws) => {
