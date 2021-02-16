@@ -1,6 +1,6 @@
 {
   "name": "network-rc",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "网络控制遥控车",
   "main": "index.js",
   "repository": "git@github.com:itiwll/network-rc.git",
@@ -9,7 +9,7 @@
   "scripts": {
     "start": "nodemon --inspect index.js",
     "server": "node index.js",
-    "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
+    "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r assets network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",

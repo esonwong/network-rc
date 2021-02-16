@@ -45,7 +45,7 @@ export default function Keyboard({
     playAudio({ path: serverConfig.audio3 });
   });
   useKeyPress("4", () => {
-    playAudio({ path: serverConfig.audio4 });
+    playAudio({ stop: true });
   });
 
   useKeyPress("enter", onEnter);

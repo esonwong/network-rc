@@ -33,10 +33,7 @@ export default class Controller extends Component {
     this.state = {
       text: "",
       zeroOrientation: undefined,
-      backwardPower: store.get("backward-power") || 50,
-      forwardPower: store.get("forward-power") || 50,
       isShowButton: store.get("is-show-button") || true,
-      gamepadEnabled: false,
       ttsInputVisible: false,
     };
     this.steeringStatus = [];
@@ -147,13 +144,7 @@ export default class Controller extends Component {
         saveServerConfig,
       },
     } = this;
-    const {
-      forwardPower,
-      backwardPower,
-      isShowButton,
-      ttsInputVisible,
-      text,
-    } = this.state;
+    const { isShowButton, ttsInputVisible, text } = this.state;
     const { channelList = [], specialChannel = {} } = serverConfig;
     const speedChannel = channelList.find(
       ({ id }) => id === specialChannel.speed
@@ -255,6 +246,8 @@ export default class Controller extends Component {
               changeChannel={changeChannel}
               channelList={serverConfig.channelList}
               channelStatus={channelStatus}
+              playAudio={playAudio}
+              serverConfig={serverConfig}
             />
           </Form.Item>
           <Form.Item>

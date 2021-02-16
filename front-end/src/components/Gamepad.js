@@ -42,6 +42,8 @@ export default function Gamepad({
   channelList = [],
   changeChannel = function () {},
   channelStatus = {},
+  playAudio,
+  serverConfig,
 }) {
   const [enabled, setEnabled] = useState(false);
   const [gamepadList, setGamepadList] = useState([]);
@@ -110,6 +112,26 @@ export default function Gamepad({
         changeChannel({ pin, value });
       });
     });
+  });
+
+  useEventListener("gamepadpress", ({ detail: { index, value } }) => {
+    if (value < 1) return;
+    switch (index) {
+      case 12:
+        playAudio({ path: serverConfig.audio1 });
+        break;
+      case 14:
+        playAudio({ path: serverConfig.audio2 });
+        break;
+      case 15:
+        playAudio({ path: serverConfig.audio3 });
+        break;
+      case 13:
+        playAudio({ path: serverConfig.audio1 });
+        break;
+      default:
+        break;
+    }
   });
 
   useEffect(() => {

@@ -6,6 +6,8 @@ import store from "store";
 import UISetting from "./UISetting";
 import ChannelSetting from "./ChannelSetting";
 import BasicSetting from "./BasicSetting";
+import Backup from "./Backup";
+import SoundSetting from "./SoundSetting";
 const { TabPane } = Tabs;
 
 export default function Setting({
@@ -91,27 +93,17 @@ export default function Setting({
         </Form>
       </TabPane>
       <TabPane tab="声音设置" key="sound">
-        <Form {...layout} initialValues={{ volume, micVolume }}>
-          <Form.Item label="喇叭音量" name="volume">
-            <Slider
-              disabled={!wsConnected}
-              min={0}
-              max={100}
-              onAfterChange={changeVolume}
-            />
-          </Form.Item>
-          <Form.Item label="麦克风灵敏度" name="micVolume">
-            <Slider
-              disabled
-              min={0}
-              max={100}
-              onAfterChange={changeMicVolume}
-            />
-          </Form.Item>
-          <Form.Item {...tailLayout}>
-            <Button onClick={clearAudioTemp}>清除缓存</Button>
-          </Form.Item>
-        </Form>
+        <SoundSetting
+          changeVolume={changeVolume}
+          changeMicVolume={changeMicVolume}
+          micVolume={micVolume}
+          volume={volume}
+          wsConnected={wsConnected}
+          saveServerConfig={saveServerConfig}
+          sharedCode={serverConfig.sharedCode}
+          sharedDuration={serverConfig.sharedDuration}
+          sharedEndTime={serverConfig.sharedEndTime}
+        />
       </TabPane>
       <TabPane tab="分享设置" key="shared">
         <Shared
@@ -121,6 +113,9 @@ export default function Setting({
           sharedDuration={serverConfig.sharedDuration}
           sharedEndTime={serverConfig.sharedEndTime}
         />
+      </TabPane>
+      <TabPane tab="备份" key="backup">
+        <Backup />
       </TabPane>
     </Tabs>
   );
