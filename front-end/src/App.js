@@ -116,7 +116,7 @@ export default class App extends Component {
     });
 
     socket.addEventListener("message", async ({ data }) => {
-      const { channelStatus } = this.state;
+      const { channelStatus, serverConfig } = this.state;
       if (typeof data === "string") {
         const { action, payload } = JSON.parse(data);
         switch (action) {
@@ -127,7 +127,7 @@ export default class App extends Component {
             this.onLogin(payload);
             break;
           case "config":
-            this.setState({ serverConfig: payload });
+            this.setState({ serverConfig: { ...serverConfig, ...payload } });
             break;
           case "volume":
             this.setState({ volume: payload });

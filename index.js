@@ -200,6 +200,13 @@ const broadcast = (action, payload) => {
   );
 };
 
+const broadcastConfig = () => {
+  const { channelList, uiComponentList, ...other } = status.config;
+  broadcast("config", { channelList });
+  broadcast("config", { uiComponentList });
+  broadcast("config", other);
+};
+
 if (userList) {
   new User({
     currentUser,
@@ -317,7 +324,7 @@ wss.on("connection", async function (socket) {
               "camera list",
               cameraList.map(({ name, size }, index) => ({ name, size, index }))
             );
-            socket.sendData("config", status.config);
+            broadcastConfig();
             socket.sendData("channel status", channelStatus);
           }
         }
@@ -337,7 +344,6 @@ wss.on("connection", async function (socket) {
         if (!check(socket)) break;
         status.saveConfig(payload);
         socket.sendData("success", { message: "设置已保存！" });
-        broadcast("config", status.config);
         if (!payload.sharedCode) {
           clients.forEach((socket) => {
             if (socket.session && socket.session.sharedCode) {
@@ -347,9 +353,8 @@ wss.on("connection", async function (socket) {
           });
           status.saveConfig({ sharedEndTime: undefined });
           sessionManager.clearSharedCodeSession();
-          broadcast("config", status.config);
         }
-
+        broadcastConfig();
         break;
       case "volume":
         if (!check(socket)) break;
@@ -389,7 +394,7 @@ wss.on("connection", async function (socket) {
         break;
       case "reset channel":
         status.resetChannelAndUI();
-        broadcast("config", status.config);
+        broadcastConfig();
         broadcast("success", { message: "通道已重置！！！！！" });
         break;
       default:
@@ -446,7 +451,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
         status.saveConfig({
           sharedEndTime: nowTime + status.config.sharedDuration,
         });
-        broadcast("config", status.config);
+        broadcastConfig();
       }
       const endTime = status.config.sharedEndTime;
       const session = sessionManager.add({ userType, sharedCode, endTime });

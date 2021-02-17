@@ -11,6 +11,7 @@ import { createRef } from "react";
 import Microphone from "./Microphone";
 import ControlUI from "./ControlUI";
 import Gamepad from "./Gamepad";
+import Orientation from "./Orientation";
 
 let curentOrientation;
 let isSupportedOrientaion = false;
@@ -70,7 +71,7 @@ export default class Controller extends Component {
 
   fixContent = () => {
     const {
-      serverConfig: { channelList = [], specialChannel },
+      serverConfig: { channelList = [], specialChannel = {} },
       saveServerConfig,
       changeChannel,
     } = this.props;
@@ -250,6 +251,10 @@ export default class Controller extends Component {
               serverConfig={serverConfig}
             />
           </Form.Item>
+
+          {/* <Form.Item>
+            <Orientation />
+          </Form.Item> */}
           <Form.Item>
             <Keybord
               playAudio={playAudio}
