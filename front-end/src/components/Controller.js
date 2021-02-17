@@ -13,20 +13,6 @@ import ControlUI from "./ControlUI";
 import Gamepad from "./Gamepad";
 import Orientation from "./Orientation";
 
-let curentOrientation;
-let isSupportedOrientaion = false;
-
-const deviceorientation = (e) => {
-  const { alpha, beta, gamma } = e;
-  curentOrientation = { alpha, beta, gamma };
-  if (alpha && !isSupportedOrientaion) {
-    isSupportedOrientaion = true;
-    message.info("手机横屏点击修正进行校准可开启,重力感应控制方向╰(*°▽°*)╯！");
-  }
-};
-
-window.addEventListener("deviceorientation", deviceorientation);
-
 export default class Controller extends Component {
   constructor(props) {
     super(props);
@@ -38,34 +24,7 @@ export default class Controller extends Component {
       ttsInputVisible: false,
     };
     this.steeringStatus = [];
-    window.addEventListener("deviceorientation", this.deviceorientation);
   }
-
-  componentWillUnmount() {
-    window.removeEventListener("deviceorientation", this.deviceorientation);
-  }
-
-  deviceorientation = ({ alpha, beta, gamma }) => {
-    const {
-      state: { isAiControlling, zeroOrientation },
-      props: {
-        serverConfig: { channelList = [], specialChannel = {} } = {},
-        changeChannel,
-      },
-    } = this;
-    const directionChannel = channelList.find(
-      ({ id }) => id === specialChannel.direction
-    );
-    if (!directionChannel) return;
-    if (!zeroOrientation) return;
-    if (isAiControlling) return;
-    const { pin } = directionChannel;
-    const { beta: baseBeta } = zeroOrientation;
-    let bateDegree = beta - baseBeta;
-    bateDegree = bateDegree < -30 ? -30 : bateDegree;
-    bateDegree = bateDegree > 30 ? 30 : bateDegree;
-    changeChannel({ pin, value: bateDegree / 30 });
-  };
 
   onControl() {}
 
@@ -82,28 +41,6 @@ export default class Controller extends Component {
 
     return (
       <Form>
-        <Form.Item
-          style={{ display: isSupportedOrientaion ? undefined : "none" }}
-        >
-          <Button
-            type="danger"
-            onClick={() => {
-              this.setState({ zeroOrientation: { ...curentOrientation } });
-            }}
-            icon={<AimOutlined />}
-          >
-            舵机重力感应校准
-          </Button>
-          &nbsp;
-          <Button
-            onClick={() => {
-              this.setState({ zeroOrientation: undefined });
-            }}
-          >
-            关闭重力感应
-          </Button>
-        </Form.Item>
-
         {direction && (
           <Form.Item label="舵机微调">
             <Slider
@@ -202,7 +139,7 @@ export default class Controller extends Component {
                   }
                 >
                   <Button shape="round">
-                    前进油门:{Math.round(speedChannel.valuePostive * 100)}
+                    前进:{Math.round(speedChannel.valuePostive * 100)}
                   </Button>
                 </Popover>
               </Form.Item>
@@ -225,7 +162,7 @@ export default class Controller extends Component {
                   }
                 >
                   <Button shape="round">
-                    倒退油门:{Math.round(speedChannel.valueNegative * -100)}
+                    倒退:{Math.round(speedChannel.valueNegative * -100)}
                   </Button>
                 </Popover>
               </Form.Item>
@@ -252,9 +189,13 @@ export default class Controller extends Component {
             />
           </Form.Item>
 
-          {/* <Form.Item>
-            <Orientation />
-          </Form.Item> */}
+          <Form.Item>
+            <Orientation
+              changeChannel={changeChannel}
+              channelStatus={channelStatus}
+              serverConfig={serverConfig}
+            />
+          </Form.Item>
           <Form.Item>
             <Keybord
               playAudio={playAudio}

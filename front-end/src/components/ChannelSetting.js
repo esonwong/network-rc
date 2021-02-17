@@ -12,6 +12,7 @@ import {
   Divider,
   Card,
   Collapse,
+  Slider,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -370,6 +371,30 @@ export default function ChannelSetting({
                     <Form.List name={[field.name, "gamepad"]}>
                       {gamepad}
                     </Form.List>
+                  </Panel>
+                  <Panel header="手机重力感应" size="small">
+                    <Form.Item
+                      {...field}
+                      label="方向"
+                      name={[field.name, "orientation", "axis"]}
+                      fieldKey={[field.fieldKey, "orientation", "axis"]}
+                    >
+                      <Select style={{ width: 80 }} allowClear>
+                        {["alpha", "beta", "gamma"].map((i) => (
+                          <Option key={i} value={i}>
+                            {i}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      label="系数"
+                      name={[field.name, "orientation", "coefficient"]}
+                      fieldKey={[field.fieldKey, "orientation", "coefficient"]}
+                    >
+                      <Slider defaultValue={1} max={2} min={-2} step={0.01} />
+                    </Form.Item>
                   </Panel>
                 </Collapse>
               </Card>
