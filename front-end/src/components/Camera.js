@@ -63,9 +63,9 @@ export default function Camera({
       setFps(fps);
     });
 
-    // w.on("resized", ({ width, height }) => {
-    // message.success(`${w.cameraName} 开启 ${width}x${height}`);
-    // });
+    w.on("resized", ({ width, height }) => {
+      message.success(`${w.cameraName} 传输分辨率 ${width}x${height}`);
+    });
 
     w.on("disconnected", function () {
       setConneected(false);

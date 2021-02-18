@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { message, Switch } from "antd";
-import { useEventListener, useDebounceEffect } from "ahooks";
+import { useEventListener, useDebounceEffect, useDebounceFn } from "ahooks";
 
 let curentOrientation;
 
@@ -12,27 +12,39 @@ export default function Orientation({
   const [zeroOrientation, setZeroOrientation] = useState(undefined);
   const [allowed, setAllowed] = useState(false);
 
-  const deviceorientation = ({ alpha, beta, gamma }) => {
-    !allowed && setAllowed(true);
-    curentOrientation = { alpha, beta, gamma };
-    // const directionChannel = channelList.find(
-    //   ({ id }) => id === specialChannel.direction
-    // );
-    // if (!directionChannel) return;
-    if (!zeroOrientation) return;
+  const { run: deviceorientation } = useDebounceFn(
+    ({ alpha, beta, gamma }) => {
+      !allowed && setAllowed(true);
+      curentOrientation = { alpha, beta, gamma };
+      if (!zeroOrientation) return;
 
-    channelList.forEach(
-      ({ pin, orientation: { coefficient = 1, axis } = {} }) => {
-        if (coefficient && axis) {
-          let diffrent = curentOrientation[axis] - zeroOrientation[axis];
-          diffrent = diffrent < -30 ? -30 : diffrent;
-          diffrent = diffrent > 30 ? 30 : diffrent;
-          changeChannel({ pin, value: (diffrent / 30) * coefficient });
+      channelList.forEach(
+        ({ pin, orientation: { coefficient = 1, axis } = {} }) => {
+          if (coefficient && axis) {
+            // https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Orientation_and_motion_data_explained
+            // alpha 0 ~ 360
+            // beta -180 ~ 180
+            // gamma -90 ~ 90
+
+            let diffrent = curentOrientation[axis] - zeroOrientation[axis];
+
+            if (axis === "alpha") {
+              if (Math.abs(diffrent) > Math.abs(360 - diffrent)) {
+                diffrent = diffrent - 360;
+              }
+            }
+            const maxDeg = 90;
+            diffrent = diffrent < -maxDeg ? -maxDeg : diffrent;
+            diffrent = diffrent > maxDeg ? maxDeg : diffrent;
+            changeChannel({ pin, value: (diffrent / maxDeg) * coefficient });
+          }
         }
-      }
-    );
-  };
-
+      );
+    },
+    {
+      wait: 50,
+    }
+  );
   useEventListener("deviceorientation", deviceorientation);
 
   useDebounceEffect(
