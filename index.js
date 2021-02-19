@@ -247,7 +247,7 @@ wss.on("connection", async function (socket) {
 
   socket.sendData("power enabled", powerEnabled);
 
-  socket.sendData("info", { message: `Network RC v${package.version}` });
+  socket.sendData("version", package.version);
 
   socket.on("close", () => {
     audioPlayer.removeListener("volume", sendVolume);

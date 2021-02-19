@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { message, Switch } from "antd";
-import { useEventListener, useDebounceEffect, useDebounceFn } from "ahooks";
+import { useEventListener, useDebounceEffect, useThrottleFn } from "ahooks";
 
 let curentOrientation;
 
@@ -12,7 +12,7 @@ export default function Orientation({
   const [zeroOrientation, setZeroOrientation] = useState(undefined);
   const [allowed, setAllowed] = useState(false);
 
-  const { run: deviceorientation } = useDebounceFn(
+  const { run: deviceorientation } = useThrottleFn(
     ({ alpha, beta, gamma }) => {
       !allowed && setAllowed(true);
       curentOrientation = { alpha, beta, gamma };

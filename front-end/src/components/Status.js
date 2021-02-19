@@ -26,6 +26,7 @@ export default function Status({
   channelStatus,
   changeChannel,
   serverConfig,
+  version,
 }) {
   const { sharedEndTime } = serverConfig;
   return (
@@ -132,6 +133,9 @@ export default function Status({
           </Tag>
         </Form.Item>
       )}
+      <Form.Item>
+        <Tag>v{version}</Tag>
+      </Form.Item>
     </Form>
   );
 }

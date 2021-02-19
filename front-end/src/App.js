@@ -45,6 +45,7 @@ export default class App extends Component {
       volume: 0,
       micVolume: 0,
       session: {},
+      version: undefined,
     };
 
     const { changeLight, changePower } = this;
@@ -120,6 +121,9 @@ export default class App extends Component {
       if (typeof data === "string") {
         const { action, payload } = JSON.parse(data);
         switch (action) {
+          case "version":
+            this.setState({ version: payload });
+            break;
           case "camera list":
             this.setState({ cameraList: payload });
             break;
@@ -379,6 +383,7 @@ export default class App extends Component {
       changeMicVolume,
       changeEditabled,
       state: {
+        version,
         cameraList,
         setting,
         wsConnected,
@@ -406,6 +411,7 @@ export default class App extends Component {
       <div className="App" ref={this.appRef}>
         <Status
           {...{
+            version,
             wsConnected,
             isFullscreen,
             lightEnabled,
