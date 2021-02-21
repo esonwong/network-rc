@@ -356,6 +356,20 @@ wss.on("connection", async function (socket) {
         }
         broadcastConfig();
         break;
+
+      case "reset config":
+        if (!check(socket)) break;
+        status.resetConfig();
+        socket.sendData("success", { message: "设置已保存！" });
+        clients.forEach((socket) => {
+          if (socket.session && socket.session.sharedCode) {
+            socket.close();
+            clients.delete(socket);
+          }
+        });
+        sessionManager.clearSharedCodeSession();
+        broadcastConfig();
+        break;
       case "volume":
         if (!check(socket)) break;
         audioPlayer.volume(payload);

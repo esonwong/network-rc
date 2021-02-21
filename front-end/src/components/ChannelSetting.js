@@ -380,9 +380,12 @@ export default function ChannelSetting({
                       fieldKey={[field.fieldKey, "orientation", "axis"]}
                     >
                       <Select style={{ width: 80 }} allowClear>
-                        {["alpha", "beta", "gamma"].map((i) => (
-                          <Option key={i} value={i}>
-                            {i}
+                        {[
+                          { name: "水平", value: "x" },
+                          { name: "垂直", value: "y" },
+                        ].map((i) => (
+                          <Option key={i.value} value={i.value}>
+                            {i.name}
                           </Option>
                         ))}
                       </Select>

@@ -16,6 +16,7 @@ export default function Setting({
   onSubmit,
   serverConfig,
   saveServerConfig,
+  resetServerConfig,
   resetChannel,
   cameraList,
   fixedController,
@@ -115,7 +116,11 @@ export default function Setting({
         />
       </TabPane>
       <TabPane tab="备份" key="backup">
-        <Backup />
+        <Backup
+          resetServerConfig={resetServerConfig}
+          saveServerConfig={saveServerConfig}
+          serverConfig={serverConfig}
+        />
       </TabPane>
     </Tabs>
   );

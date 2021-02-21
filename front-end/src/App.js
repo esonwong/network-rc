@@ -362,6 +362,10 @@ export default class App extends Component {
     this.sendData("save config", config);
   };
 
+  resetServerConfig = () => {
+    this.sendData("reset config");
+  };
+
   _resetChannel = () => {
     this.sendData("reset channel");
   };
@@ -378,6 +382,7 @@ export default class App extends Component {
       piPowerOff,
       login,
       saveServerConfig,
+      resetServerConfig,
       resetChannel,
       changeVolume,
       changeMicVolume,
@@ -448,6 +453,7 @@ export default class App extends Component {
                 onDisconnect={disconnect}
                 onSubmit={changeSetting}
                 saveServerConfig={saveServerConfig}
+                resetServerConfig={resetServerConfig}
                 resetChannel={resetChannel}
                 serverConfig={serverConfig}
                 changeVolume={changeVolume}

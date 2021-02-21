@@ -14,23 +14,37 @@ export default function Orientation({
 
   const { run: deviceorientation } = useThrottleFn(
     ({ alpha, beta, gamma }) => {
+      if (!enabled) return;
       !allowed && setAllowed(true);
-      curentOrientation = { alpha, beta, gamma };
+      if (gamma < 20 && gamma > -20) return;
+      if (gamma < 0) {
+        alpha = alpha > 180 ? alpha - 180 : alpha + 180;
+      }
+      curentOrientation = {
+        alpha,
+        beta,
+        gamma,
+      };
       if (!zeroOrientation) return;
-
       channelList.forEach(
         ({ pin, orientation: { coefficient = 1, axis } = {} }) => {
           if (coefficient && axis) {
             // https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Orientation_and_motion_data_explained
-            // alpha 0 ~ 360
-            // beta -180 ~ 180
-            // gamma -90 ~ 90
+            // alpha 0 ~ 360 x 轴
+            // beta -180 ~ 180  竖屏时的 y 轴
+            // gamma -90 ~ 90  横屏时的 y 轴
+            axis = axis === "x" ? "alpha" : "gamma";
 
             let diffrent = curentOrientation[axis] - zeroOrientation[axis];
 
-            if (axis === "alpha") {
+            if (axis === "x") {
               if (Math.abs(diffrent) > Math.abs(360 - diffrent)) {
                 diffrent = diffrent - 360;
+              }
+            }
+            if (axis === "gamma") {
+              if (Math.abs(diffrent) > Math.abs(180 - diffrent)) {
+                diffrent = diffrent - 180;
               }
             }
             const maxDeg = 90;

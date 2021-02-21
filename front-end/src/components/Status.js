@@ -7,6 +7,7 @@ import {
   FullscreenExitOutlined,
   PoweroffOutlined,
   FormOutlined,
+  HourglassOutlined,
 } from "@ant-design/icons";
 import { Location } from "@reach/router";
 import Nav from "./Nav";
@@ -127,15 +128,20 @@ export default function Status({
 
       {wsConnected && sharedEndTime && (
         <Form.Item>
-          <Tag color={session && session.endTime && "orange"}>
-            剩余:
+          <Tag
+            icon={<HourglassOutlined />}
+            color={session && session.endTime && "orange"}
+          >
             {((sharedEndTime - new Date().getTime()) / 1000).toFixed(0)}s
           </Tag>
         </Form.Item>
       )}
-      <Form.Item>
-        <Tag>v{version}</Tag>
-      </Form.Item>
+
+      {version && (
+        <Form.Item>
+          <Tag>v{version}</Tag>
+        </Form.Item>
+      )}
     </Form>
   );
 }
