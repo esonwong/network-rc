@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import store from "store";
-import { Form, Button, Switch, Slider, Popover, message, Input } from "antd";
+import { Form, Button, Switch, Slider, Popover, Input } from "antd";
 import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
-import { AimOutlined, SendOutlined, SoundOutlined } from "@ant-design/icons";
+import { SendOutlined, SoundOutlined } from "@ant-design/icons";
 import Keybord from "./Keyboard";
 import Ai from "./Ai";
 import { Router } from "@reach/router";

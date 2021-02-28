@@ -1,6 +1,8 @@
 import { useKeyPress } from "ahooks";
-import React from "react";
+import React, { useEffect } from "react";
 import { Popover, Button } from "antd";
+import localChannelStatus from "../lib/localChannelStatus";
+let pressedKeyAndChannel = [];
 
 export default function Keyboard({
   playAudio,
@@ -13,19 +15,31 @@ export default function Keyboard({
   useKeyPress(
     () => true,
     ({ type: keyType, key }) => {
-      channelList.forEach(({ pin, keyboard = [], type }) => {
-        keyboard.forEach(({ name, positive, method, speed }) => {
+      channelList.forEach((channel) => {
+        const { pin, keyboard = [], type } = channel;
+        keyboard.forEach((pressedKey) => {
+          const { name, positive, method } = pressedKey;
           if (name === key.toLocaleLowerCase()) {
             console.log(keyType, key);
             if (type === "switch") {
-              if (keyType == "keydown") {
+              if (keyType === "keydown") {
                 const value = !channelStatus[pin];
                 changeChannel({ pin, value });
                 return;
               }
             } else {
-              const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
-              changeChannel({ pin, value });
+              if (method === "step") {
+                if (keyType === "keydown") {
+                  pressedKeyAndChannel.push({ pressedKey, channel });
+                } else {
+                  pressedKeyAndChannel = pressedKeyAndChannel.filter(
+                    ({ pressedKey }) => pressedKey.key === key
+                  );
+                }
+              } else {
+                const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
+                changeChannel({ pin, value });
+              }
             }
           }
         });
@@ -49,6 +63,23 @@ export default function Keyboard({
   });
 
   useKeyPress("enter", onEnter);
+
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      pressedKeyAndChannel.forEach(
+        ({ pressedKey: { positive, speed = 0.5 }, channel: { pin } }) => {
+          let value =
+            (localChannelStatus[pin] || 0) + ((positive ? 1 : -1) * speed) / 20;
+          if (value > 1) value = 1;
+          if (value < -1) value = -1;
+          changeChannel({ pin, value });
+        }
+      );
+    }, 50);
+    return () => {
+      clearInterval(timerId);
+    };
+  }, [changeChannel]);
 
   return (
     <Popover

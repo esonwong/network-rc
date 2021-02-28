@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import md5 from "md5";
 import debounce from "debounce";
 import Status from "./components/Status";
+import localChannelStatus from "./lib/localChannelStatus";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -354,8 +355,10 @@ export default class App extends Component {
     this.sendData("micVolume", v);
   };
 
-  changeChannel = (plyload) => {
-    this.sendData("change channel", plyload);
+  changeChannel = (payload) => {
+    const { pin, value } = payload;
+    localChannelStatus[pin] = value;
+    this.sendData("change channel", payload);
   };
 
   _saveServerConfig = (config) => {

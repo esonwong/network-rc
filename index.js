@@ -547,7 +547,7 @@ const receivePing = (socket, { sendTime }) => {
 const makeHeartbeatTimer = (socket) => {
   socket.heartbeatTimeoutId && clearTimeout(socket.heartbeatTimeoutId);
   if (socket.autoLocking) {
-    /** 刹车锁定后 正常心跳统计， 大于 5 就解锁 */
+    /** 刹车锁定后 正常心跳统计， 大于 10 就解锁 */
     socket.unlockHearbertCount++;
     console.log("socket.unlockHearbertCount", socket.unlockHearbertCount);
     if (socket.unlockHearbertCount > 10) {
@@ -565,7 +565,7 @@ const makeHeartbeatTimer = (socket) => {
     if (socket.autoLocking === true) return;
     socket.autoLocking = true;
     console.warn("网络连接不稳定，自动刹车");
-    socket.sendData("success", {
+    socket.sendData("warn", {
       message: `网络连接不稳定，自动刹车, 并锁定`,
     });
     const { channelList = [], specialChannel } = status.config;
@@ -573,10 +573,10 @@ const makeHeartbeatTimer = (socket) => {
       ({ id }) => id === specialChannel.speed
     );
     if (speedChannel) {
-      const { pin } = speedChannel;
-      changePwmPin(pin, -(channelStatus[pin] || 0));
+      const { pin, valueReset } = speedChannel;
+      changePwmPin(pin, -(channelStatus[pin] || valueReset));
       await sleep(200);
-      changePwmPin(pin, 0);
+      changePwmPin(pin, valueReset);
     }
   }, status.config.autoLockTime * 2);
 };

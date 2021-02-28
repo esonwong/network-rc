@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Button, Select } from "antd";
+import { Form, Button, Select, Slider } from "antd";
 import { layout, tailLayout } from "../unit";
 
 const { Option } = Select;
@@ -31,6 +31,9 @@ export default function UISetting({ saveServerConfig, serverConfig }) {
               </Option>
             ))}
         </Select>
+      </Form.Item>
+      <Form.Item label="自动刹车延迟阀值" name="autoLockTime">
+        <Slider max={3000} />
       </Form.Item>
       <Form.Item {...tailLayout}>
         <Button type="primary" htmlType="submit">

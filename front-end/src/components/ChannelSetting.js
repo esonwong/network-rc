@@ -13,6 +13,7 @@ import {
   Card,
   Collapse,
   Slider,
+  Radio,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -52,7 +53,7 @@ export default function ChannelSetting({
 
   useEffect(() => {
     form.resetFields();
-  }, [serverConfig]);
+  }, [serverConfig, form]);
 
   const ui = (index, fields, { add, remove }) => {
     return (
@@ -155,29 +156,87 @@ export default function ChannelSetting({
     );
   };
 
-  const keyboard = (fields, { add, remove }) => (
-    <Space align="baseline" split={<Divider type="vertical" />} wrap>
-      {fields.map((field) => (
-        <Space key={field.key} align="baseline">
-          <Form.Item
-            {...field}
-            name={[field.name, "name"]}
-            fieldKey={[field.fieldKey, "name"]}
-            rules={[{ required: true, message: "客官！选一个按键！" }]}
-          >
-            <Input style={{ width: 80 }} />
-          </Form.Item>
-          <Form.Item
-            {...field}
-            name={[field.name, "positive"]}
-            fieldKey={[field.fieldKey, "positive"]}
-            valuePropName="checked"
-          >
-            <Switch checkedChildren="正向" unCheckedChildren="反向" />
-          </Form.Item>
-          <MinusCircleOutlined onClick={() => remove(field.name)} />
-        </Space>
-      ))}
+  const keyboard = (index, fields, { add, remove }) => (
+    <Space align="baseline" direction="vertical">
+      {fields.map((field) => {
+        const type = form.getFieldValue(["channelList", index, "type"]),
+          reset = form.getFieldValue([
+            "channelList",
+            index,
+            "keyboard",
+            field.name,
+            "reset",
+          ]),
+          method = form.getFieldValue([
+            "channelList",
+            index,
+            "keyboard",
+            field.name,
+            "method",
+          ]);
+
+        return (
+          <Space key={field.key} align="baseline">
+            <Form.Item
+              {...field}
+              name={[field.name, "name"]}
+              fieldKey={[field.fieldKey, "name"]}
+              rules={[{ required: true, message: "客官！选一个按键！" }]}
+            >
+              <Input style={{ width: 80 }} />
+            </Form.Item>
+
+            {type === "pwm" && (
+              <Form.Item
+                {...field}
+                name={[field.name, "method"]}
+                fieldKey={[field.fieldKey, "method"]}
+                defaultValue="default"
+              >
+                <Radio.Group size="middle">
+                  <Radio.Button value="default">默认</Radio.Button>
+                  <Radio.Button value="step">步进</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            )}
+
+            {!reset && (
+              <Form.Item
+                {...field}
+                name={[field.name, "positive"]}
+                fieldKey={[field.fieldKey, "positive"]}
+                valuePropName="checked"
+              >
+                <Switch checkedChildren="正向" unCheckedChildren="反向" />
+              </Form.Item>
+            )}
+
+            {type === "pwm" && method === "default" && (
+              <Form.Item
+                {...field}
+                name={[field.name, "reset"]}
+                fieldKey={[field.fieldKey, "reset"]}
+                valuePropName="checked"
+              >
+                <Switch checkedChildren="归位" unCheckedChildren="归位" />
+              </Form.Item>
+            )}
+
+            {type === "pwm" && method === "step" && (
+              <Form.Item
+                {...field}
+                name={[field.name, "speed"]}
+                fieldKey={[field.fieldKey, "speed"]}
+                label="速度"
+              >
+                <InputNumber max={10} min={0} step={0.1} />
+              </Form.Item>
+            )}
+
+            <MinusCircleOutlined onClick={() => remove(field.name)} />
+          </Space>
+        );
+      })}
       <PlusCircleOutlined
         onClick={() =>
           add({
@@ -364,7 +423,7 @@ export default function ChannelSetting({
                   </Panel>
                   <Panel header="键盘" size="small">
                     <Form.List name={[field.name, "keyboard"]}>
-                      {keyboard}
+                      {(...props) => keyboard(field.fieldKey, ...props)}
                     </Form.List>
                   </Panel>
                   <Panel header="手柄" size="small">
