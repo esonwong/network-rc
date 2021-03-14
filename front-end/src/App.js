@@ -437,31 +437,33 @@ export default class App extends Component {
 
     return (
       <div className="App" ref={this.appRef}>
-        <Status
-          {...{
-            version,
-            wsConnected,
-            isFullscreen,
-            lightEnabled,
-            delay,
-            powerEnabled,
-            localMicrphoneEnabled,
-            changePower,
-            changeLight,
-            piPowerOff,
-            connect,
-            disconnect,
-            setting,
-            isLogin,
-            session,
-            changeEditabled,
-            editabled,
-            channelStatus,
-            changeChannel,
-            serverConfig,
-          }}
-          disabled={!isLogin}
-        />
+        {!isFullscreen && (
+          <Status
+            {...{
+              version,
+              wsConnected,
+              isFullscreen,
+              lightEnabled,
+              delay,
+              powerEnabled,
+              localMicrphoneEnabled,
+              changePower,
+              changeLight,
+              piPowerOff,
+              connect,
+              disconnect,
+              setting,
+              isLogin,
+              session,
+              changeEditabled,
+              editabled,
+              channelStatus,
+              changeChannel,
+              serverConfig,
+            }}
+            disabled={!isLogin}
+          />
+        )}
         <Router className="app-page">
           {wsConnected && (
             <Login path={`${pubilcUrl}/login`} onSubmit={login} />
@@ -501,6 +503,7 @@ export default class App extends Component {
                 editabled={editabled}
                 cameraList={cameraList}
                 channelStatus={channelStatus}
+                isFullscreen={isFullscreen}
               />
             </>
           ) : undefined}

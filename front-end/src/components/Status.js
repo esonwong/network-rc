@@ -1,7 +1,8 @@
 import React from "react";
 import { Form, Switch, Dropdown, Button, Tag, Space } from "antd";
+import { Link } from "@reach/router";
 import {
-  HomeOutlined,
+  SettingOutlined,
   FullscreenOutlined,
   ApiOutlined,
   FullscreenExitOutlined,
@@ -9,8 +10,6 @@ import {
   FormOutlined,
   HourglassOutlined,
 } from "@ant-design/icons";
-import { Location } from "@reach/router";
-import Nav from "./Nav";
 import Audio from "./Audio";
 
 export default function Status({
@@ -33,18 +32,10 @@ export default function Status({
   return (
     <Form layout="inline" className="app-status" size="small">
       <Form.Item>
-        <Location>
-          {({ navigate }) => (
-            <Dropdown.Button
-              overlay={<Nav />}
-              onClick={() => navigate(`${process.env.PUBLIC_URL}/controller`)}
-              type="primary"
-              trigger="click"
-            >
-              <HomeOutlined /> 控制
-            </Dropdown.Button>
-          )}
-        </Location>
+        <Link to={`${process.env.PUBLIC_URL}/controller`}>
+          <img className="logo" src="/logo-256.png" alt="N-RC" />
+        </Link>
+        <span>N RC</span>
       </Form.Item>
       <Form.Item>
         <Switch
@@ -87,6 +78,16 @@ export default function Status({
           unCheckedChildren={<FormOutlined />}
           onChange={changeEditabled}
         ></Switch>
+      </Form.Item>
+
+      <Form.Item>
+        <Link to={`${process.env.PUBLIC_URL}/setting`}>
+          <Button
+            size="small"
+            icon={<SettingOutlined />}
+            shape="circle"
+          ></Button>
+        </Link>
       </Form.Item>
 
       {document.body.requestFullscreen && (

@@ -16,7 +16,18 @@ body {
 
 .app-status {
   padding: 0.5em;
+  padding-bottom: 0;
   width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  height: 0;
+}
+
+.logo {
+  display: inline-block;
+  height: 28px;
+  margin-right: 10px;
 }
 
 .app-status .ant-form-item,
@@ -227,4 +238,8 @@ body {
 }
 .recording-img {
   width: 10vw;
+}
+
+.setting-tabs {
+  margin-top: 3em;
 }

@@ -80,6 +80,7 @@ export default class Controller extends Component {
         cameraList,
         channelStatus,
         saveServerConfig,
+        isFullscreen,
       },
     } = this;
     const { isShowButton, ttsInputVisible, text } = this.state;
@@ -106,173 +107,175 @@ export default class Controller extends Component {
             onAi={(isAiControlling) => this.setState({ isAiControlling })}
           />
         </Router>
-        <Form className="controller-form" size="small" layout="inline">
-          <Form.Item>
-            <Popover
-              content={fixContent}
-              title="修正"
-              trigger="click"
-              placement="topLeft"
-            >
-              <Button icon={<SlidersOutlined />}>修正</Button>
-            </Popover>
-          </Form.Item>
-          {speedChannel && (
-            <>
-              <Form.Item>
-                <Popover
-                  placement="topLeft"
-                  content={
-                    <Slider
-                      defaultValue={speedChannel.valuePostive * 100}
-                      min={0}
-                      max={100}
-                      onChange={(v) => {
-                        speedChannel.valuePostive = v / 100;
-                        saveServerConfig({
-                          channelList,
-                        });
-                      }}
-                      arrowPointAtCenter
-                      style={{ width: "30vw" }}
-                    />
-                  }
-                >
-                  <Button shape="round">
-                    前进:{Math.round(speedChannel.valuePostive * 100)}
-                  </Button>
-                </Popover>
-              </Form.Item>
-              <Form.Item>
-                <Popover
-                  placement="topLeft"
-                  content={
-                    <Slider
-                      defaultValue={speedChannel.valueNegative * -100}
-                      min={0}
-                      max={100}
-                      style={{ width: "30vw" }}
-                      onChange={(v) => {
-                        speedChannel.valueNegative = (v / 100) * -1;
-                        saveServerConfig({
-                          channelList,
-                        });
-                      }}
-                    />
-                  }
-                >
-                  <Button shape="round">
-                    倒退:{Math.round(speedChannel.valueNegative * -100)}
-                  </Button>
-                </Popover>
-              </Form.Item>
-            </>
-          )}
-          <Form.Item>
-            <Switch
-              checked={isShowButton}
-              onChange={(isShowButton) => {
-                store.set("is-show-button", isShowButton);
-                this.setState({ isShowButton });
-              }}
-              checkedChildren={<DragOutlined />}
-              unCheckedChildren={<DragOutlined />}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Gamepad
-              changeChannel={changeChannel}
-              channelList={serverConfig.channelList}
-              channelStatus={channelStatus}
-              playAudio={playAudio}
-              serverConfig={serverConfig}
-            />
-          </Form.Item>
+        {!isFullscreen && (
+          <Form className="controller-form" size="small" layout="inline">
+            <Form.Item>
+              <Popover
+                content={fixContent}
+                title="修正"
+                trigger="click"
+                placement="topLeft"
+              >
+                <Button icon={<SlidersOutlined />}>修正</Button>
+              </Popover>
+            </Form.Item>
+            {speedChannel && (
+              <>
+                <Form.Item>
+                  <Popover
+                    placement="topLeft"
+                    content={
+                      <Slider
+                        defaultValue={speedChannel.valuePostive * 100}
+                        min={0}
+                        max={100}
+                        onChange={(v) => {
+                          speedChannel.valuePostive = v / 100;
+                          saveServerConfig({
+                            channelList,
+                          });
+                        }}
+                        arrowPointAtCenter
+                        style={{ width: "30vw" }}
+                      />
+                    }
+                  >
+                    <Button shape="round">
+                      前进:{Math.round(speedChannel.valuePostive * 100)}
+                    </Button>
+                  </Popover>
+                </Form.Item>
+                <Form.Item>
+                  <Popover
+                    placement="topLeft"
+                    content={
+                      <Slider
+                        defaultValue={speedChannel.valueNegative * -100}
+                        min={0}
+                        max={100}
+                        style={{ width: "30vw" }}
+                        onChange={(v) => {
+                          speedChannel.valueNegative = (v / 100) * -1;
+                          saveServerConfig({
+                            channelList,
+                          });
+                        }}
+                      />
+                    }
+                  >
+                    <Button shape="round">
+                      倒退:{Math.round(speedChannel.valueNegative * -100)}
+                    </Button>
+                  </Popover>
+                </Form.Item>
+              </>
+            )}
+            <Form.Item>
+              <Switch
+                checked={isShowButton}
+                onChange={(isShowButton) => {
+                  store.set("is-show-button", isShowButton);
+                  this.setState({ isShowButton });
+                }}
+                checkedChildren={<DragOutlined />}
+                unCheckedChildren={<DragOutlined />}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Gamepad
+                changeChannel={changeChannel}
+                channelList={serverConfig.channelList}
+                channelStatus={channelStatus}
+                playAudio={playAudio}
+                serverConfig={serverConfig}
+              />
+            </Form.Item>
 
-          <Form.Item>
-            <Orientation
-              changeChannel={changeChannel}
-              channelStatus={channelStatus}
-              serverConfig={serverConfig}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Keybord
-              playAudio={playAudio}
-              channelStatus={channelStatus}
-              channelList={serverConfig.channelList}
-              changeChannel={changeChannel}
-              serverConfig={serverConfig}
-              onEnter={() => {
-                this.setState({ ttsInputVisible: true });
-                setTimeout(() => {
-                  ttsInput.current && ttsInput.current.focus();
-                }, 200);
-              }}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Popover
-              arrowPointAtCenter
-              trigger="click"
-              placement="topRight"
-              visible={ttsInputVisible}
-              onVisibleChange={(ttsInputVisible) => {
-                this.setState({ ttsInputVisible });
-                setTimeout(() => {
-                  ttsInput.current && ttsInput.current.focus();
-                }, 200);
-              }}
-              content={
-                <form>
-                  <Input.Search
-                    ref={ttsInput}
-                    name="tts"
-                    style={{ width: "60vw" }}
-                    placeholder="发送语音"
-                    enterButton="发送"
-                    value={text}
-                    onChange={(e) => this.setState({ text: e.target.value })}
-                    onSearch={(text) => {
-                      onTTS(text);
-                      this.setState({ text: "" });
-                    }}
-                    loading={ttsPlaying}
-                    onKeyDown={(e) => {
-                      e.stopPropagation();
-                      if (e.key === "Escape") {
-                        this.setState({ ttsInputVisible: false });
-                      }
-                    }}
-                  />
-                </form>
-              }
-            >
-              <Button shape="round">
-                <SendOutlined />
+            <Form.Item>
+              <Orientation
+                changeChannel={changeChannel}
+                channelStatus={channelStatus}
+                serverConfig={serverConfig}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Keybord
+                playAudio={playAudio}
+                channelStatus={channelStatus}
+                channelList={serverConfig.channelList}
+                changeChannel={changeChannel}
+                serverConfig={serverConfig}
+                onEnter={() => {
+                  this.setState({ ttsInputVisible: true });
+                  setTimeout(() => {
+                    ttsInput.current && ttsInput.current.focus();
+                  }, 200);
+                }}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Popover
+                arrowPointAtCenter
+                trigger="click"
+                placement="topRight"
+                visible={ttsInputVisible}
+                onVisibleChange={(ttsInputVisible) => {
+                  this.setState({ ttsInputVisible });
+                  setTimeout(() => {
+                    ttsInput.current && ttsInput.current.focus();
+                  }, 200);
+                }}
+                content={
+                  <form>
+                    <Input.Search
+                      ref={ttsInput}
+                      name="tts"
+                      style={{ width: "60vw" }}
+                      placeholder="发送语音"
+                      enterButton="发送"
+                      value={text}
+                      onChange={(e) => this.setState({ text: e.target.value })}
+                      onSearch={(text) => {
+                        onTTS(text);
+                        this.setState({ text: "" });
+                      }}
+                      loading={ttsPlaying}
+                      onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Escape") {
+                          this.setState({ ttsInputVisible: false });
+                        }
+                      }}
+                    />
+                  </form>
+                }
+              >
+                <Button shape="round">
+                  <SendOutlined />
+                </Button>
+              </Popover>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                shape="round"
+                onClick={() => playAudio({ path: serverConfig.audio1 })}
+              >
+                <SoundOutlined />
               </Button>
-            </Popover>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              shape="round"
-              onClick={() => playAudio({ path: serverConfig.audio1 })}
-            >
-              <SoundOutlined />
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Microphone
-              url={
-                setting.host &&
-                `${window.location.protocol === "https:" ? "wss://" : "ws://"}${
-                  setting.host
-                }/audio`
-              }
-            />
-          </Form.Item>
-        </Form>
+            </Form.Item>
+            <Form.Item>
+              <Microphone
+                url={
+                  setting.host &&
+                  `${
+                    window.location.protocol === "https:" ? "wss://" : "ws://"
+                  }${setting.host}/audio`
+                }
+              />
+            </Form.Item>
+          </Form>
+        )}
         <ControlUI
           channelStatus={channelStatus}
           isShowButton={isShowButton}
@@ -282,6 +285,7 @@ export default class Controller extends Component {
           editabled={editabled}
           cameraList={cameraList}
           setting={setting}
+          isFullscreen={isFullscreen}
         />
       </div>
     );

@@ -8,6 +8,7 @@ import ChannelSetting from "./ChannelSetting";
 import BasicSetting from "./BasicSetting";
 import Backup from "./Backup";
 import SoundSetting from "./SoundSetting";
+import Nav from "./Nav";
 const { TabPane } = Tabs;
 
 export default function Setting({
@@ -35,7 +36,7 @@ export default function Setting({
   };
 
   return (
-    <Tabs defaultActiveKey="basic">
+    <Tabs defaultActiveKey="1" className="setting-tabs">
       <TabPane tab="连接设置" key="1">
         <Form {...layout} onFinish={onSubmit} initialValues={form}>
           <br />
@@ -52,6 +53,7 @@ export default function Setting({
             </Button>
           </Form.Item>
         </Form>
+        <Nav />
       </TabPane>
 
       <TabPane tab="基本设置" key="basic">
