@@ -10,13 +10,12 @@ if (!existsSync("/var/audio")) {
   mkdirSync("/var/audio");
 }
 
-const express = require("express");
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
-const app = express();
 const package = require("./package.json");
 const md5 = require("md5");
 const { spawn } = require("child_process");
 const User = require("./lib/user");
+const app = require("./lib/app");
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
 const Audio = require("./lib/Audio");
@@ -84,7 +83,7 @@ const argv = require("yargs")
   .env("NETWORK_RC")
   .help().argv;
 
-console.info(`版本: ${package.version} 预览版`);
+console.info(`版本: ${package.version}`);
 
 const {
   frp,
@@ -143,11 +142,6 @@ const server = createServer(
   app
 );
 
-app.use(express.static(path.resolve(__dirname, "./front-end/build")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname + "/front-end/build/index.html"));
-});
-
 let powerEnabled = false,
   lightEnabled = false;
 
@@ -202,10 +196,12 @@ const broadcast = (action, payload) => {
 
 const broadcastConfig = () => {
   const { channelList, uiComponentList, ...other } = status.config;
-  broadcast("config", { channelList });
-  broadcast("config", { uiComponentList });
   broadcast("config", other);
 };
+
+status.on("update", () => {
+  broadcast("config update");
+});
 
 if (userList) {
   new User({

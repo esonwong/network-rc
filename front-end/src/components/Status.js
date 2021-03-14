@@ -76,7 +76,7 @@ export default function Status({
           <Audio
             url={`${
               window.location.protocol === "https:" ? "wss://" : "ws://"
-            }${setting.wsAddress}/microphone`}
+            }${setting.host}/microphone`}
           />
         </Form.Item>
       )}

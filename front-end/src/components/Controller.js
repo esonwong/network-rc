@@ -265,9 +265,9 @@ export default class Controller extends Component {
           <Form.Item>
             <Microphone
               url={
-                setting.wsAddress &&
+                setting.host &&
                 `${window.location.protocol === "https:" ? "wss://" : "ws://"}${
-                  setting.wsAddress
+                  setting.host
                 }/audio`
               }
             />

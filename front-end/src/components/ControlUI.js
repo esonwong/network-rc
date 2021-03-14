@@ -160,10 +160,7 @@ export default function ControlUI({
                   editabled={editabled}
                   key={"camera" + cameraIndex}
                   index={cameraIndex}
-                  url={
-                    setting.wsAddress &&
-                    `${setting.wsAddress}/video${cameraIndex}`
-                  }
+                  url={setting.host && `${setting.host}/video${cameraIndex}`}
                   onChangeVideoRatio={(v) => {
                     if (ratio !== v) {
                       savePosition(id, { x, y, z, size, ratio });

@@ -11,6 +11,7 @@ import md5 from "md5";
 import debounce from "debounce";
 import Status from "./components/Status";
 import localChannelStatus from "./lib/localChannelStatus";
+import axios from "axios";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -22,7 +23,7 @@ export default class App extends Component {
       editabled: false,
       cameraList: [],
       setting: {
-        wsAddress: window.location.host,
+        host: window.location.host,
         ...store.get("setting"),
       },
       serverConfig: {},
@@ -91,12 +92,12 @@ export default class App extends Component {
   }
 
   connect = () => {
-    const { wsAddress } = this.state.setting;
+    const { host } = this.state.setting;
     let pingTime, heartbeatTime;
     const socket = (this.socket = new WebSocket(
       `${
         window.location.protocol === "https:" ? "wss://" : "ws://"
-      }${wsAddress}/control`
+      }${host}/control`
     ));
     socket.binaryType = "arraybuffer";
 
@@ -133,6 +134,9 @@ export default class App extends Component {
             break;
           case "config":
             this.setState({ serverConfig: { ...serverConfig, ...payload } });
+            break;
+          case "config update":
+            this.getServerConfig();
             break;
           case "volume":
             this.setState({ volume: payload });
@@ -193,6 +197,17 @@ export default class App extends Component {
     }
   }
 
+  async getServerConfig() {
+    this.setState({ loading: true });
+    const { host } = this.state.setting;
+    try {
+      const { data: serverConfig } = await axios(`//${host}/config`);
+      this.setState({ serverConfig });
+    } finally {
+      this.setState({ loading: false });
+    }
+  }
+
   onLogin = ({ message: m = "无密码", session } = {}) => {
     message.success(m);
     this.setState({ isLogin: true, session });
@@ -206,6 +221,8 @@ export default class App extends Component {
     } else {
       navigate(`${pubilcUrl}/controller`, { replace: true });
     }
+
+    this.getServerConfig();
 
     // video 标签
     // const time = setInterval(() => {
@@ -362,7 +379,10 @@ export default class App extends Component {
   };
 
   _saveServerConfig = (config) => {
-    this.sendData("save config", config);
+    const {
+      setting: { host },
+    } = this.state;
+    axios.post(`//${host}/config`, config);
   };
 
   resetServerConfig = () => {

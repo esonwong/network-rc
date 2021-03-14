@@ -29,7 +29,7 @@ export default function Setting({
 }) {
   const clearCameraSetting = () => {
     cameraList.forEach((_, index) =>
-      store.remove(`camera-${form.wsAddress}/video${index}`)
+      store.remove(`camera-${form.host}/video${index}`)
     );
     window.location.reload();
   };
@@ -41,7 +41,7 @@ export default function Setting({
           <br />
           <Form.Item
             label="连接地址"
-            name="wsAddress"
+            name="host"
             rules={[{ required: true, message: "请输入连接地址!" }]}
           >
             <Input />
