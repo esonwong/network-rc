@@ -84,10 +84,8 @@ export default function Joystick({
   };
 
   const end = () => {
-    debugger;
     if (disabled) return;
     if (!autoReset) return;
-    debugger;
     setValue({ x: 0, y: 0 });
     onChange({ x: 0, y: 0 });
   };

@@ -27,6 +27,7 @@ export default function Setting({
   volume,
   micVolume,
   updateVersion,
+  updateStaus,
   ...form
 }) {
   const clearCameraSetting = () => {
@@ -53,7 +54,6 @@ export default function Setting({
               <Button type="primary" htmlType="submit">
                 保存并刷新
               </Button>
-              <Button onClick={updateVersion}>更新版本</Button>
             </Space>
           </Form.Item>
         </Form>
@@ -121,11 +121,13 @@ export default function Setting({
           sharedEndTime={serverConfig.sharedEndTime}
         />
       </TabPane>
-      <TabPane tab="备份" key="backup">
+      <TabPane tab="备份和更新" key="backup">
         <Backup
           resetServerConfig={resetServerConfig}
           saveServerConfig={saveServerConfig}
           serverConfig={serverConfig}
+          updateVersion={updateVersion}
+          updateStaus={updateStaus}
         />
       </TabPane>
     </Tabs>

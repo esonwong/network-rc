@@ -204,16 +204,29 @@ status.on("update", () => {
   broadcast("config update");
 });
 
+updater.on("downloading", () => {
+  broadcast("update-status", "下载中");
+});
 updater.on("downloaded", () => {
-  broadcast("success", "下载完成");
+  broadcast("success", { message: "下载完成" });
+  broadcast("update-status", "解压中");
 });
 
 updater.on("untared", () => {
-  broadcast("success", "解压完成");
+  broadcast("success", { message: "解压完成" });
+});
+
+updater.on("updated", () => {
+  broadcast("success", { message: "升级玩完成了！重启中！" });
+  broadcast("update-status", "重启中");
+});
+
+updater.on("before-restart", () => {
+  broadcast("before-restart");
 });
 
 updater.on("error", () => {
-  broadcast("error", "升级错误");
+  broadcast("error", { message: "升级错误" });
 });
 
 if (userList) {

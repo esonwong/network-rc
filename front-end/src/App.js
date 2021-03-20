@@ -48,6 +48,7 @@ export default class App extends Component {
       micVolume: 0,
       session: {},
       version: undefined,
+      updateStaus: undefined,
     };
 
     const { changeLight, changePower } = this;
@@ -152,6 +153,16 @@ export default class App extends Component {
           case "tts playing":
             this.setState({ ttsPlaying: payload });
             break;
+
+          case "update-status":
+            this.setState({ updateStaus: payload });
+            break;
+
+          case "before-restart":
+            setTimeout(() => {
+              window.location.reload();
+            }, 5000);
+            break;
           case "pong":
             this.setState({
               delay: (new Date().getTime() - payload.sendTime) / 2,
@@ -208,9 +219,9 @@ export default class App extends Component {
     }
   }
 
-  updateVersion() {
+  updateVersion = () => {
     this.sendData("update");
-  }
+  };
 
   onLogin = ({ message: m = "无密码", session } = {}) => {
     message.success(m);
@@ -435,6 +446,7 @@ export default class App extends Component {
         session,
         editabled,
         channelStatus,
+        updateStaus,
       },
       tts,
       playAudio,
@@ -465,6 +477,7 @@ export default class App extends Component {
               channelStatus,
               changeChannel,
               serverConfig,
+              updateStaus,
             }}
             disabled={!isLogin}
           />
@@ -491,6 +504,7 @@ export default class App extends Component {
                 volume={volume}
                 micVolume={micVolume}
                 updateVersion={updateVersion}
+                updateStaus={updateStaus}
               />
               <Controller
                 path={`${pubilcUrl}/controller`}
