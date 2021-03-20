@@ -48,20 +48,18 @@ export default function Status({
           checkedChildren={<ApiOutlined />}
         />
       </Form.Item>
-      <Space>
-        {(serverConfig.channelList || [])
-          .filter(({ enabled, type }) => enabled && type === "switch")
-          .map(({ pin, name }) => (
-            <Form.Item key={pin}>
-              <Switch
-                checked={channelStatus[pin] || false}
-                checkedChildren={name}
-                unCheckedChildren={name}
-                onChange={(value) => changeChannel({ pin, value })}
-              />
-            </Form.Item>
-          ))}
-      </Space>
+      {(serverConfig.channelList || [])
+        .filter(({ enabled, type }) => enabled && type === "switch")
+        .map(({ pin, name }) => (
+          <Form.Item key={pin}>
+            <Switch
+              checked={channelStatus[pin] || false}
+              checkedChildren={name}
+              unCheckedChildren={name}
+              onChange={(value) => changeChannel({ pin, value })}
+            />
+          </Form.Item>
+        ))}
       {isLogin && (
         <Form.Item>
           <Audio

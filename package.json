@@ -1,6 +1,6 @@
 {
   "name": "network-rc",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "网络控制遥控车",
   "main": "index.js",
   "repository": "git@github.com:itiwll/network-rc.git",

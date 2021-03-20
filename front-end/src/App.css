@@ -39,6 +39,7 @@ body {
   overflow-y: auto;
   height: calc(100% - 38px);
   padding: 20px;
+  padding-top: 55px;
 }
 
 .controller {
@@ -238,8 +239,4 @@ body {
 }
 .recording-img {
   width: 10vw;
-}
-
-.setting-tabs {
-  margin-top: 3em;
 }
