@@ -21,6 +21,7 @@ const Camera = require("./lib/Camera");
 const Audio = require("./lib/Audio");
 const audioPlayer = require("./lib/AudioPlayer");
 const status = require("./lib/status");
+const updater = require("./lib/updater");
 const Microphone = require("./lib/Microphone");
 const { sleep } = require("./lib/unit");
 const argv = require("yargs")
@@ -201,6 +202,18 @@ const broadcastConfig = () => {
 
 status.on("update", () => {
   broadcast("config update");
+});
+
+updater.on("downloaded", () => {
+  broadcast("success", "下载完成");
+});
+
+updater.on("untared", () => {
+  broadcast("success", "解压完成");
+});
+
+updater.on("error", () => {
+  broadcast("error", "升级错误");
 });
 
 if (userList) {
@@ -406,6 +419,11 @@ wss.on("connection", async function (socket) {
         status.resetChannelAndUI();
         broadcastConfig();
         broadcast("success", { message: "通道已重置！！！！！" });
+        break;
+
+      case "update":
+        broadcast("info", { message: "开始更新" });
+        updater.update();
         break;
       default:
         console.log("怎么了？");

@@ -208,6 +208,10 @@ export default class App extends Component {
     }
   }
 
+  updateVersion() {
+    this.sendData("update");
+  }
+
   onLogin = ({ message: m = "无密码", session } = {}) => {
     message.success(m);
     this.setState({ isLogin: true, session });
@@ -410,6 +414,7 @@ export default class App extends Component {
       changeVolume,
       changeMicVolume,
       changeEditabled,
+      updateVersion,
       state: {
         version,
         cameraList,
@@ -485,6 +490,7 @@ export default class App extends Component {
                 changeMicVolume={changeMicVolume}
                 volume={volume}
                 micVolume={micVolume}
+                updateVersion={updateVersion}
               />
               <Controller
                 path={`${pubilcUrl}/controller`}

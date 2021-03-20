@@ -32,7 +32,6 @@ export default class Controller extends Component {
     const {
       serverConfig: { channelList = [], specialChannel = {} },
       saveServerConfig,
-      changeChannel,
     } = this.props;
 
     const direction = channelList.find(

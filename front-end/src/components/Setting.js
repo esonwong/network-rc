@@ -1,5 +1,5 @@
 import React from "react";
-import { Slider, Form, Button, Input, Tabs } from "antd";
+import { Slider, Form, Button, Input, Tabs, Space } from "antd";
 import Shared from "./Shared";
 import { layout, tailLayout } from "../unit";
 import store from "store";
@@ -26,6 +26,7 @@ export default function Setting({
   clearAudioTemp,
   volume,
   micVolume,
+  updateVersion,
   ...form
 }) {
   const clearCameraSetting = () => {
@@ -48,9 +49,12 @@ export default function Setting({
             <Input />
           </Form.Item>
           <Form.Item {...tailLayout}>
-            <Button type="primary" htmlType="submit">
-              保存并刷新
-            </Button>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                保存并刷新
+              </Button>
+              <Button onClick={updateVersion}>更新版本</Button>
+            </Space>
           </Form.Item>
         </Form>
         <Nav />
