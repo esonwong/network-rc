@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Button, message, Upload, Space } from "antd";
-import { layout, tailLayout } from "../unit";
+import { layout } from "../unit";
 import {
   UploadOutlined,
   DownloadOutlined,
@@ -42,7 +42,7 @@ export default function Backup({
   };
   return (
     <Form {...layout}>
-      <Form.Item {...tailLayout}>
+      <Form.Item>
         <Space>
           <Button icon={<DownloadOutlined />} type="primary" onClick={save}>
             备份当前设置
@@ -57,7 +57,7 @@ export default function Backup({
         </Space>
       </Form.Item>
 
-      <Form.Item {...tailLayout}>
+      <Form.Item >
         <Button
           onClick={(e) => {
             e.preventDefault();
