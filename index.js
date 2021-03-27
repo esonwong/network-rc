@@ -80,6 +80,12 @@ const argv = require("yargs")
       describe: "frp 服务器认证 token, token",
       type: "string",
     },
+    tslCertPath: {
+      type: "string",
+    },
+    tslKeyPath: {
+      type: "string",
+    },
   })
   .env("NETWORK_RC")
   .help().argv;
@@ -96,6 +102,8 @@ const {
   userList,
   tts,
   tsl,
+  tslCertPath,
+  tslKeyPath
 } = argv;
 let { password } = argv;
 let currentUser;
@@ -131,12 +139,14 @@ const server = createServer(
     secureProtocol: status.enabledHttps ? secureProtocol : undefined,
     key: status.enabledHttps
       ? readFileSync(
-          path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`)
+          tslKeyPath ||
+            path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`)
         )
       : undefined,
     cert: status.enabledHttps
       ? readFileSync(
-          path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`)
+          tslCertPath ||
+            path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`)
         )
       : undefined,
   },
