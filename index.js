@@ -103,7 +103,7 @@ const {
   tts,
   tsl,
   tslCertPath,
-  tslKeyPath
+  tslKeyPath,
 } = argv;
 let { password } = argv;
 let currentUser;
@@ -473,6 +473,10 @@ const login = (socket, { sessionId, token, sharedCode }) => {
       message: "OMG 你登录啦！",
     });
     return;
+  } else {
+    if (!token && !sharedCode && !sessionId) {
+      check(socket);
+    }
   }
 
   if (token) {
