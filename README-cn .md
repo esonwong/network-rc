@@ -1,17 +1,16 @@
-# Network RC -  Remote Control Car Software For Raspberry Pi
+# 树莓派网络遥控车软件 Network RC
 
-[中文](./README-cn.md)
+Network RC 是运行在树莓派和浏览器上的网络遥控车软件。具备以下特性：
 
-Network RC' feature:
-
-- low-latency control and network video￼ ￼transmission
-- 27 custom channels(PWM or Height/Low)
-- touch, gamepad, keyboard, RC transmitter
-- real-time listening and voice sending
-- repoviding NAT traverse
-- voice broadcast
-- playing audio
-- remote shared
+- 低延迟控制和网络图传
+- 通道自定义（27 个 高低电平或者 PWM 通道）
+- 支持多摄像头
+- 支持触屏操作、游戏手柄、枪控、板控
+- 支持实时语音收听和语音喊话
+- 内置网络穿透
+- 系统语音播报
+- 播放音频
+- 远程分享
 
 ## 依赖
 
@@ -73,6 +72,36 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 - [network-rc.esonwong.com](https://network-rc.esonwong.com/download)
 - [github](https://github.com/itiwll/network-rc/releases)
+
+## ToDo
+
+- [ ] 设置麦克风灵敏度
+- [ ] 一键安装脚本
+- [x] 添加远程获取 frps 配置的功能
+- [x] 自定义通道
+- [x] 修复云台舵机的卡顿
+- [x] 保存车子运行的相关状态
+- [x] 检测摄像头分辨率
+- [x] 修复摄像头数量检测错误
+- [x] 播放手机端录制的音频
+- [x] 支持自定义证书
+- [x] frp 运行添加 user 参数
+- [x] ~~替换播放声音的程序~~
+- [x] 更新支持者列表
+- [x] 添加摄像头画面重置按钮
+- [x] 更新内置 frp 配置
+- [x] 为本人提供的 frp 服务启用 https
+- [x] 网络连接响应时间超过 500 毫秒自动刹车
+- [x] ping 值显示
+- [x] 支持手柄
+- [x] 网络穿透
+- [x] Ai 控制(暂时移除)
+- [x] 支持车辆麦克风
+- [x] ~~使用 webrtc 点对点音视频控制信号传输~~（延迟高已弃用）
+- [x] ~~使用 MSE~~ (延迟高已弃用）)
+- [x] 支持多摄像头
+  - [x] 编辑/锁定状态
+  - [x] 检测摄像头数量
 
 ## 社群
 
