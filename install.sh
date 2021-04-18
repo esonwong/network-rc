@@ -91,7 +91,7 @@ Wants=network.target
 [Service]
 User=root
 Type=simple
-ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p "'$password'" --frpServerPort '$frpServerPort' --frpServerToken "'$frpServerToken'" --frpServerUser '$frpServerUser' --tslCertPath '$tslCertPath' --tslKeyPath '$tslKeyPath'
+ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p \"$password\" --frpServerPort '$frpServerPort' --frpServerToken "'$frpServerToken'" --frpServerUser '$frpServerUser' --tslCertPath '$tslCertPath' --tslKeyPath '$tslKeyPath'
 Restart= always
 RestartSec=1min
 
