@@ -13,7 +13,7 @@ if (!existsSync("/var/audio")) {
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const package = require("./package.json");
 const md5 = require("md5");
-const { spawn } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const User = require("./lib/user");
 const app = require("./lib/app");
 const TTS = require("./lib/tts");
@@ -92,7 +92,7 @@ const argv = require("yargs")
 
 console.info(`版本: ${package.version}`);
 
-const {
+let {
   frp,
   frpPort,
   frpServer,
@@ -134,21 +134,23 @@ let sharedEndTimerId;
 
 const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
+if (status.enabledHttps && !tslKeyPath) {
+  tslKeyPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`);
+  tslCertPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`);
+  console.info(`获取 https 证书:${frpServer}`);
+  execSync(
+    `wget https://network-rc.esonwong.com/download/cert/${frpServer}/privkey.pem -O ${tslKeyPath}`
+  );
+  execSync(
+    `wget https://network-rc.esonwong.com/download/cert/${frpServer}/fullchain.pem -O ${tslCertPath}`
+  );
+}
+
 const server = createServer(
   {
     secureProtocol: status.enabledHttps ? secureProtocol : undefined,
-    key: status.enabledHttps
-      ? readFileSync(
-          tslKeyPath ||
-            path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`)
-        )
-      : undefined,
-    cert: status.enabledHttps
-      ? readFileSync(
-          tslCertPath ||
-            path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`)
-        )
-      : undefined,
+    key: status.enabledHttps ? readFileSync(tslKeyPath) : undefined,
+    cert: status.enabledHttps ? readFileSync(tslCertPath) : undefined,
   },
   app
 );
