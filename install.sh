@@ -83,7 +83,7 @@ echo ""
 echo ""
 echo "安装 Network RC 服务"
 
-echo '[Unit]
+sudo bash -c "echo '[Unit]
 Description=network-rc
 After=syslog.target  network.target
 Wants=network.target
@@ -91,13 +91,13 @@ Wants=network.target
 [Service]
 User=root
 Type=simple
-ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p "'$password'" --frpServerPort '$frpServerPort' --frpServerToken "'$frpServerToken'" --frpServerUser '$frpServerUser' --tslCertPath '$tslCertPath' --tslKeyPath '$tslKeyPath'
+ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p \"$password\" --frpServerPort '$frpServerPort' --frpServerToken "'$frpServerToken'" --frpServerUser '$frpServerUser' --tslCertPath '$tslCertPath' --tslKeyPath '$tslKeyPath'
 Restart= always
 RestartSec=1min
 
 
 [Install]
-WantedBy=multi-user.target' > /etc/systemd/system/network-rc.service
+WantedBy=multi-user.target' > /etc/systemd/system/network-rc.service"
 
 sudo systemctl enable network-rc.service
 sudo systemctl restart network-rc.service

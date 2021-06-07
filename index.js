@@ -103,7 +103,7 @@ const {
   tts,
   tsl,
   tslCertPath,
-  tslKeyPath
+  tslKeyPath,
 } = argv;
 let { password } = argv;
 let currentUser;
@@ -261,6 +261,7 @@ wss.on("connection", async function (socket) {
   console.log("客户端连接！");
   TTS("已建立神经连接，同步率百分之九十五");
   console.log("已经设置密码", password ? "是" : "否");
+
   clients.add(socket);
 
   socket.sendData = sendData;
@@ -472,6 +473,10 @@ const login = (socket, { sessionId, token, sharedCode }) => {
       message: "OMG 你登录啦！",
     });
     return;
+  } else {
+    if (!token && !sharedCode && !sessionId) {
+      check(socket);
+    }
   }
 
   if (token) {
