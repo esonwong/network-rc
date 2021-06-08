@@ -13,7 +13,7 @@ Network RC' feature:
 - playing audio
 - remote shared
 
-## 依赖
+## Dependence
 
 - ffmpeg: Please make sure ffmpeg is installed，This installation method is `sudo apt install ffmpeg -y`
 - nodejs
@@ -87,7 +87,7 @@ How to join a group: add personal WeChat account `EsonWong_`, remark `Network RC
 
 [Paypal Donate Link](https://www.paypal.com/donate?business=27B3QGKHUM2FE&item_name=Buy+me+a+cup+of+coffee&currency_code=USD)
 ![WeChat Donate QR Code](https://blog.esonwong.com/asset/wechat-donate.jpg)
-![Paypal Donate QR Code](https://blog.esonwong.com/asset/paypal-donate.jpg)
+![Paypal Donate QR Code](https://blog.esonwong.com/asset/paypal-donate.png)
 
 ## Links
 
