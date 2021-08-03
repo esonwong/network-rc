@@ -12,6 +12,7 @@ import debounce from "debounce";
 import Status from "./components/Status";
 import localChannelStatus from "./lib/localChannelStatus";
 import axios from "axios";
+import WebRTC from "./lib/WebRTC";
 
 const pubilcUrl = process.env.PUBLIC_URL;
 
@@ -262,6 +263,10 @@ export default class App extends Component {
     //     this.changeCamera(true);
     //   })
     // }, 100)
+
+    this.webrtc = new WebRTC({
+      socket: this.socket,
+    })
   };
 
   // loadPacket = (data) => {

@@ -40,34 +40,45 @@ export default class WebRTC {
   }
 
   onOffer = async (offer) => {
+    console.log('WebRTC Get offer', offer)
+
     // # 4 创建客户端 rc
     const rc = new RTCPeerConnection({
       // iceTransportPolicy: "relay",
-      sdpSemantics: 'unified-plan',
+      // sdpSemantics: 'unified-plan',
       iceServers: [
         {
-          urls: 'stun:global.stun.twilio.com:3478?transport=udp'
-        },
-        {
-          urls: "turn:us.esonwong.com:3478",
+          urls: "turn:gz.esonwong.com:3478",
           username: "eson",
           credential: "networkrc"
         },
         {
-          urls: 'stun:stun.l.google.com:19302'
-        },
-        {
-          urls: "stun:stun.ideasip.com"
+          urls: 'stun:global.stun.twilio.com:3478?transport=udp'
         },
       ],
     });
 
+    const dataChannel = rc.createDataChannel('test');
+    dataChannel.onopen = function(event) {
+      dataChannel.send('Hi you!');
+      setInterval(() => {
+        debugger
+        dataChannel.send('Hi you!');
+      }, 5000)
+    }
+    dataChannel.onmessage = function(event) {
+      console.log(event.data);
+    }
+
+    setInterval(() => {
+      console.log(rc)
+    }, 5000)
     
 
     rc.addEventListener("connectionstatechange", ({ target }) => {
       console.log("Connection state change", target.connectionState);
       if (target.connectionState === "connected") {
-        this.onSuccess();
+        this?.onSuccess?.();
       }
       if (target.connectionState === "disconnected") {
         this.close();
@@ -91,10 +102,12 @@ export default class WebRTC {
     // # 5 设置客户端远程 description
     await rc.setRemoteDescription(offer);
 
+    if(this.video){
     // # 6 获取远程 stream
     console.log("receivers", rc.getReceivers());
     const remoteStream = new MediaStream(rc.getReceivers().map(receiver => receiver.track));
     this.video.srcObject = remoteStream;
+  }
 
 
 
@@ -112,6 +125,7 @@ export default class WebRTC {
 
     // # 7 设置客户端本地 description 传递本地回答详情
     const answer = await rc.createAnswer();
+    console.log('WebRTC answer', answer)
     await rc.setLocalDescription(answer);
     this.socketSend({ type: "answer", payload: answer })
   }
