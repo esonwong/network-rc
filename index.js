@@ -14,7 +14,6 @@ const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const package = require("./package.json");
 const md5 = require("md5");
 const { spawn, execSync } = require("child_process");
-const User = require("./lib/user");
 const app = require("./lib/app");
 const TTS = require("./lib/tts");
 const Camera = require("./lib/Camera");
@@ -28,12 +27,6 @@ const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9058", "开启网络穿透")
   .options({
-    u: {
-      alias: "userList",
-      default: false,
-      type: "boolean",
-      describe: "用户列表",
-    },
     p: {
       alias: "password",
       describe: "密码",
@@ -90,6 +83,8 @@ const argv = require("yargs")
   .env("NETWORK_RC")
   .help().argv;
 
+const WebRTC = require('./lib/WebRTC')
+
 console.info(`版本: ${package.version}`);
 
 let {
@@ -99,14 +94,12 @@ let {
   frpServerPort,
   frpServerToken,
   frpServerUser,
-  userList,
   tts,
   tsl,
   tslCertPath,
   tslKeyPath,
 } = argv;
 let { password } = argv;
-let currentUser;
 
 status.argv = argv;
 status.enabledHttps = tsl;
@@ -241,24 +234,6 @@ updater.on("error", () => {
   broadcast("error", { message: "升级错误" });
 });
 
-if (userList) {
-  new User({
-    currentUser,
-    onChange(user) {
-      broadcast("info", {
-        message: `${currentUser ? currentUser.name : ""} 时间到啦，轮到 ${
-          user.name
-        } 啦。`,
-      });
-      currentUser = user;
-      password = user.password;
-      wss.clients.forEach((ws) => {
-        ws.close(0, "时间到了");
-      });
-    },
-  });
-}
-
 wss.on("connection", async function (socket) {
   console.log("客户端连接！");
   TTS("已建立神经连接，同步率百分之九十五");
@@ -296,52 +271,51 @@ wss.on("connection", async function (socket) {
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
 
-    // if (action.indexOf("webrtc") !== -1) {
-    //   if (!check(socket)) return;
-    //   const type = action.split(" ")[1];
-    //   switch (type) {
-    //     case "connect":
-    //       stopWebsocketMedia();
-    //       socket.webrtc = new WebRTC({
-    //         socket,
-    //         onOffer(offer) {
-    //           socket.sendData("webrtc offer", offer)
-    //         },
-    //         onCandidate(candidate) {
-    //           socket.sendData("webrtc candidate", candidate)
-    //         },
-    //         onSuccess() {
-    //         },
-    //         onClose() {
-    //           socket.sendData("webrtc close")
-    //           broadcast("stream_active", false);
-    //         },
-    //         onError({ message }) {
-    //           socket.sendData("switch", { protocol: "websocket" });
-    //         },
-    //         onWarnning({ message }) {
-    //           socket.sendData("warn", { status: 1, message });
-    //         }
-    //       });
-    //       break;
-    //     case "answer":
-    //       socket.webrtc.onAnswer(payload);
-    //       break
-    //     case "candidate":
-    //       socket.webrtc.onCandidate(payload);
-    //       break;
-    //     case "camera":
-    //       socket.webrtc && socket.webrtc.openCamera(payload);
-    //       break;
-    //     case "close":
-    //       socket.webrtc && socket.webrtc.close();
-    //       break;
-    //     default:
-    //       console.log("怎么了？ webrtc", type);
-    //       break;
-    //   }
-    //   return;
-    // }
+    if (action.indexOf("webrtc") !== -1) {
+      if (!check(socket)) return;
+      const type = action.split(" ")[1];
+      switch (type) {
+        case "connect":
+          socket.webrtc = new WebRTC({
+            socket,
+            onOffer(offer) {
+              socket.sendData("webrtc offer", offer)
+            },
+            onCandidate(candidate) {
+              socket.sendData("webrtc candidate", candidate)
+            },
+            onSuccess() {
+            },
+            onClose() {
+              socket.sendData("webrtc close")
+              broadcast("stream_active", false);
+            },
+            onError({ message }) {
+              socket.sendData("switch", { protocol: "websocket" });
+            },
+            onWarnning({ message }) {
+              socket.sendData("warn", { status: 1, message });
+            }
+          });
+          break;
+        case "answer":
+          socket.webrtc.onAnswer(payload);
+          break
+        case "candidate":
+          socket.webrtc.onCandidate(payload);
+          break;
+        case "camera":
+          socket.webrtc && socket.webrtc.openCamera(payload);
+          break;
+        case "close":
+          socket.webrtc && socket.webrtc.close();
+          break;
+        default:
+          console.log("怎么了？ webrtc", type);
+          break;
+      }
+      return;
+    }
 
     switch (action) {
       case "heartbeat":
