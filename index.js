@@ -83,7 +83,7 @@ const argv = require("yargs")
   .env("NETWORK_RC")
   .help().argv;
 
-const WebRTC = require('./lib/WebRTC')
+const WebRTC = require("./lib/WebRTC");
 
 console.info(`版本: ${package.version}`);
 
@@ -129,7 +129,10 @@ const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
 if (status.enabledHttps && !tslKeyPath) {
   tslKeyPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`);
-  tslCertPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/fullchain.pem`);
+  tslCertPath = path.resolve(
+    __dirname,
+    `./lib/frpc/${frpServer}/fullchain.pem`
+  );
   console.info(`获取 https 证书:${frpServer}`);
   execSync(
     `wget https://network-rc.esonwong.com/download/cert/${frpServer}/privkey.pem -O ${tslKeyPath}`
@@ -176,9 +179,6 @@ new Microphone({ server });
 new Audio({ server });
 
 const clients = new Set();
-function sendData(action, payload) {
-  this.send(JSON.stringify({ action, payload }));
-}
 
 function sendBinary(socket, frame) {
   if (socket.buzy) return;
@@ -241,7 +241,15 @@ wss.on("connection", async function (socket) {
 
   clients.add(socket);
 
-  socket.sendData = sendData;
+  socket.sendData = function (action, payload) {
+    if (
+      socket.webrtcChannel &&
+      socket.webrtcChannel.controller &&
+      socket.webrtcChannel.controller.readyState === "open"
+    )
+      socket.webrtcChannel.controller.send(JSON.stringify({ action, payload }));
+    else this.send(JSON.stringify({ action, payload }));
+  };
   socket.sendBinary = sendBinary;
 
   const volume = await audioPlayer.getVolume();
@@ -278,34 +286,51 @@ wss.on("connection", async function (socket) {
         case "connect":
           socket.webrtc = new WebRTC({
             socket,
+            onDataChannelOpen(channel) {
+              if (socket.webrtcChannel) {
+                socket.webrtcChannel[channel.label] = channel;
+              } else {
+                socket.webrtcChannel = {
+                  [channel.label]: channel,
+                };
+              }
+              socket.sendData("connect type", "webrtc");
+            },
+            rtcDataChannelList: [
+              {
+                label: "controller",
+                onMessage(data) {
+                  const { action, payload } = JSON.parse(data);
+                  controllerMessageHandle(socket, action, payload, "rtc");
+                },
+              },
+              ...cameraList.map(({ name }) => ({ label: name })),
+            ],
             onOffer(offer) {
-              socket.sendData("webrtc offer", offer)
+              socket.sendData("webrtc offer", offer);
             },
             onCandidate(candidate) {
-              socket.sendData("webrtc candidate", candidate)
+              socket.sendData("webrtc candidate", candidate);
             },
-            onSuccess() {
-            },
+            onSuccess() {},
             onClose() {
-              socket.sendData("webrtc close")
+              socket.sendData("webrtc close");
               broadcast("stream_active", false);
+              socket.sendData("connect type", "ws");
             },
             onError({ message }) {
               socket.sendData("switch", { protocol: "websocket" });
             },
             onWarnning({ message }) {
               socket.sendData("warn", { status: 1, message });
-            }
+            },
           });
           break;
         case "answer":
           socket.webrtc.onAnswer(payload);
-          break
+          break;
         case "candidate":
           socket.webrtc.onCandidate(payload);
-          break;
-        case "camera":
-          socket.webrtc && socket.webrtc.openCamera(payload);
           break;
         case "close":
           socket.webrtc && socket.webrtc.close();
@@ -317,119 +342,123 @@ wss.on("connection", async function (socket) {
       return;
     }
 
-    switch (action) {
-      case "heartbeat":
-        makeHeartbeatTimer(socket);
-        break;
-      case "ping":
-        receivePing(socket, payload);
-        break;
-      case "login":
-        login(socket, payload);
-        if (!check(socket)) break;
-        if (socket.isLogin) {
-          if (socket.isLogin) {
-            socket.sendData(
-              "camera list",
-              cameraList.map(({ name, size }, index) => ({ name, size, index }))
-            );
-            broadcastConfig();
-            socket.sendData("channel status", channelStatus);
-          }
-        }
-        break;
-      case "tts":
-        speak(socket, payload);
-        break;
-      case "pi power off":
-        if (!check(socket)) break;
-        piPowerOff();
-        break;
-      case "pi reboot":
-        if (!check(socket)) break;
-        piReboot();
-        break;
-      case "save config":
-        if (!check(socket)) break;
-        status.saveConfig(payload);
-        socket.sendData("success", { message: "设置已保存！" });
-        if (!payload.sharedCode) {
-          clients.forEach((socket) => {
-            if (socket.session && socket.session.sharedCode) {
-              socket.close();
-              clients.delete(socket);
-            }
-          });
-          status.saveConfig({ sharedEndTime: undefined });
-          sessionManager.clearSharedCodeSession();
-        }
-        broadcastConfig();
-        break;
+    controllerMessageHandle(socket, action, payload, "ws");
+  });
+});
 
-      case "reset config":
-        if (!check(socket)) break;
-        status.resetConfig();
-        socket.sendData("success", { message: "设置已保存！" });
+const controllerMessageHandle = (socket, action, payload, type) => {
+  switch (action) {
+    case "heartbeat":
+      makeHeartbeatTimer(socket);
+      break;
+    case "ping":
+      receivePing(socket, { ...payload, type });
+      break;
+    case "login":
+      login(socket, payload);
+      if (!check(socket)) break;
+      if (socket.isLogin) {
+        if (socket.isLogin) {
+          socket.sendData(
+            "camera list",
+            cameraList.map(({ name, size }, index) => ({ name, size, index }))
+          );
+          broadcastConfig();
+          socket.sendData("channel status", channelStatus);
+        }
+      }
+      break;
+    case "tts":
+      speak(socket, payload);
+      break;
+    case "pi power off":
+      if (!check(socket)) break;
+      piPowerOff();
+      break;
+    case "pi reboot":
+      if (!check(socket)) break;
+      piReboot();
+      break;
+    case "save config":
+      if (!check(socket)) break;
+      status.saveConfig(payload);
+      socket.sendData("success", { message: "设置已保存！" });
+      if (!payload.sharedCode) {
         clients.forEach((socket) => {
           if (socket.session && socket.session.sharedCode) {
             socket.close();
             clients.delete(socket);
           }
         });
+        status.saveConfig({ sharedEndTime: undefined });
         sessionManager.clearSharedCodeSession();
-        broadcastConfig();
-        break;
-      case "volume":
-        if (!check(socket)) break;
-        audioPlayer.volume(payload);
-        break;
-      case "play audio":
-        if (!check(socket)) break;
-        const { path, stop } = payload;
-        if (stop) {
-          audioPlayer.stop();
-        }
-        if (path) {
-          audioPlayer.push({ type: "mp3 file path", data: { path } });
-        }
-        break;
-      case "change channel":
-        if (!check(socket)) break;
-        const channel = status.config.channelList.find(
-          (i) => i.pin === payload.pin
-        );
-        if (channel && channel.enabled) {
-          const { pin, value: inputValue } = payload;
-          broadcast("channel status", { [pin]: inputValue });
-          if (channel.type === "switch") {
-            changeSwitchPin(pin, inputValue > 0 ? true : false);
-            break;
-          }
-          const { valueReset, valuePostive, valueNegative } = channel;
-          const value =
-            inputValue > 0
-              ? inputValue * (valuePostive - valueReset) + valueReset
-              : inputValue == 0
-              ? valueReset
-              : inputValue * (valueReset - valueNegative) + valueReset;
-          changePwmPin(pin, value);
-        }
-        break;
-      case "reset channel":
-        status.resetChannelAndUI();
-        broadcastConfig();
-        broadcast("success", { message: "通道已重置！！！！！" });
-        break;
+      }
+      broadcastConfig();
+      break;
 
-      case "update":
-        broadcast("info", { message: "开始更新" });
-        updater.update();
-        break;
-      default:
-        console.log("怎么了？");
-    }
-  });
-});
+    case "reset config":
+      if (!check(socket)) break;
+      status.resetConfig();
+      socket.sendData("success", { message: "设置已保存！" });
+      clients.forEach((socket) => {
+        if (socket.session && socket.session.sharedCode) {
+          socket.close();
+          clients.delete(socket);
+        }
+      });
+      sessionManager.clearSharedCodeSession();
+      broadcastConfig();
+      break;
+    case "volume":
+      if (!check(socket)) break;
+      audioPlayer.volume(payload);
+      break;
+    case "play audio":
+      if (!check(socket)) break;
+      const { path, stop } = payload;
+      if (stop) {
+        audioPlayer.stop();
+      }
+      if (path) {
+        audioPlayer.push({ type: "mp3 file path", data: { path } });
+      }
+      break;
+    case "change channel":
+      if (!check(socket)) break;
+      const channel = status.config.channelList.find(
+        (i) => i.pin === payload.pin
+      );
+      if (channel && channel.enabled) {
+        const { pin, value: inputValue } = payload;
+        broadcast("channel status", { [pin]: inputValue });
+        if (channel.type === "switch") {
+          changeSwitchPin(pin, inputValue > 0 ? true : false);
+          break;
+        }
+        const { valueReset, valuePostive, valueNegative } = channel;
+        const value =
+          inputValue > 0
+            ? inputValue * (valuePostive - valueReset) + valueReset
+            : inputValue == 0
+            ? valueReset
+            : inputValue * (valueReset - valueNegative) + valueReset;
+        changePwmPin(pin, value);
+      }
+      break;
+    case "reset channel":
+      status.resetChannelAndUI();
+      broadcastConfig();
+      broadcast("success", { message: "通道已重置！！！！！" });
+      break;
+
+    case "update":
+      broadcast("info", { message: "开始更新" });
+      updater.update();
+      break;
+    default:
+      console.log("怎么了？");
+  }
+};
 
 const login = (socket, { sessionId, token, sharedCode }) => {
   if (socket.islogin) {
@@ -639,7 +668,7 @@ const speak = async (socket, payload) => {
     await TTS(payload.text, payload);
   }
   if (socket.webrtc) socket.webrtc.openAudioPlayer();
-  await sleep(1000);
+  await sleep(800);
   socket.sendData("tts playing", false);
 };
 
@@ -695,6 +724,7 @@ let cameraList;
       cardType,
       deviceSize: size,
       cameraIndex: index,
+      clients,
     });
   });
 
