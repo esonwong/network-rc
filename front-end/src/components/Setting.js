@@ -1,5 +1,5 @@
 import React from "react";
-import { Slider, Form, Button, Input, Tabs, Space } from "antd";
+import { Slider, Form, Button, Input, Tabs, Space, Switch } from "antd";
 import Shared from "./Shared";
 import { layout, tailLayout } from "../unit";
 import store from "store";
@@ -48,6 +48,13 @@ export default function Setting({
             rules={[{ required: true, message: "请输入连接地址!" }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            label="启用 WebRTC"
+            name="webrtcEnabled"
+            valuePropName="checked"
+          >
+            <Switch />
           </Form.Item>
           <Form.Item {...tailLayout}>
             <Space>

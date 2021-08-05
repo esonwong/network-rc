@@ -1,6 +1,6 @@
 {
   "name": "network-rc",
-  "version": "1.5.3",
+  "version": "2.0.0",
   "description": "网络控制遥控车",
   "main": "index.js",
   "repository": "git@github.com:itiwll/network-rc.git",
@@ -24,7 +24,7 @@
     "rpio-pwm": "^1.0.3",
     "stream-split": "^1.1.0",
     "uuidv4": "^6.0.7",
-    "wrtc": "^0.4.4",
+    "wrtc": "^0.4.7",
     "xf-tts-socket": "^1.2.2",
     "yargs": "^15.3.1"
   },

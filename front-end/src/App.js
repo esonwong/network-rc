@@ -28,7 +28,7 @@ export default class App extends Component {
         ...store.get("setting"),
       },
       serverConfig: {},
-      channelStatus: {},
+      gpioChannelStatus: {},
       wsConnected: false,
       cameraEnabled: false,
       lightEnabled: false,
@@ -39,6 +39,7 @@ export default class App extends Component {
       localMicrphoneEnabled: true,
       videoSize: 50,
       delay: undefined,
+      connectType: "ws",
       action: {
         speed: 0,
         direction: 0,
@@ -105,92 +106,20 @@ export default class App extends Component {
 
     socket.addEventListener("open", () => {
       this.setState({ wsConnected: true });
-      socket.sendData = (action, payload) => {
-        socket.send(JSON.stringify({ action, payload }));
-      };
       pingTime = setInterval(() => {
         const sendTime = new Date().getTime();
-        socket.sendData("ping", { sendTime });
+        this.sendData("ping", { sendTime });
       }, 1000);
 
       heartbeatTime = setInterval(() => {
-        socket.sendData("heartbeat");
+        this.sendData("heartbeat");
       }, 200);
 
       this.login();
     });
 
     socket.addEventListener("message", async ({ data }) => {
-      const { channelStatus, serverConfig } = this.state;
-      if (typeof data === "string") {
-        const { action, payload } = JSON.parse(data);
-        switch (action) {
-          case "version":
-            this.setState({ version: payload });
-            break;
-          case "camera list":
-            this.setState({ cameraList: payload });
-            break;
-          case "login":
-            this.onLogin(payload);
-            break;
-          case "config":
-            this.setState({ serverConfig: { ...serverConfig, ...payload } });
-            break;
-          case "config update":
-            this.getServerConfig();
-            break;
-          case "volume":
-            this.setState({ volume: payload });
-            break;
-          case "micVolume":
-            this.setState({ micVolume: payload });
-            break;
-          case "channel status":
-            this.setState({
-              channelStatus: { ...channelStatus, ...payload },
-            });
-            break;
-          case "tts playing":
-            this.setState({ ttsPlaying: payload });
-            break;
-
-          case "update-status":
-            this.setState({ updateStaus: payload });
-            break;
-
-          case "before-restart":
-            setTimeout(() => {
-              window.location.reload();
-            }, 5000);
-            break;
-          case "pong":
-            this.setState({
-              delay: (new Date().getTime() - payload.sendTime) / 2,
-            });
-            break;
-          case "info":
-            message.info(payload.message);
-            break;
-          case "warn":
-            message.warn(payload.message);
-            break;
-          case "error":
-            if (payload.type === "auth error") {
-              if (window.location.pathname !== "/login") {
-                navigate(`${pubilcUrl}/login`);
-              }
-            }
-            message.error(payload.message);
-            break;
-          case "success":
-            message.success(payload.message);
-            break;
-          default:
-            // message.info(`action: ${action}`)
-            break;
-        }
-      }
+      this.messageHandle(data);
     });
 
     socket.addEventListener("close", () => {
@@ -200,12 +129,87 @@ export default class App extends Component {
     });
   };
 
+  messageHandle(data) {
+    const { gpioChannelStatus, serverConfig } = this.state;
+    if (typeof data === "string") {
+      const { action, payload } = JSON.parse(data);
+      switch (action) {
+        case "connect type":
+          this.setState({ connectType: payload });
+          break;
+        case "version":
+          this.setState({ version: payload });
+          break;
+        case "camera list":
+          this.setState({ cameraList: payload });
+          break;
+        case "login":
+          this.onLogin(payload);
+          break;
+        case "config":
+          this.setState({ serverConfig: { ...serverConfig, ...payload } });
+          break;
+        case "config update":
+          this.getServerConfig();
+          break;
+        case "volume":
+          this.setState({ volume: payload });
+          break;
+        case "micVolume":
+          this.setState({ micVolume: payload });
+          break;
+        case "channel status":
+          this.setState({
+            gpioChannelStatus: { ...gpioChannelStatus, ...payload },
+          });
+          break;
+        case "tts playing":
+          this.setState({ ttsPlaying: payload });
+          break;
+
+        case "update-status":
+          this.setState({ updateStaus: payload });
+          break;
+
+        case "before-restart":
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+          break;
+        case "pong":
+          this.setState({
+            delay: (new Date().getTime() - payload.sendTime) / 2,
+          });
+          break;
+        case "info":
+          message.info(payload.message);
+          break;
+        case "warn":
+          message.warn(payload.message);
+          break;
+        case "error":
+          if (payload.type === "auth error") {
+            if (window.location.pathname !== "/login") {
+              navigate(`${pubilcUrl}/login`);
+            }
+          }
+          message.error(payload.message);
+          break;
+        case "success":
+          message.success(payload.message);
+          break;
+        default:
+          // message.info(`action: ${action}`)
+          break;
+      }
+    }
+  }
+
   sendData(action, payload) {
-    if (!this.state.wsConnected) return;
-    if (this.socket) {
-      this.socket.sendData(action, payload);
-    } else {
-      console.error("未连接！");
+    if (this.state.wsConnected) {
+      if (this?.webrtcChannel?.controller?.readyState === "open")
+        this.webrtcChannel.controller.send(JSON.stringify({ action, payload }));
+      else this.socket.send(JSON.stringify({ action, payload }));
     }
   }
 
@@ -263,10 +267,9 @@ export default class App extends Component {
     //     this.changeCamera(true);
     //   })
     // }, 100)
-
-    this.webrtc = new WebRTC({
-      socket: this.socket,
-    })
+    if (this.state.setting.webrtcEnabled) {
+      this.openWebRTC();
+    }
   };
 
   // loadPacket = (data) => {
@@ -283,6 +286,26 @@ export default class App extends Component {
   //     data && this.sourceBuffer1.appendBuffer(data);
   //   }
   // }
+
+  openWebRTC() {
+    if (!this.state.isLogin) return;
+    this.webrtc = new WebRTC({
+      socket: this.socket,
+      onDataChannel: (rtcDataChannel) => {
+        const { label } = rtcDataChannel;
+        if (this.webrtcChannel) {
+          this.webrtcChannel[label] = rtcDataChannel;
+        } else {
+          this.webrtcChannel = { [label]: rtcDataChannel };
+        }
+        if (rtcDataChannel.label === "controller") {
+          rtcDataChannel.addEventListener("message", ({ data }) =>
+            this.messageHandle(data)
+          );
+        }
+      },
+    });
+  }
 
   disconnect = (e) => {
     e && e.preventDefault();
@@ -358,6 +381,7 @@ export default class App extends Component {
     this.setState({ setting });
     store.set("setting", setting);
     navigate(`${pubilcUrl}/controller`);
+    window.location.reload();
   };
 
   changeZeroSpeedRate = (speedZeroRate) => {
@@ -450,8 +474,9 @@ export default class App extends Component {
         micVolume,
         session,
         editabled,
-        channelStatus,
+        gpioChannelStatus,
         updateStaus,
+        connectType,
       },
       tts,
       playAudio,
@@ -461,12 +486,14 @@ export default class App extends Component {
       <div className="App" ref={this.appRef}>
         {!isFullscreen && (
           <Status
+            channelStatus={gpioChannelStatus}
+            delay={delay}
+            connectType={connectType}
             {...{
               version,
               wsConnected,
               isFullscreen,
               lightEnabled,
-              delay,
               powerEnabled,
               localMicrphoneEnabled,
               changePower,
@@ -479,7 +506,6 @@ export default class App extends Component {
               session,
               changeEditabled,
               editabled,
-              channelStatus,
               changeChannel,
               serverConfig,
               updateStaus,
@@ -527,7 +553,7 @@ export default class App extends Component {
                 changeChannel={changeChannel}
                 editabled={editabled}
                 cameraList={cameraList}
-                channelStatus={channelStatus}
+                channelStatus={gpioChannelStatus}
                 isFullscreen={isFullscreen}
               />
             </>

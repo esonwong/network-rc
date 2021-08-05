@@ -27,6 +27,7 @@ export default function Status({
   changeChannel,
   serverConfig,
   version,
+  connectType,
 }) {
   const { sharedEndTime } = serverConfig;
   return (
@@ -120,7 +121,7 @@ export default function Status({
       {wsConnected && delay && (
         <Form.Item>
           <Tag color={delay > 80 ? "red" : "green"}>
-            ping:{delay.toFixed(0)}
+            {connectType}:{delay.toFixed(0)}
           </Tag>
         </Form.Item>
       )}
