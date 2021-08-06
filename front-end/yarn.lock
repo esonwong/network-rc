@@ -2429,6 +2429,10 @@
   resolved "https://registry.npm.taobao.org/@xtuc/long/download/@xtuc/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha1-0pHGpOl5ibXGHZrPOWrk/hM6cY0=
 
+"Broadway@https://github.com/itiwll/Broadway.git":
+  version "0.0.0"
+  resolved "https://github.com/itiwll/Broadway.git#d32f9deb2c39f15ba3f9ec5105f5cd31e244bd2d"
+
 abab@^2.0.3, abab@^2.0.5:
   version "2.0.5"
   resolved "https://registry.nlark.com/abab/download/abab-2.0.5.tgz#c0b678fb32d60fc1219c784d6a826fe385aeb79a"

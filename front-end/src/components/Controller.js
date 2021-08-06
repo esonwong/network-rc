@@ -80,6 +80,8 @@ export default class Controller extends Component {
         channelStatus,
         saveServerConfig,
         isFullscreen,
+        session,
+        webrtcChannel,
       },
     } = this;
     const { isShowButton, ttsInputVisible, text } = this.state;
@@ -276,6 +278,8 @@ export default class Controller extends Component {
           </Form>
         )}
         <ControlUI
+          webrtcChannel={webrtcChannel}
+          session={session}
           channelStatus={channelStatus}
           isShowButton={isShowButton}
           uiComponentList={serverConfig.uiComponentList}

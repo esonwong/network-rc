@@ -18,6 +18,8 @@ export default function ControlUI({
   setting,
   isShowButton,
   channelStatus,
+  session,
+  webrtcChannel,
 }) {
   const [orientation, setOrientation] = useState(
     screenDirction.matches ? "portrait" : "landscape"
@@ -157,6 +159,7 @@ export default function ControlUI({
               )}
               {type === "camera" && (
                 <Camera
+                  session={session}
                   editabled={editabled}
                   key={"camera" + cameraIndex}
                   index={cameraIndex}
@@ -169,6 +172,7 @@ export default function ControlUI({
                   onClickFullScreen={() => {}}
                   onClickCoverScreen={() => {}}
                   size={size}
+                  rtcChannel={webrtcChannel[name]}
                 />
               )}
             </Rnd>

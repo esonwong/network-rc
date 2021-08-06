@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import WSAvcPlayer from "ws-avc-player";
+import Player from "../lib/Player";
+// import Player from "ws-avc-player";
 import { useState } from "react";
 import { Button, Switch, message, Select } from "antd";
 import { useCreation, useDebounceEffect, useEventListener } from "ahooks";
@@ -12,8 +13,12 @@ import {
 
 const { Option } = Select;
 
-function open(enabled, pause, wsavc, payload) {
-  enabled && !pause && wsavc && wsavc.ws && wsavc.send("open-request", payload);
+function open(enabled, pause, player, payload) {
+  enabled &&
+    !pause &&
+    player &&
+    player.ws &&
+    player.send("open-request", payload);
 }
 
 export default function Camera({
@@ -23,6 +28,8 @@ export default function Camera({
   onChangeVideoRatio,
   onClickFullScreen,
   onClickCoverScreen,
+  session,
+  rtcChannel,
 }) {
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
@@ -35,14 +42,18 @@ export default function Camera({
   const [rotate, setRotate] = useState(0); // 旋转
   const [connected, setConneected] = useState(false);
 
-  const wsavc = useCreation(() => {
-    const { rotate = 0, enabled = true, inputFormatIndex = 0, fps = 30 } =
-      store.get(storeName) || {};
+  const player = useCreation(() => {
+    const {
+      rotate = 0,
+      enabled = true,
+      inputFormatIndex = 0,
+      fps = 30,
+    } = store.get(storeName) || {};
     setEnabled(enabled);
     setRotate(rotate);
     setInputFormatIndex(inputFormatIndex);
     setFps(fps);
-    const w = new WSAvcPlayer({
+    const w = new Player({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
     });
@@ -67,7 +78,7 @@ export default function Camera({
       message.success(`${w.cameraName} 传输分辨率 ${width}x${height}`);
     });
 
-    w.on("disconnected", function () {
+    w.on("close", function () {
       setConneected(false);
     });
 
@@ -98,14 +109,11 @@ export default function Camera({
   // }
 
   function start() {
-    wsavc.connect(
-      `${window.location.protocol === "https:" ? "wss://" : "ws://"}${url}`
-    );
+    player && player.open(url);
   }
 
   function end() {
-    wsavc && wsavc.ws && wsavc.disconnect();
-    wsavc.AvcPlayer.canvas.remove();
+    player && player.close();
   }
 
   useEventListener(
@@ -122,9 +130,15 @@ export default function Camera({
 
   useDebounceEffect(
     () => {
-      connected && open(enabled, pause, wsavc, { inputFormatIndex, fps, size });
+      connected &&
+        open(enabled, pause, player, {
+          inputFormatIndex,
+          fps,
+          size,
+          sessionId: session.id,
+        });
     },
-    [enabled, pause, wsavc, fps, inputFormatIndex, size, connected],
+    [enabled, pause, player, fps, inputFormatIndex, size, connected, session],
     {
       wait: 500,
     }
@@ -138,14 +152,14 @@ export default function Camera({
         end();
       } else {
         start();
-        box.appendChild(wsavc.AvcPlayer.canvas);
+        box.appendChild(player.AvcPlayer.canvas);
       }
       return function () {
         end();
       };
       // eslint-disable-next-line
     },
-    [url, wsavc, enabled, pause],
+    [url, player, enabled, pause],
     {
       wait: 500,
     }
@@ -154,6 +168,13 @@ export default function Camera({
   useEffect(() => {
     store.set(storeName, { rotate, enabled, inputFormatIndex });
   }, [storeName, rotate, enabled, inputFormatIndex]);
+
+  useEffect(() => {
+    if (rtcChannel) {
+      player.setRTCDataChannel(rtcChannel);
+      return () => player.removeRTCDataChannel(rtcChannel);
+    }
+  }, [rtcChannel, player]);
 
   return (
     <div className="camera">

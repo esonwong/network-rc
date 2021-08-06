@@ -51,6 +51,7 @@ export default class App extends Component {
       session: {},
       version: undefined,
       updateStaus: undefined,
+      webrtcChannel: [],
     };
 
     const { changeLight, changePower } = this;
@@ -291,6 +292,9 @@ export default class App extends Component {
     if (!this.state.isLogin) return;
     this.webrtc = new WebRTC({
       socket: this.socket,
+      onClose() {
+        delete this.webrtc;
+      },
       onDataChannel: (rtcDataChannel) => {
         const { label } = rtcDataChannel;
         if (this.webrtcChannel) {
@@ -298,10 +302,17 @@ export default class App extends Component {
         } else {
           this.webrtcChannel = { [label]: rtcDataChannel };
         }
+        this.setState({ webrtcChannel: this.webrtcChannel });
         if (rtcDataChannel.label === "controller") {
           rtcDataChannel.addEventListener("message", ({ data }) =>
             this.messageHandle(data)
           );
+        }
+      },
+      onDataChannelClose: (channel) => {
+        if (this.webrtcChannel[channel.label]) {
+          delete this.webrtcChannel[channel.label];
+          this.setState({ webrtcChannel: this.webrtcChannel });
         }
       },
     });
@@ -477,6 +488,7 @@ export default class App extends Component {
         gpioChannelStatus,
         updateStaus,
         connectType,
+        webrtcChannel,
       },
       tts,
       playAudio,
@@ -538,6 +550,7 @@ export default class App extends Component {
                 updateStaus={updateStaus}
               />
               <Controller
+                session={session}
                 path={`${pubilcUrl}/controller`}
                 controller={controller}
                 lightEnabled={lightEnabled}
@@ -555,6 +568,7 @@ export default class App extends Component {
                 cameraList={cameraList}
                 channelStatus={gpioChannelStatus}
                 isFullscreen={isFullscreen}
+                webrtcChannel={webrtcChannel}
               />
             </>
           ) : undefined}

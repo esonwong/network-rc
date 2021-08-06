@@ -142,6 +142,7 @@ if (status.enabledHttps && !tslKeyPath) {
   );
 }
 
+let cameraList = [];
 const server = createServer(
   {
     secureProtocol: status.enabledHttps ? secureProtocol : undefined,
@@ -179,20 +180,6 @@ new Microphone({ server });
 new Audio({ server });
 
 const clients = new Set();
-
-function sendBinary(socket, frame) {
-  if (socket.buzy) return;
-  socket.buzy = true;
-  socket.buzy = false;
-
-  socket.send(
-    Buffer.concat([NALseparator, frame]),
-    { binary: true },
-    function ack() {
-      socket.buzy = false;
-    }
-  );
-}
 
 const broadcast = (action, payload) => {
   clients.forEach(
@@ -250,7 +237,6 @@ wss.on("connection", async function (socket) {
       socket.webrtcChannel.controller.send(JSON.stringify({ action, payload }));
     else this.send(JSON.stringify({ action, payload }));
   };
-  socket.sendBinary = sendBinary;
 
   const volume = await audioPlayer.getVolume();
   const sendVolume = function (volume) {
@@ -286,6 +272,9 @@ wss.on("connection", async function (socket) {
         case "connect":
           socket.webrtc = new WebRTC({
             socket,
+            onClose() {
+              delete socket.webrtc;
+            },
             onDataChannelOpen(channel) {
               if (socket.webrtcChannel) {
                 socket.webrtcChannel[channel.label] = channel;
@@ -295,6 +284,19 @@ wss.on("connection", async function (socket) {
                 };
               }
               socket.sendData("connect type", "webrtc");
+              const camServer = cameraList.find((i) => i.name == channel.label);
+              if (camServer) {
+                camServer.server.pushRTCDataChannel(channel);
+              }
+            },
+            onDataChannelClose(channel) {
+              const camServer = cameraList.find((i) => i.name == channel.label);
+              if (camServer) {
+                camServer.server.removeRTCDataChannel(channel);
+              }
+              if (socket.webrtcChannel[channel.label]) {
+                delete socket.webrtcChannel[channel.label];
+              }
             },
             rtcDataChannelList: [
               {
@@ -712,7 +714,6 @@ function getIPAdress() {
   }
 }
 
-let cameraList;
 (async () => {
   cameraList = await Camera.getCameraList();
   cameraList.forEach((item, index) => {
@@ -724,7 +725,6 @@ let cameraList;
       cardType,
       deviceSize: size,
       cameraIndex: index,
-      clients,
     });
   });
 

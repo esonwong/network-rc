@@ -219,5 +219,6 @@ network-rc.service
 users.yml
 lib/tts/*.pcm
 deploy.js
+deploy-bate.js
 
 assets/*.mp3
