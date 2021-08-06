@@ -69,7 +69,7 @@ echo ""
 echo ""
 echo "下载 Network RC"
 sudo rm -f /tmp/network-rc.tar.gz
-wget -O /tmp/network-rc.tar.gz https://network-rc.esonwong.com/download/network-rc-bate.tar.gz
+wget -O /tmp/network-rc.tar.gz https://network-rc.esonwong.com/download/network-rc-beta.tar.gz
 
 echo ""
 echo ""
@@ -110,7 +110,7 @@ curl -X POST 'https://api.hipacloud.com/v1/apps/610cd37366dab8af97741508/tables/
 --data "{
   \"values\": {
     \"名称\": \"安装\",
-    \"描述\": \"bate\",
+    \"描述\": \"beta\",
     \"端口\": $frpPort
   }
 }

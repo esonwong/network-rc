@@ -25,6 +25,7 @@ export default class App extends Component {
       cameraList: [],
       setting: {
         host: window.location.host,
+        webrtcEnabled: true,
         ...store.get("setting"),
       },
       serverConfig: {},
@@ -289,8 +290,10 @@ export default class App extends Component {
   // }
 
   openWebRTC() {
+    this.webrtc?.close?.();
     if (!this.state.isLogin) return;
     this.webrtc = new WebRTC({
+      micphoneEanbled: this.state.localMicrphoneEnabled,
       socket: this.socket,
       onClose() {
         delete this.webrtc;

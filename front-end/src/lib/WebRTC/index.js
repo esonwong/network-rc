@@ -1,11 +1,20 @@
 export default class WebRTC {
-  constructor({ video, socket, onError, onSuccess, onClose, onDataChannel }) {
+  constructor({
+    video,
+    micphoneEanbled = false,
+    socket,
+    onError,
+    onSuccess,
+    onClose,
+    onDataChannel,
+  }) {
     this.video = video;
     this.socket = socket;
     this.onError = onError;
     this.onSuccess = onSuccess;
     this.onClose = onClose;
     this.onDataChannel = onDataChannel;
+    this.micphoneEanbled = micphoneEanbled;
 
     // #0 请求 webrtc 连接
     this.socketSend({ type: "connect" });
@@ -105,18 +114,20 @@ export default class WebRTC {
       this.video.srcObject = remoteStream;
     }
 
-    try {
-      this.localStream = await window.navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
-      this.localStream.getTracks().forEach((track) => rc.addTrack(track));
-    } catch (error) {
-      this.onError(
-        new Error(
-          "控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"
-        )
-      );
+    if (this.micphoneEanbled) {
+      try {
+        this.localStream = await window.navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false,
+        });
+        this.localStream.getTracks().forEach((track) => rc.addTrack(track));
+      } catch (error) {
+        this.onError(
+          new Error(
+            "控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"
+          )
+        );
+      }
     }
 
     // # 7 设置客户端本地 description 传递本地回答详情
