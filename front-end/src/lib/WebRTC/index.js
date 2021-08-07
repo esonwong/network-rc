@@ -40,9 +40,8 @@ export default class WebRTC {
       case "offer":
         this.onOffer(payload);
         break;
-
       case "candidate":
-        this.onCandidate(payload);
+        this.addCandidate(payload);
         break;
       default:
         console.log(action);
@@ -63,6 +62,7 @@ export default class WebRTC {
           username: "eson",
           credential: "networkrc",
         },
+        { urls: ["stun:turn2.l.google.com"] },
         {
           urls: "stun:stun.miwifi.com",
         },
@@ -89,12 +89,12 @@ export default class WebRTC {
       }
     });
     rc.addEventListener("iceconnectionstatechange", function (e) {
-      console.log("iceConnectionState", rc.iceConnectionState);
+      // console.log("iceConnectionState", e);
     });
     rc.addEventListener("icecandidate", ({ candidate }) => {
       if (!candidate) return;
       this.socketSend({ type: "candidate", payload: candidate });
-      console.log("local candidate", candidate);
+      // console.log("local candidate", candidate);
     });
     rc.addEventListener("icecandidateerror", function (e) {
       console.error("icecandidateerror", e);
@@ -122,7 +122,7 @@ export default class WebRTC {
         });
         this.localStream.getTracks().forEach((track) => rc.addTrack(track));
       } catch (error) {
-        this.onError(
+        this.onError?.(
           new Error(
             "控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"
           )
@@ -137,8 +137,10 @@ export default class WebRTC {
     this.socketSend({ type: "answer", payload: answer });
   };
 
-  onCandidate(candidate) {
-    // console.log("remote candidate", candidate);
+  addCandidate(candidate) {
+    if (!candidate) return;
+    console.log("remote candidate", candidate.candidate);
+    this.rc.addIceCandidate(new RTCIceCandidate(candidate));
   }
 
   close() {

@@ -107,7 +107,10 @@ export default class App extends Component {
     socket.binaryType = "arraybuffer";
 
     socket.addEventListener("open", () => {
-      this.setState({ wsConnected: true });
+      this.setState({
+        wsConnected: true,
+        connectType: "ws",
+      });
       pingTime = setInterval(() => {
         const sendTime = new Date().getTime();
         this.sendData("ping", { sendTime });

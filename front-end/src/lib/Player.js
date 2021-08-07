@@ -2,7 +2,7 @@ import BroadwayPlayer from "Broadway/Player/Player";
 import { EventEmitter } from "events";
 
 class Player extends EventEmitter {
-  constructor({ useWorker, workerFile } = {}) {
+  constructor({ useWorker, workerFile, sessionId } = {}) {
     super();
     // this.canvas = canvas
     // this.canvastype = canvastype
@@ -31,6 +31,7 @@ class Player extends EventEmitter {
     this.framesList = [];
     this.running = false;
     this.shiftFrameTimeout = null;
+    this.sessionId = sessionId;
 
     this._messageHandle = this.messageHandle.bind(this);
   }
@@ -71,13 +72,12 @@ class Player extends EventEmitter {
     this.ws.onopen = () => {
       console.log("Connected to " + url);
       this.emit("connected", url);
+      this.send("get-info", { sessionId: this.sessionId });
     };
 
     this.framesList = [];
 
-    this.ws.onmessage = (evt) => {
-      this.messageHandle(evt);
-    };
+    this.ws.onmessage = this._messageHandle;
 
     this.ws.onclose = () => {
       this.running = false;
@@ -89,10 +89,10 @@ class Player extends EventEmitter {
   }
 
   setRTCDataChannel(rtcDataChannel) {
-    rtcDataChannel.addEventListener("message", this._messageHandle);
-    this.send("get-info");
-    this.ws?.close?.();
     this.rtcDataChannel = rtcDataChannel;
+    rtcDataChannel.addEventListener("message", this._messageHandle);
+    this.send("get-info", { sessionId: this.sessionId });
+    this.ws?.close?.();
   }
 
   removeRTCDataChannel() {

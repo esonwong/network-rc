@@ -294,7 +294,7 @@ wss.on("connection", async function (socket) {
               if (camServer) {
                 camServer.server.removeRTCDataChannel(channel);
               }
-              if (socket.webrtcChannel[channel.label]) {
+              if (socket.webrtcChannel && socket.webrtcChannel[channel.label]) {
                 delete socket.webrtcChannel[channel.label];
               }
             },
@@ -311,7 +311,7 @@ wss.on("connection", async function (socket) {
             onOffer(offer) {
               socket.sendData("webrtc offer", offer);
             },
-            onCandidate(candidate) {
+            sendCandidate(candidate) {
               socket.sendData("webrtc candidate", candidate);
             },
             onSuccess() {},
@@ -332,7 +332,7 @@ wss.on("connection", async function (socket) {
           socket.webrtc.onAnswer(payload);
           break;
         case "candidate":
-          socket.webrtc.onCandidate(payload);
+          socket.webrtc.addCandidate(payload);
           break;
         case "close":
           socket.webrtc && socket.webrtc.close();

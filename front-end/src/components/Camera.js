@@ -14,11 +14,7 @@ import {
 const { Option } = Select;
 
 function open(enabled, pause, player, payload) {
-  enabled &&
-    !pause &&
-    player &&
-    player.ws &&
-    player.send("open-request", payload);
+  enabled && !pause && player && player.send("open-request", payload);
 }
 
 export default function Camera({
@@ -56,6 +52,7 @@ export default function Camera({
     const w = new Player({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
+      sessionId: session.id,
     });
 
     w.on("connected", function () {
