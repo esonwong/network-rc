@@ -94,7 +94,7 @@ export default function ControlUI({
           },
           index
         ) => {
-          const position = positionMap[id]?.[orientation] ||
+          let position = positionMap[id]?.[orientation] ||
             defaultPosition?.[orientation] || {
               x: index * 70,
               y: index * 30,
@@ -103,7 +103,31 @@ export default function ControlUI({
               ratio: undefined,
             };
 
-          const { size, z, x, y, ratio } = position;
+          const { size, z, x, y, ratio, videoRate = 4 / 3 } = position;
+
+          function setFullScreen(id) {
+            const width = window.innerWidth;
+            const height = width / videoRate;
+            const x = 0;
+            const y = (window.innerHeight - height) / 2;
+            const z = 0;
+            savePosition(id, { ...position, x, y, z, size: { width, height } });
+          }
+
+          function setCenterScreen(id) {
+            const height = window.innerHeight / 4;
+            const width = height * videoRate;
+            savePosition(id, {
+              ...position,
+              size: {
+                width,
+                height,
+              },
+              x: (window.innerWidth - width) / 2,
+              y: -38,
+              z: 2,
+            });
+          }
 
           return enabled ? (
             <Rnd
@@ -169,8 +193,8 @@ export default function ControlUI({
                       savePosition(id, { x, y, z, size, ratio });
                     }
                   }}
-                  onClickFullScreen={() => {}}
-                  onClickCoverScreen={() => {}}
+                  onClickFullScreen={() => setFullScreen(id)}
+                  onClickCenterScreen={() => setCenterScreen(id)}
                   size={size}
                   rtcChannel={webrtcChannel[name]}
                 />

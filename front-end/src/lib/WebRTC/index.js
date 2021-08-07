@@ -149,7 +149,10 @@ export default class WebRTC {
       this.localStream.getTracks().forEach((track) => track.stop());
     this.rc.close();
     this.rc = undefined;
-    this.video.srcObject = null;
+
+    if (this.video) {
+      this.video.srcObject = null;
+    }
     this.socketSend({ type: "close" });
     this.onClose();
   }

@@ -265,6 +265,8 @@ wss.on("connection", async function (socket) {
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
 
+    // console.log("Websocket recived message", action, payload);
+
     if (action.indexOf("webrtc") !== -1) {
       if (!check(socket)) return;
       const type = action.split(" ")[1];
@@ -303,6 +305,9 @@ wss.on("connection", async function (socket) {
                 label: "controller",
                 onMessage(data) {
                   const { action, payload } = JSON.parse(data);
+                  // if (action !== "heartbeat") {
+                  //   console.log("RTC message", action, payload);
+                  // }
                   controllerMessageHandle(socket, action, payload, "rtc");
                 },
               },
@@ -463,6 +468,7 @@ const controllerMessageHandle = (socket, action, payload, type) => {
 };
 
 const login = (socket, { sessionId, token, sharedCode }) => {
+  console.log("Login in");
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
     return;
@@ -735,11 +741,6 @@ function getIPAdress() {
       `本地访问地址 http${
         status.enabledHttps ? "s" : ""
       }://${getIPAdress()}:8080`
-    );
-    await TTS(
-      `可使用 http${
-        status.enabledHttps ? "s" : ""
-      }协议访问${getIPAdress()} 8080端口`
     );
 
     if (frp) {

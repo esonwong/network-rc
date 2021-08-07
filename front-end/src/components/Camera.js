@@ -6,9 +6,9 @@ import { Button, Switch, message, Select } from "antd";
 import { useCreation, useDebounceEffect, useEventListener } from "ahooks";
 import store from "store";
 import {
-  BorderOutlined,
-  ExpandAltOutlined,
   RotateRightOutlined,
+  CompressOutlined,
+  BorderOutlined,
 } from "@ant-design/icons";
 
 const { Option } = Select;
@@ -23,7 +23,7 @@ export default function Camera({
   size,
   onChangeVideoRatio,
   onClickFullScreen,
-  onClickCoverScreen,
+  onClickCenterScreen,
   session,
   rtcChannel,
 }) {
@@ -181,14 +181,14 @@ export default function Camera({
           <Button
             size="small"
             shape="circle"
-            icon={<BorderOutlined />}
-            onClick={onClickFullScreen}
+            icon={<CompressOutlined />}
+            onClick={onClickCenterScreen}
           />
           <Button
             size="small"
             shape="circle"
-            icon={<ExpandAltOutlined />}
-            onClick={onClickCoverScreen}
+            icon={<BorderOutlined />}
+            onClick={onClickFullScreen}
           />
           <Button
             size="small"

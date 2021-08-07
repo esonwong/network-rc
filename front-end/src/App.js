@@ -120,7 +120,7 @@ export default class App extends Component {
         this.sendData("heartbeat");
       }, 200);
 
-      this.login();
+      setTimeout(() => this.login(), 200);
     });
 
     socket.addEventListener("message", async ({ data }) => {
@@ -136,6 +136,7 @@ export default class App extends Component {
 
   messageHandle(data) {
     const { gpioChannelStatus, serverConfig } = this.state;
+
     if (typeof data === "string") {
       const { action, payload } = JSON.parse(data);
       switch (action) {
@@ -212,9 +213,11 @@ export default class App extends Component {
 
   sendData(action, payload) {
     if (this.state.wsConnected) {
-      if (this?.webrtcChannel?.controller?.readyState === "open")
+      if (this?.webrtcChannel?.controller?.readyState === "open") {
         this.webrtcChannel.controller.send(JSON.stringify({ action, payload }));
-      else this.socket.send(JSON.stringify({ action, payload }));
+      } else {
+        this.socket.send(JSON.stringify({ action, payload }));
+      }
     }
   }
 
@@ -332,8 +335,6 @@ export default class App extends Component {
   };
 
   login = ({ password, sharedCode } = {}) => {
-    const { wsConnected } = this.state;
-    if (!wsConnected) return;
     const session = store.get("network-rc-session") || {};
     this.sendData("login", {
       token: password ? md5(`${password}eson`) : undefined,
