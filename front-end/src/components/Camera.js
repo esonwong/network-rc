@@ -13,10 +13,6 @@ import {
 
 const { Option } = Select;
 
-function open(enabled, pause, player, payload) {
-  enabled && !pause && player && player.send("open-request", payload);
-}
-
 export default function Camera({
   url,
   editabled,
@@ -30,7 +26,7 @@ export default function Camera({
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
   const [enabled, setEnabled] = useState(false);
-  const [pause, setPause] = useState(false);
+  const [pause, setPause] = useState(false); // 后台 pause
   const [cameraName, setCameraName] = useState("");
   const [formatList, setFormatList] = useState([]);
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined);
@@ -53,6 +49,7 @@ export default function Camera({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
       sessionId: session.id,
+      url,
     });
 
     w.on("connected", function () {
@@ -90,29 +87,6 @@ export default function Camera({
     }
   }
 
-  // function setFullScreen() {
-  //   const width = window.innerWidth;
-  //   const height = width / videoRate;
-  //   setViewSize({ width, height });
-  //   setPosition({ x: 0, y: (window.innerHeight - height) / 2, z: 0 });
-  // }
-
-  // function setCenterScreen() {
-  //   const height = window.innerHeight / 4;
-  //   const width = height * videoRate;
-  //   const position = { x: (window.innerWidth - width) / 2, y: -38, z: 2 };
-  //   setPosition(position);
-  //   setViewSize({ width, height });
-  // }
-
-  function start() {
-    player && player.open(url);
-  }
-
-  function end() {
-    player && player.close();
-  }
-
   useEventListener(
     "visibilitychange",
     function () {
@@ -127,36 +101,24 @@ export default function Camera({
 
   useDebounceEffect(
     () => {
-      connected &&
-        open(enabled, pause, player, {
+      const box = boxEl.current;
+      if (connected && !pause && enabled) {
+        player.open({
           inputFormatIndex,
           fps,
           size,
-          sessionId: session.id,
         });
-    },
-    [enabled, pause, player, fps, inputFormatIndex, size, connected, session],
-    {
-      wait: 500,
-    }
-  );
 
-  useDebounceEffect(
-    () => {
-      const box = boxEl.current;
-
-      if (!enabled || pause) {
-        end();
+        player.AvcPlayer.canvas.style.display = "";
+        if (player.AvcPlayer.canvas.parentElement !== box) {
+          box.appendChild(player.AvcPlayer.canvas);
+        }
       } else {
-        start();
-        box.appendChild(player.AvcPlayer.canvas);
+        player.close()
+        player.AvcPlayer.canvas.style.display = "none";
       }
-      return function () {
-        end();
-      };
-      // eslint-disable-next-line
     },
-    [url, player, enabled, pause],
+    [enabled, pause, player, fps, inputFormatIndex, size, connected],
     {
       wait: 500,
     }

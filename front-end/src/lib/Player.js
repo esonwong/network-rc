@@ -80,7 +80,6 @@ class Player extends EventEmitter {
     this.ws.onmessage = this._messageHandle;
 
     this.ws.onclose = () => {
-      this.running = false;
       this.emit("disconnected");
       console.log("Player: Websocket Connection closed");
     };
@@ -91,11 +90,13 @@ class Player extends EventEmitter {
   setRTCDataChannel(rtcDataChannel) {
     this.rtcDataChannel = rtcDataChannel;
     rtcDataChannel.addEventListener("message", this._messageHandle);
+    this.emit("connected");
     this.send("get-info", { sessionId: this.sessionId });
     this.ws?.close?.();
   }
 
   removeRTCDataChannel() {
+    this.send("close");
     this.rtcDataChannel.removeEventListener("message", this._messageHandle);
   }
 
@@ -142,15 +143,12 @@ class Player extends EventEmitter {
       );
   }
 
-  open(url) {
-    if (this.rtcDataChannel) {
-      this.emit("connected", url);
-    } else {
-      this.connectWs(url);
-    }
+  open(payload) {
+    this.send("open-request", payload);
   }
 
   close() {
+    this.send("close");
     this.AvcPlayer.canvas.remove();
   }
 }

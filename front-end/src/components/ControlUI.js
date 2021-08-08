@@ -160,7 +160,7 @@ export default function ControlUI({
                 };
                 savePosition(id, { x, y, z, size, ratio });
               }}
-              style={{ zIndex: positionMap[id]?.[orientation]?.z || index + 2 }}
+              style={{ zIndex: positionMap[id]?.[orientation]?.z ?? index + 2 }}
             >
               {type === "joystick" && (
                 <Joystick
