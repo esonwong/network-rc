@@ -19,6 +19,9 @@ export default class WebRTC {
     // #0 请求 webrtc 连接
     this.socketSend({ type: "connect" });
     this.socket.addEventListener("message", this.onSocketMessage);
+
+    this.audioEl = document.createElement("audio");
+    document.body.appendChild(this.audioEl);
   }
 
   socketSend({ type, payload }) {
@@ -105,29 +108,27 @@ export default class WebRTC {
     // # 5 设置客户端远程 description
     await rc.setRemoteDescription(offer);
 
-    if (this.video) {
-      // # 6 获取远程 stream
-      console.log("receivers", rc.getReceivers());
-      const remoteStream = new MediaStream(
-        rc.getReceivers().map((receiver) => receiver.track)
-      );
-      this.video.srcObject = remoteStream;
-    }
+    // # 6 获取远程 stream
+    console.log("receivers", rc.getReceivers());
+    const remoteStream = new MediaStream(
+      rc.getReceivers().map((receiver) => receiver.track)
+    );
+    this.audioEl.srcObject = remoteStream;
+    this.audioEl.play();
+    // this.video.srcObject = remoteStream;
 
-    if (this.micphoneEanbled) {
-      try {
-        this.localStream = await window.navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: false,
-        });
-        this.localStream.getTracks().forEach((track) => rc.addTrack(track));
-      } catch (error) {
-        this.onError?.(
-          new Error(
-            "控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"
-          )
-        );
-      }
+    try {
+      this.localStream = await window.navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      this.localStream.getTracks().forEach((track) => rc.addTrack(track));
+    } catch (error) {
+      this.onError?.(
+        new Error(
+          "控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"
+        )
+      );
     }
 
     // # 7 设置客户端本地 description 传递本地回答详情
@@ -147,9 +148,9 @@ export default class WebRTC {
     this.socket.removeEventListener("message", this.onSocketMessage);
     this.localStream &&
       this.localStream.getTracks().forEach((track) => track.stop());
-    this.rc.close();
+    this.rc?.close?.();
     this.rc = undefined;
-
+    this.audioEl.srcObject = null;
     if (this.video) {
       this.video.srcObject = null;
     }
