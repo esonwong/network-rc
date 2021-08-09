@@ -1,12 +1,14 @@
 import BroadwayPlayer from "Broadway/Player/Player";
 import { EventEmitter } from "events";
+import { setTimeout } from "timers";
 
 class Player extends EventEmitter {
-  constructor({ useWorker, workerFile, sessionId } = {}) {
+  constructor({ useWorker, workerFile, sessionId, url } = {}) {
     super();
     // this.canvas = canvas
     // this.canvastype = canvastype
     this.now = new Date().getTime();
+    this.url = url;
 
     this.AvcPlayer = new BroadwayPlayer({
       useWorker,
@@ -58,7 +60,8 @@ class Player extends EventEmitter {
     // this.shiftFrameTimeout = setTimeout(this.shiftFrame, 1)
   };
 
-  connectWs(url) {
+  connectWs(payload) {
+    const url = this.url;
     // Websocket initialization
     if (this.ws !== undefined) {
       this.ws.close();
@@ -67,17 +70,21 @@ class Player extends EventEmitter {
     this.ws = new WebSocket(
       `${window.location.protocol === "https:" ? "wss://" : "ws://"}${url}`
     );
+
     this.ws.binaryType = "arraybuffer";
 
-    this.ws.onopen = () => {
+    this.ws.addEventListener("open", () => {
       console.log("Connected to " + url);
       this.emit("connected", url);
       this.send("get-info", { sessionId: this.sessionId });
-    };
+      this.send("open-request", { sessionId: this.sessionId, ...payload });
+    });
+
+    this.ws.addEventListener("message", (e) => {
+      this._messageHandle(e);
+    });
 
     this.framesList = [];
-
-    this.ws.onmessage = this._messageHandle;
 
     this.ws.onclose = () => {
       this.emit("disconnected");
@@ -91,8 +98,11 @@ class Player extends EventEmitter {
     this.rtcDataChannel = rtcDataChannel;
     rtcDataChannel.addEventListener("message", this._messageHandle);
     this.emit("connected");
-    this.send("get-info", { sessionId: this.sessionId });
     this.ws?.close?.();
+    this.send("get-info", { sessionId: this.sessionId });
+    if (this.opening) {
+      this.send("open-request", { sessionId: this.sessionId, ...this.config });
+    }
   }
 
   removeRTCDataChannel() {
@@ -102,7 +112,9 @@ class Player extends EventEmitter {
 
   messageHandle(evt) {
     if (typeof evt.data == "string") {
-      return this.cmd(JSON.parse(evt.data));
+      console.log(`Camera message received`, evt);
+      const { action, payload } = JSON.parse(evt.data);
+      return this.cmd({ action, payload });
     }
 
     this.pktnum++;
@@ -119,11 +131,12 @@ class Player extends EventEmitter {
   }
 
   cmd(cmd) {
-    console.log("Incoming request", cmd);
     switch (cmd.action) {
       case "initalize": {
         return this.emit("initalized", cmd.payload);
       }
+      // case "ready":
+      //   break;
       default:
         return this.emit(cmd.action, cmd.payload);
     }
@@ -144,11 +157,20 @@ class Player extends EventEmitter {
   }
 
   open(payload) {
-    this.send("open-request", payload);
+    this.opening = true;
+    this.config = payload;
+    if (this.rtcDataChannel?.readyState === "open") {
+      this.send("get-info", { sessionId: this.sessionId });
+      this.send("open-request", { sessionId: this.sessionId, ...this.config });
+    } else {
+      this.connectWs(payload);
+    }
   }
 
   close() {
+    this.opening = false;
     this.send("close");
+    this.ws?.close?.();
     this.AvcPlayer.canvas.remove();
   }
 }

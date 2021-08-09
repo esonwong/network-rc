@@ -3,7 +3,12 @@ import Player from "../lib/Player";
 // import Player from "ws-avc-player";
 import { useState } from "react";
 import { Button, Switch, message, Select } from "antd";
-import { useCreation, useDebounceEffect, useEventListener } from "ahooks";
+import {
+  useCreation,
+  useDebounceEffect,
+  useEventListener,
+  useUnmount,
+} from "ahooks";
 import store from "store";
 import {
   RotateRightOutlined,
@@ -22,6 +27,7 @@ export default function Camera({
   onClickCenterScreen,
   session,
   rtcChannel,
+  cameraIndex,
 }) {
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
@@ -32,9 +38,9 @@ export default function Camera({
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined);
   const [fps, setFps] = useState(30);
   const [rotate, setRotate] = useState(0); // 旋转
-  const [connected, setConneected] = useState(false);
 
   const player = useCreation(() => {
+    console.log("useCreation", cameraIndex);
     const {
       rotate = 0,
       enabled = true,
@@ -50,10 +56,6 @@ export default function Camera({
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
       sessionId: session.id,
       url,
-    });
-
-    w.on("connected", function () {
-      setConneected(true);
     });
 
     w.on("info", ({ cameraName, size: { width, height }, formatList }) => {
@@ -72,11 +74,11 @@ export default function Camera({
       message.success(`${w.cameraName} 传输分辨率 ${width}x${height}`);
     });
 
-    w.on("close", function () {
-      setConneected(false);
-    });
-
     return w;
+  });
+
+  useUnmount(() => {
+    player.close();
   });
 
   function changeRotate() {
@@ -102,7 +104,7 @@ export default function Camera({
   useDebounceEffect(
     () => {
       const box = boxEl.current;
-      if (connected && !pause && enabled) {
+      if (!pause && enabled) {
         player.open({
           inputFormatIndex,
           fps,
@@ -114,11 +116,11 @@ export default function Camera({
           box.appendChild(player.AvcPlayer.canvas);
         }
       } else {
-        player.close()
+        player.close();
         player.AvcPlayer.canvas.style.display = "none";
       }
     },
-    [enabled, pause, player, fps, inputFormatIndex, size, connected],
+    [enabled, pause, player, fps, inputFormatIndex, size],
     {
       wait: 500,
     }

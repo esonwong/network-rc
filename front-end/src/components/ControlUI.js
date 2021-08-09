@@ -186,6 +186,7 @@ export default function ControlUI({
                   session={session}
                   editabled={editabled}
                   key={"camera" + cameraIndex}
+                  cameraIndex={"camera" + cameraIndex}
                   index={cameraIndex}
                   url={setting.host && `${setting.host}/video${cameraIndex}`}
                   onChangeVideoRatio={(v) => {

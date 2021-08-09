@@ -17,11 +17,11 @@ read -p "Network RC 密码(默认 networkrc):" password
 password=${password:-networkrc}
 
 if [ "$defaultFrp" = "no" ]; then
+read -p "frp remote_port(用于访问遥控车控制界面, 如: 9088, 默认随机):" frpPort
 read -p "frp 服务器地址(默认: gz.esonwong.com):" frpServer
 read -p "frp 服务器连接端口, server_port(默认9099):" frpServerPort
 read -p "frp user:" frpServerToken
 read -p "frp token:" frpServerUser
-read -p "frp remote_port(用于访问遥控车控制界面, 如: 9088, 默认随机):" frpPort
 read -p "https 证书 cert 路径:" -e tslCertPath
 read -p "https 证书 key 路径:" -e tslKeyPath
 else
