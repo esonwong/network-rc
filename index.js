@@ -609,9 +609,7 @@ const makeHeartbeatTimer = (socket) => {
       socket.autoLocking = false;
       socket.unlockHearbertCount = 0;
       console.info("网络恢复");
-      socket.sendData("success", {
-        message: `网络恢复 (￣︶￣)↗  ，解除锁定 !`,
-      });
+      socket.sendData("locked", false);
     }
   }
   socket.heartbeatTimeoutId = setTimeout(async () => {
@@ -620,9 +618,7 @@ const makeHeartbeatTimer = (socket) => {
     if (socket.autoLocking === true) return;
     socket.autoLocking = true;
     console.warn("网络连接不稳定，自动刹车");
-    socket.sendData("warn", {
-      message: `网络连接不稳定，自动刹车, 并锁定`,
-    });
+    socket.sendData("locked", true);
     const { channelList = [], specialChannel } = status.config;
     const speedChannel = channelList.find(
       ({ id }) => id === specialChannel.speed

@@ -84,7 +84,7 @@ export default class WebRTC {
     rc.addEventListener("connectionstatechange", ({ target }) => {
       console.log("Connection state change", target.connectionState);
       if (target.connectionState === "connected") {
-        this?.onSuccess?.();
+        this?.onSuccess?.({});
         console.log("RTC", rc);
       }
       if (target.connectionState === "disconnected") {
@@ -113,8 +113,8 @@ export default class WebRTC {
     const remoteStream = new MediaStream(
       rc.getReceivers().map((receiver) => receiver.track)
     );
+
     this.audioEl.srcObject = remoteStream;
-    this.audioEl.play();
     // this.video.srcObject = remoteStream;
 
     try {
@@ -142,6 +142,10 @@ export default class WebRTC {
     if (!candidate) return;
     console.log("remote candidate", candidate.candidate);
     this.rc.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+
+  playAudio(playing) {
+    playing ? this.audioEl.play() : this.audioEl.pause();
   }
 
   close() {

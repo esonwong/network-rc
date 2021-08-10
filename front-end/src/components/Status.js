@@ -9,6 +9,7 @@ import {
   PoweroffOutlined,
   FormOutlined,
   HourglassOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import Audio from "./Audio";
 
@@ -28,6 +29,8 @@ export default function Status({
   serverConfig,
   version,
   connectType,
+  onMicphoneChange,
+  locked,
 }) {
   const { sharedEndTime } = serverConfig;
   return (
@@ -64,6 +67,8 @@ export default function Status({
       {isLogin && (
         <Form.Item>
           <Audio
+            connectType={connectType}
+            onMicphoneChange={onMicphoneChange}
             url={`${
               window.location.protocol === "https:" ? "wss://" : "ws://"
             }${setting.host}/microphone`}
@@ -120,7 +125,10 @@ export default function Status({
       )}
       {wsConnected && delay && (
         <Form.Item>
-          <Tag color={delay > 80 ? "red" : "green"}>
+          <Tag
+            icon={locked ? <StopOutlined /> : undefined}
+            color={locked || delay > 80 ? "red" : "green"}
+          >
             {connectType}:{delay.toFixed(0)}
           </Tag>
         </Form.Item>

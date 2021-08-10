@@ -53,6 +53,7 @@ export default class App extends Component {
       version: undefined,
       updateStaus: undefined,
       webrtcChannel: [],
+      locaked: false,
     };
 
     const { changeLight, changePower } = this;
@@ -171,6 +172,10 @@ export default class App extends Component {
           break;
         case "tts playing":
           this.setState({ ttsPlaying: payload });
+          break;
+
+        case "locked":
+          this.setState({ locked: payload });
           break;
 
         case "update-status":
@@ -326,6 +331,10 @@ export default class App extends Component {
       },
     });
   }
+
+  playCarMicphonne = (playing) => {
+    this.webrtc?.playAudio?.(playing);
+  };
 
   disconnect = (e) => {
     e && e.preventDefault();
@@ -496,9 +505,11 @@ export default class App extends Component {
         updateStaus,
         connectType,
         webrtcChannel,
+        locked,
       },
       tts,
       playAudio,
+      playCarMicphonne,
     } = this;
 
     return (
@@ -508,6 +519,8 @@ export default class App extends Component {
             channelStatus={gpioChannelStatus}
             delay={delay}
             connectType={connectType}
+            onMicphoneChange={playCarMicphonne}
+            locked={locked}
             {...{
               version,
               wsConnected,
