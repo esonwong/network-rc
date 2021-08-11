@@ -1527,10 +1527,9 @@ rimraf@^2.6.1:
   dependencies:
     glob "^7.1.3"
 
-rpio-pwm@^1.0.3:
+"rpio-pwm@https://github.com/itiwll/rpio-pwm.git":
   version "1.0.3"
-  resolved "https://registry.npm.taobao.org/rpio-pwm/download/rpio-pwm-1.0.3.tgz#5bd95247b29b7638a62f3fd88ef7e34869bb3441"
-  integrity sha1-W9lSR7KbdjimLz/YjvfjSGm7NEE=
+  resolved "https://github.com/itiwll/rpio-pwm.git#a2907c752ac8f98dff61f0bd45fb16dae28e027c"
   dependencies:
     nan "^2.7.0"
 

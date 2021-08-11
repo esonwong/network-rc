@@ -140,7 +140,7 @@ export default class WebRTC {
 
   addCandidate(candidate) {
     if (!candidate) return;
-    console.log("remote candidate", candidate.candidate);
+    // console.log("remote candidate", candidate.candidate);
     this.rc.addIceCandidate(new RTCIceCandidate(candidate));
   }
 

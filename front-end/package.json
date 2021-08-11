@@ -31,9 +31,9 @@
     "uuidv4": "^6.2.6"
   },
   "scripts": {
-    "start": "HOST=0.0.0.0 react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "HOST=0.0.0.0 react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -52,7 +52,12 @@
     ]
   },
   "devDependencies": {
+    "babel-plugin-import": "^1.13.3",
+    "customize-cra": "^1.0.0",
+    "less": "^4.1.1",
+    "less-loader": "^5.0.0",
     "node-sass": "^4.0.0",
+    "react-app-rewired": "^2.1.8",
     "react-scripts": "^4.0.3"
   }
 }

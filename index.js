@@ -127,7 +127,9 @@ let sharedEndTimerId;
 
 const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
-if (status.enabledHttps) {
+console.log("tslKeyPath", tslKeyPath);
+
+if (status.enabledHttps && !tslKeyPath) {
   tslKeyPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`);
   tslCertPath = path.resolve(
     __dirname,

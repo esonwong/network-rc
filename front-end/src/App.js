@@ -318,6 +318,7 @@ export default class App extends Component {
         }
         this.setState({ webrtcChannel: this.webrtcChannel });
         if (rtcDataChannel.label === "controller") {
+          this.setState({ locked: false });
           rtcDataChannel.addEventListener("message", ({ data }) =>
             this.messageHandle(data)
           );

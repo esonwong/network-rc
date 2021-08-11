@@ -11,7 +11,7 @@ import {
   HourglassOutlined,
   StopOutlined,
 } from "@ant-design/icons";
-import Audio from "./Audio";
+import CarMicphone from "./CarMicphone";
 
 export default function Status({
   piPowerOff,
@@ -66,7 +66,7 @@ export default function Status({
         ))}
       {isLogin && (
         <Form.Item>
-          <Audio
+          <CarMicphone
             connectType={connectType}
             onMicphoneChange={onMicphoneChange}
             url={`${

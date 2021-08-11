@@ -27,7 +27,6 @@ export default function Camera({
   onClickCenterScreen,
   session,
   rtcChannel,
-  cameraIndex,
 }) {
   const storeName = `camera-${url}`;
   const boxEl = useRef(null);
@@ -40,7 +39,6 @@ export default function Camera({
   const [rotate, setRotate] = useState(0); // 旋转
 
   const player = useCreation(() => {
-    console.log("useCreation", cameraIndex);
     const {
       rotate = 0,
       enabled = true,
