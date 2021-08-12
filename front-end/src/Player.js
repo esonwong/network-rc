@@ -11,7 +11,6 @@ export default class Player extends Component {
     const { setCanvasRef } = this.props;
     this.ref.current.appendChild(this.wsavc.AvcPlayer.canvas);
     setCanvasRef && setCanvasRef(this.wsavc.AvcPlayer.canvas);
-
   }
 
   componentWillReceiveProps(nextProps) {
@@ -31,7 +30,8 @@ export default class Player extends Component {
         window.location.host
       }`
     );
-        this.wsavc.connect("ws://localhost:8080");
+
+    // this.wsavc.connect("ws://localhost:8080");
     // this.wsavc.connect(
     //   `${window.location.protocol === "https:" ? "wss" : "ws"}://${
     //     window.location.host

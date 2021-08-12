@@ -79,6 +79,12 @@ const argv = require("yargs")
     tslKeyPath: {
       type: "string",
     },
+    lp: {
+      alias: "localPort",
+      default: 8080,
+      describe: "local server port",
+      type: "number",
+    },
   })
   .env("NETWORK_RC")
   .help().argv;
@@ -98,6 +104,7 @@ let {
   tsl,
   tslCertPath,
   tslKeyPath,
+  localPort,
 } = argv;
 let { password } = argv;
 
@@ -129,7 +136,7 @@ const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 
 console.log("tslKeyPath", tslKeyPath);
 
-if (status.enabledHttps && !tslKeyPath) {
+if (status.enabledHttps && frpServer === "gz.esonwong.com") {
   tslKeyPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`);
   tslCertPath = path.resolve(
     __dirname,
@@ -694,9 +701,7 @@ process.on("SIGINT", async function () {
 
 server.on("error", (e) => {
   if (e.code === "EADDRINUSE") {
-    console.log(
-      "哎哟喂，你已经启动了一个 Network RC， 或者 8080 端口被其他程序使用了..."
-    );
+    console.log(` ${localPort} 端口被其他程序使用了...`);
   }
 });
 
@@ -732,13 +737,13 @@ function getIPAdress() {
     });
   });
 
-  server.listen(8080, async (e) => {
+  server.listen(localPort, async (e) => {
     console.log("server", server.address());
     await TTS(`系统初始化完成!`);
     console.log(
       `本地访问地址 http${
         status.enabledHttps ? "s" : ""
-      }://${getIPAdress()}:8080`
+      }://${getIPAdress()}:${localPort}`
     );
 
     if (frp) {
@@ -751,6 +756,7 @@ function getIPAdress() {
         process.env.FRP_SERVER_PORT = frpServerPort;
         process.env.FRP_SERVER_TOKEN = frpServerToken;
         process.env.FRP_SERVER_USER = frpServerUser;
+        process.env.LOCAL_PORT = localPort;
         require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
       }
     }
