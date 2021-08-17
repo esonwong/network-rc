@@ -13,19 +13,19 @@ read -p "使用内置 frp 服务器(yes/no, 默认 yes):" defaultFrp
 defaultFrp=${defaultFrp:yes}
 
 
+read -p "frp remote_port(用于访问遥控车控制界面, 如: 9088, 默认随机):" frpPort
+defaultPort=$(rand 9010 9098)
+frpPort=${frpPort:-$defaultPort}
 read -p "Network RC 密码(默认 networkrc):" password
 password=${password:-networkrc}
 
 if [ "$defaultFrp" = "no" ]; then
-read -p "frp remote_port(用于访问遥控车控制界面, 如: 9088, 默认随机):" frpPort
-read -p "frp 服务器地址(默认: gz.esonwong.com):" frpServer
-read -p "frp 服务器连接端口, server_port(默认9099):" frpServerPort
-read -p "frp user:" frpServerToken
-read -p "frp token:" frpServerUser
-read -p "https 证书 cert 路径:" -e tslCertPath
-read -p "https 证书 key 路径:" -e tslKeyPath
-else
-frpPort=$(rand 9010 9098)
+  read -p "frp 服务器地址(默认: gz.esonwong.com):" frpServer
+  read -p "frp 服务器连接端口, server_port(默认9099):" frpServerPort
+  read -p "frp user:" frpServerToken
+  read -p "frp token:" frpServerUser
+  read -p "https 证书 cert 路径:" -e tslCertPath
+  read -p "https 证书 key 路径:" -e tslKeyPath
 fi
 
 defaultFrp=${defaultFrp:yes}
@@ -92,8 +92,8 @@ Wants=network.target
 User=root
 Type=simple
 ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p \"$password\" --frpServerPort '$frpServerPort' --frpServerToken "'$frpServerToken'" --frpServerUser '$frpServerUser' --tslCertPath '$tslCertPath' --tslKeyPath '$tslKeyPath'
-Restart= always
-RestartSec=1min
+Restart=always
+RestartSec=15s
 
 
 [Install]

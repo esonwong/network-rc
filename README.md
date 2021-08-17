@@ -18,8 +18,6 @@ Network RC' feature:
 - ffmpeg: Please make sure ffmpeg is installed，This installation method is `sudo apt install ffmpeg -y`
 - nodejs
 
-> **Note：Not comparible with lastest Raspberry Pi system, please use this version: <http://downloads.raspberrypi.org/raspbian/images/raspbian-2020-02-07/>**
-
 ## Install
 
 ```bash

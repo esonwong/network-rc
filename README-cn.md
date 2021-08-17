@@ -19,8 +19,6 @@ Network RC 是运行在树莓派和浏览器上的网络遥控车软件。具备
 - ffmpeg: 运行前请确保树莓派上安装了 ffmpeg，安装方法 `sudo apt install ffmpeg -y`
 - nodejs
 
-> **注意：在最新树莓派系统上存在兼通性问题， 使用此版本系统<http://downloads.raspberrypi.org/raspbian/images/raspbian-2020-02-07/>**
-
 ## 安装
 
 ```bash
