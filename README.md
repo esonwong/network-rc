@@ -1,14 +1,15 @@
-# Network RC -  Remote Control Car Software For Raspberry Pi
+# Network RC - Remote Control Car Software For Raspberry Pi
 
 [中文](./README-cn.md)
 
 Network RC' feature:
 
-- low-latency control and network video￼ ￼transmission
+- low-latency control and network video￼transmission
 - 27 custom channels(PWM or Height/Low)
+- multiple cameras
 - touch, gamepad, keyboard, RC transmitter
-- real-time listening and voice sending
-- repoviding NAT traverse
+- real-time listening and voice sending/two-way voice call
+- server or RTC transmission, auto switch
 - voice broadcast
 - playing audio
 - remote shared
@@ -45,23 +46,7 @@ yarn # or npm install
 sudo node index.js
 ```
 
-打开 `http://[your raspberry pi's ip adress]:8080`
-
-## Usage
-
-```bash
-# 基本使用
-node index.js
-
-# 设置密码
-node index.js -p password
-
-# 启用网络穿透
-node index.js -f -o 9088 --tsl
-
-# 自定义网络穿透服务器
-node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerToken xxxxx
-```
+open `http://[your raspberry pi's ip adress]:8080`
 
 ## Circuit Diagram
 
