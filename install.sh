@@ -22,8 +22,8 @@ password=${password:-networkrc}
 if [ "$defaultFrp" = "no" ]; then
   read -p "frp 服务器地址(默认: gz.esonwong.com):" frpServer
   read -p "frp 服务器连接端口, server_port(默认9099):" frpServerPort
-  read -p "frp user:" frpServerToken
-  read -p "frp token:" frpServerUser
+  read -p "frp user:" frpServerUser
+  read -p "frp token:" frpServerToken
   read -p "https 证书 cert 路径:" -e tslCertPath
   read -p "https 证书 key 路径:" -e tslKeyPath
 fi
@@ -91,7 +91,7 @@ Wants=network.target
 [Service]
 User=root
 Type=simple
-ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p \"$password\" --frpServerPort '$frpServerPort' --frpServerToken "'$frpServerToken'" --frpServerUser '$frpServerUser' --tslCertPath '$tslCertPath' --tslKeyPath '$tslKeyPath'
+ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f '$frpServer' -o '$frpPort' -p \"$password\" --frpServerPort '$frpServerPort' --frpServerToken \"$frpServerToken\" --frpServerUser \"$frpServerUser\" --tslCertPath \"$tslCertPath\" --tslKeyPath \"$tslKeyPath\"
 Restart=always
 RestartSec=15s
 
@@ -99,6 +99,7 @@ RestartSec=15s
 [Install]
 WantedBy=multi-user.target' > /etc/systemd/system/network-rc.service"
 
+echo "重启 Network RC 服务"
 sudo systemctl enable network-rc.service
 sudo systemctl restart network-rc.service
 
