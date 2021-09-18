@@ -222,3 +222,5 @@ deploy.js
 deploy-beta.js
 
 assets/*.mp3
+.temp
+.cache

@@ -67,6 +67,7 @@ export default function Status({
       {isLogin && (
         <Form.Item>
           <CarMicphone
+            session={session}
             connectType={connectType}
             onMicphoneChange={onMicphoneChange}
             url={`${
