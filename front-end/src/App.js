@@ -46,7 +46,7 @@ export default class App extends Component {
         direction: 0,
       },
       ttsPlaying: false,
-      isLogin: true,
+      isLogin: false,
       volume: 0,
       micVolume: 0,
       session: {},
