@@ -1,12 +1,13 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import Joystick from "./Joystick";
 import Camera from "./Camera";
 import { Rnd } from "react-rnd";
-import store from "store";
-import { useEventListener, useUpdateEffect } from "ahooks";
+import { useCreation, useEventListener } from "ahooks";
 import "./ControlUI.scss";
 import classnames from "classnames";
 import JoystickSlider from "./JoystickSlider";
+import { useSelector, useDispatch } from "react-redux";
+import { updatePositionMap, setOrientation } from "../store/ui";
 
 const screenDirction = window.matchMedia("(orientation: portrait)");
 export default function ControlUI({
@@ -21,35 +22,18 @@ export default function ControlUI({
   session,
   webrtcChannel,
 }) {
-  const [orientation, setOrientation] = useState(
-    screenDirction.matches ? "portrait" : "landscape"
-  );
+  const positionMap = useSelector((state) => state.ui.positionMap);
+  const orientation = useSelector((state) => state.ui.orientation);
+  const dispatch = useDispatch();
 
-  const [positionMap, setPositionMap] = useState(
-    store.get("ui-position") || {}
-  );
-
-  const savePosition = useCallback(
-    (id, position) => {
-      if (!positionMap[id]) {
-        positionMap[id] = {};
-      }
-      positionMap[id][orientation] = { ...position };
-      setPositionMap({ ...positionMap });
-    },
-    [positionMap, orientation]
-  );
-
-  useUpdateEffect(() => {
-    if (!editabled) {
-      store.set("ui-position", positionMap);
-    }
-  }, [editabled]);
+  useCreation(() => {
+    dispatch(setOrientation(screenDirction.matches ? "portrait" : "landscape"));
+  });
 
   useEventListener(
     "change",
     ({ matches }) => {
-      setOrientation(matches ? "portrait" : "landscape");
+      dispatch(setOrientation(matches ? "portrait" : "landscape"));
     },
     {
       target: screenDirction,
@@ -76,6 +60,8 @@ export default function ControlUI({
       i.type = "camera";
       i.cameraIndex = i.index;
       i.enabled = true;
+      i.x = 0;
+      i.y = 0;
       return i;
     }),
     ...(isShowButton ? uiComponentList : []),
@@ -83,21 +69,27 @@ export default function ControlUI({
 
   return (
     <>
-      {list.map((i, index) => (
-        <Item
-          key={i.id}
-          index={index}
-          editabled={editabled}
-          session={session}
-          webrtcChannel={webrtcChannel}
-          onControl={onControl}
-          setting={setting}
-          savePosition={savePosition}
-          positionMap={positionMap}
-          orientation={orientation}
-          {...i}
-        />
-      ))}
+      {list.map((i, index) => {
+        const { id } = i;
+        const position = positionMap[id]?.[orientation];
+
+        return (
+          <Item
+            key={i.id}
+            index={index}
+            editabled={editabled}
+            session={session}
+            webrtcChannel={webrtcChannel}
+            onControl={onControl}
+            setting={setting}
+            onPositionChange={(position) =>
+              dispatch(updatePositionMap({ orientation, id, position }))
+            }
+            position={position}
+            {...i}
+          />
+        );
+      })}
     </>
   );
 }
@@ -110,40 +102,30 @@ const Item = ({
   autoReset,
   cameraIndex,
   vertical,
-  defaultPosition,
-  positionMap,
-  orientation,
-  savePosition,
+  index,
+  position = { x: index * 20, y: index * 20, z: index + 2, videoRate: 4 / 3 },
+  onPositionChange,
   editabled,
   onControl,
   session,
   webrtcChannel,
   setting,
-  index,
 }) => {
-  let position = useMemo(
-    () =>
-      positionMap[id]?.[orientation] ||
-      defaultPosition?.[orientation] || {
-        x: index * 70,
-        y: index * 30,
-        z: positionMap[id]?.[orientation]?.z || index + 2,
-        size: undefined,
-        ratio: undefined,
-      },
-    [positionMap, id, orientation, defaultPosition, index]
-  );
-
-  const { size, z, ratio, videoRate = 4 / 3 } = position;
+  const {
+    x = index * 20,
+    y = index * 20,
+    z = index + 2,
+    videoRate = 4 / 3,
+    ratio,
+    size = undefined,
+  } = position;
 
   const onChangeVideoRatio = useCallback(
     (v) => {
-      const { size, z, x, y, ratio } = position;
-      if (ratio !== v) {
-        savePosition(id, { x, y, z, size, ratio: v });
-      }
+      if (v === ratio) return;
+      onPositionChange({ ratio: v });
     },
-    [savePosition, id, position]
+    [ratio, onPositionChange]
   );
 
   const setFullScreen = useCallback(
@@ -153,16 +135,16 @@ const Item = ({
       const x = 0;
       const y = (window.innerHeight - height) / 2;
       const z = 0;
-      savePosition(id, { ...position, x, y, z, size: { width, height } });
+      onPositionChange({ ...position, x, y, z, size: { width, height } });
     },
-    [savePosition, videoRate, position]
+    [onPositionChange, videoRate, position]
   );
 
   const setCenterScreen = useCallback(
     (id) => {
       const height = window.innerHeight / 4;
       const width = height * videoRate;
-      savePosition(id, {
+      onPositionChange({
         ...position,
         size: {
           width,
@@ -173,19 +155,19 @@ const Item = ({
         z: 2,
       });
     },
-    [savePosition, position, videoRate]
+    [onPositionChange, position, videoRate]
   );
 
   const onDragStop = useCallback(
     (_, { x, y }) => {
-      savePosition(id, { x, y, z, size, ratio });
+      onPositionChange({ x, y });
     },
-    [id, savePosition, z, size, ratio]
+    [onPositionChange]
   );
 
   return enabled ? (
     <Rnd
-      key={id}
+      key={`rnd-${id}`}
       disableDragging={!editabled}
       enableResizing={{
         top: editabled,
@@ -202,7 +184,7 @@ const Item = ({
         resized: size,
       })}
       lockAspectRatio={ratio === undefined ? true : ratio}
-      position={position}
+      position={{ x, y }}
       size={size}
       onDragStop={onDragStop}
       onResizeStop={(e, direction, ref, delta, { x, y }) => {
@@ -210,9 +192,9 @@ const Item = ({
           width: ref.offsetWidth,
           height: ref.offsetHeight,
         };
-        savePosition(id, { x, y, z, size, ratio });
+        onPositionChange({ x, y, z, size });
       }}
-      style={{ zIndex: positionMap[id]?.[orientation]?.z ?? index + 2 }}
+      style={{ zIndex: position?.z ?? index + 2 }}
     >
       {type === "joystick" && (
         <Joystick
@@ -241,7 +223,7 @@ const Item = ({
           cameraIndex={"camera" + cameraIndex}
           index={cameraIndex}
           url={setting.host && `${setting.host}/video${cameraIndex}`}
-          onChangeVideoRatio={onChangeVideoRatio}
+          onChangeVideoRatio={(v) => onChangeVideoRatio(v)}
           onClickFullScreen={() => setFullScreen(id)}
           onClickCenterScreen={() => setCenterScreen(id)}
           size={size}

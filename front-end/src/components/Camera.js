@@ -49,6 +49,7 @@ export default function Camera({
     setRotate(rotate);
     setInputFormatIndex(inputFormatIndex);
     setFps(fps);
+
     const w = new Player({
       useWorker: true,
       workerFile: `${process.env.PUBLIC_URL}/Decoder.js`,
@@ -60,13 +61,12 @@ export default function Camera({
       setCameraName(cameraName);
       w.cameraName = cameraName;
       setFormatList(formatList);
-      onChangeVideoRatio(width / height);
     });
 
-    w.on("open", ({ inputFormatIndex, fps }) => {
-      setInputFormatIndex(inputFormatIndex);
-      setFps(fps);
-    });
+    // w.on("open", ({ inputFormatIndex, fps }) => {
+    //   setInputFormatIndex(inputFormatIndex);
+    //   setFps(fps);
+    // });
 
     w.on("resized", ({ width, height }) => {
       message.success(`${w.cameraName} 传输分辨率 ${width}x${height}`);
@@ -74,6 +74,16 @@ export default function Camera({
 
     return w;
   });
+
+  useEffect(() => {
+    const changeRoatio = ({ size: { width, height } }) => {
+      onChangeVideoRatio(width / height);
+    };
+    player.on("info", changeRoatio);
+    return () => {
+      player.off("info", changeRoatio);
+    };
+  }, [onChangeVideoRatio, player]);
 
   useUnmount(() => {
     player.close();
@@ -118,7 +128,7 @@ export default function Camera({
         player.AvcPlayer.canvas.style.display = "none";
       }
     },
-    [enabled, pause, player, fps, inputFormatIndex, size],
+    [enabled, pause, player, inputFormatIndex, fps, size],
     {
       wait: 500,
     }
@@ -164,7 +174,10 @@ export default function Camera({
             size="small"
           >
             {formatList.map(({ format, size }, index) => (
-              <Option value={index}>{`${size} ${format}`}</Option>
+              <Option
+                key={size + format}
+                value={index}
+              >{`${size} ${format}`}</Option>
             ))}
           </Select>
           <Select defaultValue={fps} onChange={setFps} size="small">

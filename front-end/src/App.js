@@ -547,29 +547,29 @@ export default class App extends Component {
           />
         )}
         <Router className="app-page">
+          <Setting
+            path={`${pubilcUrl}/setting`}
+            {...setting}
+            cameraList={cameraList}
+            wsConnected={wsConnected}
+            onDisconnect={disconnect}
+            onSubmit={changeSetting}
+            saveServerConfig={saveServerConfig}
+            resetServerConfig={resetServerConfig}
+            resetChannel={resetChannel}
+            serverConfig={serverConfig}
+            changeVolume={changeVolume}
+            changeMicVolume={changeMicVolume}
+            volume={volume}
+            micVolume={micVolume}
+            updateVersion={updateVersion}
+            updateStaus={updateStaus}
+          />
           {wsConnected && (
             <Login path={`${pubilcUrl}/login`} onSubmit={login} />
           )}
           {isLogin ? (
             <>
-              <Setting
-                path={`${pubilcUrl}/setting`}
-                {...setting}
-                cameraList={cameraList}
-                wsConnected={wsConnected}
-                onDisconnect={disconnect}
-                onSubmit={changeSetting}
-                saveServerConfig={saveServerConfig}
-                resetServerConfig={resetServerConfig}
-                resetChannel={resetChannel}
-                serverConfig={serverConfig}
-                changeVolume={changeVolume}
-                changeMicVolume={changeMicVolume}
-                volume={volume}
-                micVolume={micVolume}
-                updateVersion={updateVersion}
-                updateStaus={updateStaus}
-              />
               <Controller
                 session={session}
                 path={`${pubilcUrl}/controller`}

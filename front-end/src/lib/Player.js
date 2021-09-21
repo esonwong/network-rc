@@ -77,7 +77,10 @@ class Player extends EventEmitter {
       console.log("Connected to " + url);
       this.emit("connected", url);
       this.send("get-info", { sessionId: this.sessionId });
-      this.send("open-request", { sessionId: this.sessionId, ...payload });
+      this.send("open-request", {
+        sessionId: this.sessionId,
+        ...payload,
+      });
     });
 
     this.ws.addEventListener("message", (e) => {
@@ -161,7 +164,11 @@ class Player extends EventEmitter {
     this.config = payload;
     if (this.rtcDataChannel?.readyState === "open") {
       this.send("get-info", { sessionId: this.sessionId });
-      this.send("open-request", { sessionId: this.sessionId, ...this.config });
+      this.send("open-request", {
+        sessionId: this.sessionId,
+        ...this.config,
+        ...payload,
+      });
     } else {
       this.connectWs(payload);
     }
