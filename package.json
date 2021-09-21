@@ -9,9 +9,7 @@
   "scripts": {
     "start": "nodemon --inspect index.js",
     "server": "node index.js",
-    "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r assets network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r assets network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
   },
   "dependencies": {
     "@clusterws/cws": "^1.5.0",
@@ -32,9 +30,6 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@vuepress/plugin-google-analytics": "^1.8.2",
-    "@vuepress/shared-utils": "^1.8.2",
-    "nodemon": "^2.0.2",
-    "vuepress": "^2.0.0-beta.26"
+    "nodemon": "^2.0.2"
   }
 }
