@@ -634,8 +634,10 @@ const makeHeartbeatTimer = (socket) => {
     );
     if (speedChannel) {
       const { pin, valueReset } = speedChannel;
-      changePwmPin(pin, -(channelStatus[pin] || valueReset));
-      await sleep(200);
+      if (status.config.autoLockTime) {
+        changePwmPin(pin, -(channelStatus[pin] || valueReset));
+        await sleep(status.config.autoLockTime);
+      }
       changePwmPin(pin, valueReset);
     }
   }, status.config.autoLockTime * 2);

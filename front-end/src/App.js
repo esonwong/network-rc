@@ -454,7 +454,9 @@ export default class App extends Component {
     const {
       setting: { host },
     } = this.state;
-    axios.post(`//${host}/config`, config);
+    axios.post(`//${host}/config`, config).catch((e) => {
+      console.error(e);
+    });
   };
 
   resetServerConfig = () => {
