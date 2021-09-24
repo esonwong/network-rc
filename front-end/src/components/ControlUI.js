@@ -231,5 +231,5 @@ const Item = ({
         />
       )}
     </Rnd>
-  ) : undefined;
+  ) : null;
 };
