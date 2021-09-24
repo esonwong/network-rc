@@ -1,6 +1,6 @@
 # Network RC - Remote Control Car Software For Raspberry Pi
 
-[中文](./README-cn.md)
+[中文](./README-cn.md) | [Docs](https://network-rc.esonwong.com)
 
 Network RC' feature:
 

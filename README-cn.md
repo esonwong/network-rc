@@ -1,6 +1,6 @@
 # 树莓派网络遥控车软件 Network RC
 
-[English](./README.md)
+[English](./README.md) | [文档](https://network-rc.esonwong.com)
 
 Network RC 是运行在树莓派和浏览器上的网络遥控车软件。具备以下特性：
 
