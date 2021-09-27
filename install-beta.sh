@@ -69,7 +69,7 @@ echo ""
 echo ""
 echo "下载 Network RC"
 sudo rm -f /tmp/network-rc.tar.gz
-wget -O /tmp/network-rc.tar.gz https://network-rc.esonwong.com/download/network-rc-beta.tar.gz
+wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz
 
 echo ""
 echo ""

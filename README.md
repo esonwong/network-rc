@@ -22,7 +22,7 @@ Network RC' feature:
 ## Install
 
 ```bash
-bash <(curl -sL https://network-rc.esonwong.com/download/install.sh)
+bash <(curl -sL https://download.esonwong.com/network-rc/install.sh)
 ```
 
 ## Guide
@@ -54,7 +54,7 @@ open `http://[your raspberry pi's ip adress]:8080`
 
 ## Downloads
 
-- [network-rc.esonwong.com](https://network-rc.esonwong.com/download)
+- [network-rc.esonwong.com](https://download.esonwong.com/network-rc)
 
 ## Social Group
 

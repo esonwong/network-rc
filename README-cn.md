@@ -22,7 +22,7 @@ Network RC 是运行在树莓派和浏览器上的网络遥控车软件。具备
 ## 安装
 
 ```bash
-bash <(curl -sL https://network-rc.esonwong.com/download/install.sh)
+bash <(curl -sL https://download.esonwong.com/network-rc/install.sh)
 ```
 
 ## 使用教程
@@ -70,7 +70,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 树莓派软件下载
 
-- [network-rc.esonwong.com](https://network-rc.esonwong.com/download)
+- [network-rc.esonwong.com](https://download.esonwong.com/network-rc)
 - [github](https://github.com/itiwll/network-rc/releases)
 
 ## ToDo

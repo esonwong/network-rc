@@ -144,10 +144,10 @@ if (status.enabledHttps && frpServer === "gz.esonwong.com") {
   );
   console.info(`获取 https 证书:${frpServer}`);
   execSync(
-    `wget https://network-rc.esonwong.com/download/cert/${frpServer}/privkey.pem -O ${tslKeyPath}`
+    `wget https://download.esonwong.com/network-rc/cert/${frpServer}/privkey.pem -O ${tslKeyPath}`
   );
   execSync(
-    `wget https://network-rc.esonwong.com/download/cert/${frpServer}/fullchain.pem -O ${tslCertPath}`
+    `wget https://download.esonwong.com/network-rc/cert/${frpServer}/fullchain.pem -O ${tslCertPath}`
   );
 }
 
