@@ -93,7 +93,7 @@ export default function Setting({
           onFinish={saveServerConfig}
           initialValues={serverConfig}
         >
-          <Form.Item label="摄像头采集分辨率最大宽度" name="cameraMaxWidth">
+          <Form.Item label="分辨率最大宽度" name="cameraMaxWidth" extra="摄像头画面采集的最大宽度">
             <Slider disabled={!wsConnected} min={0} max={1024} />
           </Form.Item>
           <Form.Item {...tailLayout}>

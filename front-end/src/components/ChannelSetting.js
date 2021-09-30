@@ -160,13 +160,6 @@ export default function ChannelSetting({
     <Space align="baseline" direction="vertical">
       {fields.map((field) => {
         const type = form.getFieldValue(["channelList", index, "type"]),
-          reset = form.getFieldValue([
-            "channelList",
-            index,
-            "keyboard",
-            field.name,
-            "reset",
-          ]),
           method = form.getFieldValue([
             "channelList",
             index,
@@ -182,6 +175,7 @@ export default function ChannelSetting({
               name={[field.name, "name"]}
               fieldKey={[field.fieldKey, "name"]}
               rules={[{ required: true, message: "客官！选一个按键！" }]}
+              extra="键盘按键"
             >
               <Input style={{ width: 80 }} />
             </Form.Item>
@@ -192,6 +186,7 @@ export default function ChannelSetting({
                 name={[field.name, "method"]}
                 fieldKey={[field.fieldKey, "method"]}
                 defaultValue="default"
+                extra="控制方式"
               >
                 <Radio.Group size="middle">
                   <Radio.Button value="default">默认</Radio.Button>
@@ -200,36 +195,31 @@ export default function ChannelSetting({
               </Form.Item>
             )}
 
-            {!reset && (
-              <Form.Item
-                {...field}
-                name={[field.name, "positive"]}
-                fieldKey={[field.fieldKey, "positive"]}
-                valuePropName="checked"
-              >
-                <Switch checkedChildren="正向" unCheckedChildren="反向" />
-              </Form.Item>
-            )}
-
-            {type === "pwm" && method === "default" && (
-              <Form.Item
-                {...field}
-                name={[field.name, "reset"]}
-                fieldKey={[field.fieldKey, "reset"]}
-                valuePropName="checked"
-              >
-                <Switch checkedChildren="归位" unCheckedChildren="归位" />
-              </Form.Item>
-            )}
-
-            {type === "pwm" && method === "step" && (
+            {type === "pwm" && (
               <Form.Item
                 {...field}
                 name={[field.name, "speed"]}
                 fieldKey={[field.fieldKey, "speed"]}
-                label="速度"
+                extra={
+                  method === "default"
+                    ? "-1 ~ 1， 0 为归位"
+                    : "步进速度的变化速度"
+                }
               >
-                <InputNumber max={10} min={0} step={0.1} />
+                <InputNumber max={1} min={-1} step={0.1} />
+              </Form.Item>
+            )}
+
+            {(method === "default" || type === "switch") && (
+              <Form.Item
+                {...field}
+                name={[field.name, "autoReset"]}
+                fieldKey={[field.fieldKey, "autoReset"]}
+                extra="释放按钮是否复位"
+                valuePropName="checked"
+                defaultValue={true}
+              >
+                <Switch />
               </Form.Item>
             )}
 
@@ -240,7 +230,7 @@ export default function ChannelSetting({
       <PlusCircleOutlined
         onClick={() =>
           add({
-            positive: true,
+            speed: 1,
           })
         }
       />
@@ -255,7 +245,8 @@ export default function ChannelSetting({
             {...field}
             name={[field.name, "name"]}
             fieldKey={[field.fieldKey, "name"]}
-            rules={[{ required: true, message: "客官！选一个按键！" }]}
+            rules={[{ required: true, message: "客官！选一个！" }]}
+            extra="摇杆轴或按键"
           >
             <Select style={{ width: 100 }}>
               {gamePadInputList.map(({ value, name }) => (
@@ -265,11 +256,11 @@ export default function ChannelSetting({
           </Form.Item>
           <Form.Item
             {...field}
-            name={[field.name, "positive"]}
-            fieldKey={[field.fieldKey, "positive"]}
-            valuePropName="checked"
+            name={[field.name, "speed"]}
+            fieldKey={[field.fieldKey, "speed"]}
+            extra="-1 ~ 1， 0 为归位"
           >
-            <Switch checkedChildren="正向" unCheckedChildren="反向" />
+            <InputNumber min={-1} max={1} step={0.1} />
           </Form.Item>
           <MinusCircleOutlined onClick={() => remove(field.name)} />
         </Space>
@@ -277,7 +268,7 @@ export default function ChannelSetting({
       <PlusCircleOutlined
         onClick={() =>
           add({
-            positive: true,
+            speed: 1,
           })
         }
       />

@@ -16,9 +16,9 @@ export default function Keyboard({
     () => true,
     ({ type: keyType, key }) => {
       channelList.forEach((channel) => {
-        const { pin, keyboard = [], type } = channel;
+        const { pin, keyboard = [], autoReset, type } = channel;
         keyboard.forEach((pressedKey) => {
-          const { name, positive, method } = pressedKey;
+          const { name, speed, method } = pressedKey;
           if (name === key.toLocaleLowerCase()) {
             console.log(keyType, key);
             if (type === "switch") {
@@ -27,18 +27,28 @@ export default function Keyboard({
                 changeChannel({ pin, value });
                 return;
               }
+
+              if (keyType === "keydup" && autoReset) {
+                changeChannel({ pin, value: 0 });
+                return;
+              }
             } else {
               if (method === "step") {
                 if (keyType === "keydown") {
                   pressedKeyAndChannel.push({ pressedKey, channel });
-                } else {
+                }
+                if (keyType === "keyup") {
                   pressedKeyAndChannel = pressedKeyAndChannel.filter(
                     ({ pressedKey }) => pressedKey.key === key
                   );
                 }
               } else {
-                const value = keyType === "keydown" ? (positive ? 1 : -1) : 0;
-                changeChannel({ pin, value });
+                if (keyType === "keydown") {
+                  changeChannel({ pin, value: speed });
+                }
+                if (keyType === "keydup" && autoReset) {
+                  changeChannel({ pin, value: 0 });
+                }
               }
             }
           }
@@ -65,17 +75,20 @@ export default function Keyboard({
   useKeyPress("enter", onEnter);
 
   useEffect(() => {
+    console.log("changeChannel change");
+    const interval = 100;
     const timerId = setInterval(() => {
       pressedKeyAndChannel.forEach(
         ({ pressedKey: { positive, speed = 0.5 }, channel: { pin } }) => {
           let value =
-            (localChannelStatus[pin] || 0) + ((positive ? 1 : -1) * speed) / 20;
+            (localChannelStatus[pin] || 0) +
+            ((positive ? 1 : -1) * speed) / (1000 / interval);
           if (value > 1) value = 1;
           if (value < -1) value = -1;
           changeChannel({ pin, value });
         }
       );
-    }, 50);
+    }, interval);
     return () => {
       clearInterval(timerId);
     };

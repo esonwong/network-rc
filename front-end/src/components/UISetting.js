@@ -53,10 +53,11 @@ export default function UISetting({ saveServerConfig, serverConfig }) {
                   </Form.Item>
                   <Form.Item
                     {...field}
-                    label="自动归位"
+                    label="释放归位"
                     name={[field.name, "autoReset"]}
                     fieldKey={[field.fieldKey, "autoReset"]}
                     valuePropName="checked"
+                    extra="释放 UI 控件是否自动归位"
                   >
                     <Switch />
                   </Form.Item>
