@@ -70,8 +70,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## 树莓派软件下载
 
-- [network-rc.esonwong.com](https://download.esonwong.com/network-rc)
-- [github](https://github.com/itiwll/network-rc/releases)
+- <https://download.esonwong.com/network-rc>
 
 ## ToDo
 

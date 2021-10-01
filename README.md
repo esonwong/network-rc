@@ -54,7 +54,7 @@ open `http://[your raspberry pi's ip adress]:8080`
 
 ## Downloads
 
-- [network-rc.esonwong.com](https://download.esonwong.com/network-rc)
+- <https://download.esonwong.com/network-rc>
 
 ## Social Group
 
