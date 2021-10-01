@@ -449,6 +449,7 @@ export default function ChannelSetting({
                           label="复位值"
                           name={[field.name, "valueReset"]}
                           fieldKey={[field.fieldKey, "valueReset"]}
+                          shouldUpdate
                         >
                           <InputNumber
                             step={0.1}
@@ -476,7 +477,7 @@ export default function ChannelSetting({
                             max={form.getFieldValue([
                               "channelList",
                               field.fieldKey,
-                              "valueNegative",
+                              "valueReset",
                             ])}
                           />
                         </Form.Item>
