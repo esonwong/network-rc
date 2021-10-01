@@ -15,12 +15,12 @@ export default function Keyboard({
   useKeyPress(
     () => true,
     ({ type: keyType, key }) => {
+      console.log(key, keyType);
       channelList.forEach((channel) => {
-        const { pin, keyboard = [], autoReset, type } = channel;
+        const { pin, keyboard = [], type } = channel;
         keyboard.forEach((pressedKey) => {
-          const { name, speed, method } = pressedKey;
-          if (name === key.toLocaleLowerCase()) {
-            console.log(keyType, key);
+          const { name, speed, method, autoReset } = pressedKey;
+          if (name.toLocaleLowerCase() === key.toLocaleLowerCase()) {
             if (type === "switch") {
               if (keyType === "keydown") {
                 const value = !channelStatus[pin];
@@ -28,7 +28,7 @@ export default function Keyboard({
                 return;
               }
 
-              if (keyType === "keydup" && autoReset) {
+              if (keyType === "keyup" && autoReset) {
                 changeChannel({ pin, value: 0 });
                 return;
               }
@@ -46,7 +46,7 @@ export default function Keyboard({
                 if (keyType === "keydown") {
                   changeChannel({ pin, value: speed });
                 }
-                if (keyType === "keydup" && autoReset) {
+                if (keyType === "keyup" && autoReset) {
                   changeChannel({ pin, value: 0 });
                 }
               }

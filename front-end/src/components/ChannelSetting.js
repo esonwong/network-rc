@@ -156,11 +156,12 @@ export default function ChannelSetting({
     );
   };
 
-  const keyboard = (index, fields, { add, remove }) => (
-    <Space align="baseline" direction="vertical">
-      {fields.map((field) => {
-        const type = form.getFieldValue(["channelList", index, "type"]),
-          method = form.getFieldValue([
+  const keyboard = (index, fields, { add, remove }) => {
+    const type = form.getFieldValue(["channelList", index, "type"]);
+    return (
+      <Space align="baseline" direction="vertical">
+        {fields.map((field) => {
+          const method = form.getFieldValue([
             "channelList",
             index,
             "keyboard",
@@ -168,112 +169,190 @@ export default function ChannelSetting({
             "method",
           ]);
 
-        return (
-          <Space key={field.key} align="baseline">
-            <Form.Item
-              {...field}
-              name={[field.name, "name"]}
-              fieldKey={[field.fieldKey, "name"]}
-              rules={[{ required: true, message: "客官！选一个按键！" }]}
-              extra="键盘按键"
-            >
-              <Input style={{ width: 80 }} />
-            </Form.Item>
-
-            {type === "pwm" && (
+          return (
+            <Space key={field.key} align="baseline">
               <Form.Item
                 {...field}
-                name={[field.name, "method"]}
-                fieldKey={[field.fieldKey, "method"]}
-                defaultValue="default"
-                extra="控制方式"
+                name={[field.name, "name"]}
+                fieldKey={[field.fieldKey, "name"]}
+                rules={[{ required: true, message: "客官！选一个按键！" }]}
+                extra="键盘按键"
               >
-                <Radio.Group size="middle">
-                  <Radio.Button value="default">默认</Radio.Button>
-                  <Radio.Button value="step">步进</Radio.Button>
-                </Radio.Group>
+                <Input style={{ width: 80 }} />
               </Form.Item>
-            )}
 
-            {type === "pwm" && (
+              {type === "pwm" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "method"]}
+                  fieldKey={[field.fieldKey, "method"]}
+                  defaultValue="default"
+                  extra="控制方式"
+                >
+                  <Radio.Group size="middle">
+                    <Radio.Button value="default">默认</Radio.Button>
+                    <Radio.Button value="step">步进</Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+              )}
+
+              {type === "pwm" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "speed"]}
+                  fieldKey={[field.fieldKey, "speed"]}
+                  extra={
+                    method === "default"
+                      ? "-1 ~ 1， 0 为归位"
+                      : "每秒步进速度系数"
+                  }
+                >
+                  <InputNumber max={1} min={-1} step={0.1} />
+                </Form.Item>
+              )}
+
+              {/* {type === "switch" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "speed"]}
+                  fieldKey={[field.fieldKey, "speed"]}
+                  extra="高低电平"
+                >
+                  <Radio.Group size="middle">
+                    <Radio.Button value={1}>高</Radio.Button>
+                    <Radio.Button value={-1}>低</Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+              )} */}
+
+              {(method === "default" || type === "switch") && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "autoReset"]}
+                  fieldKey={[field.fieldKey, "autoReset"]}
+                  extra="释放键盘是否复位"
+                  valuePropName="checked"
+                  defaultValue={true}
+                >
+                  <Switch />
+                </Form.Item>
+              )}
+
+              <MinusCircleOutlined onClick={() => remove(field.name)} />
+            </Space>
+          );
+        })}
+        <PlusCircleOutlined
+          onClick={() =>
+            add({
+              speed: 1,
+              autoReset: true,
+              method: "default",
+            })
+          }
+        />
+      </Space>
+    );
+  };
+
+  const gamepad = (index, fields, { add, remove }) => {
+    const type = form.getFieldValue(["channelList", index, "type"]);
+
+    return (
+      <Space align="baseline" split={<Divider type="vertical" />} wrap>
+        {fields.map((field) => {
+          const method = form.getFieldValue([
+            "channelList",
+            index,
+            "gamepad",
+            field.name,
+            "method",
+          ]);
+          return (
+            <Space key={field.key} align="baseline">
               <Form.Item
                 {...field}
-                name={[field.name, "speed"]}
-                fieldKey={[field.fieldKey, "speed"]}
-                extra={
-                  method === "default"
-                    ? "-1 ~ 1， 0 为归位"
-                    : "步进速度的变化速度"
-                }
+                name={[field.name, "name"]}
+                fieldKey={[field.fieldKey, "name"]}
+                rules={[{ required: true, message: "客官！选一个！" }]}
+                extra="摇杆轴或按键"
               >
-                <InputNumber max={1} min={-1} step={0.1} />
+                <Select style={{ width: 100 }}>
+                  {gamePadInputList.map(({ value, name }) => (
+                    <Option value={value}> {name} </Option>
+                  ))}
+                </Select>
               </Form.Item>
-            )}
 
-            {(method === "default" || type === "switch") && (
-              <Form.Item
-                {...field}
-                name={[field.name, "autoReset"]}
-                fieldKey={[field.fieldKey, "autoReset"]}
-                extra="释放按钮是否复位"
-                valuePropName="checked"
-                defaultValue={true}
-              >
-                <Switch />
-              </Form.Item>
-            )}
+              {type === "pwm" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "method"]}
+                  fieldKey={[field.fieldKey, "method"]}
+                  defaultValue="default"
+                  extra="控制方式"
+                >
+                  <Radio.Group size="middle">
+                    <Radio.Button value="default">默认</Radio.Button>
+                    <Radio.Button value="step">步进</Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+              )}
 
-            <MinusCircleOutlined onClick={() => remove(field.name)} />
-          </Space>
-        );
-      })}
-      <PlusCircleOutlined
-        onClick={() =>
-          add({
-            speed: 1,
-          })
-        }
-      />
-    </Space>
-  );
+              {type === "pwm" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "speed"]}
+                  fieldKey={[field.fieldKey, "speed"]}
+                  extra="控制系数，-1 ~ 1"
+                >
+                  <InputNumber min={-1} max={1} step={0.1} />
+                </Form.Item>
+              )}
 
-  const gamepad = (fields, { add, remove }) => (
-    <Space align="baseline" split={<Divider type="vertical" />} wrap>
-      {fields.map((field) => (
-        <Space key={field.key} align="baseline">
-          <Form.Item
-            {...field}
-            name={[field.name, "name"]}
-            fieldKey={[field.fieldKey, "name"]}
-            rules={[{ required: true, message: "客官！选一个！" }]}
-            extra="摇杆轴或按键"
-          >
-            <Select style={{ width: 100 }}>
-              {gamePadInputList.map(({ value, name }) => (
-                <Option value={value}> {name} </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            {...field}
-            name={[field.name, "speed"]}
-            fieldKey={[field.fieldKey, "speed"]}
-            extra="-1 ~ 1， 0 为归位"
-          >
-            <InputNumber min={-1} max={1} step={0.1} />
-          </Form.Item>
-          <MinusCircleOutlined onClick={() => remove(field.name)} />
-        </Space>
-      ))}
-      <PlusCircleOutlined
-        onClick={() =>
-          add({
-            speed: 1,
-          })
-        }
-      />
-    </Space>
-  );
+              {/* {method === "default" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "autoReset"]}
+                  fieldKey={[field.fieldKey, "autoReset"]}
+                  extra="释放按钮是否复位"
+                  valuePropName="checked"
+                  defaultValue={true}
+                >
+                  <Switch />
+                </Form.Item>
+              )} */}
+
+              {/* {type === "switch" && (
+                <Form.Item
+                  {...field}
+                  name={[field.name, "speed"]}
+                  fieldKey={[field.fieldKey, "speed"]}
+                  extra="高低电平"
+                >
+                  <Radio.Group size="middle">
+                    <Radio.Button value={1}>高</Radio.Button>
+                    <Radio.Button value={-1}>低</Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+              )} */}
+
+              <MinusCircleOutlined onClick={() => remove(field.name)} />
+            </Space>
+          );
+        })}
+        <PlusCircleOutlined
+          onClick={() =>
+            add({
+              speed: 1,
+              autoReset: true,
+              method: "default",
+            })
+          }
+        />
+      </Space>
+    );
+  };
 
   return (
     <Form form={form} onFinish={saveServerConfig} initialValues={serverConfig}>
@@ -419,7 +498,7 @@ export default function ChannelSetting({
                   </Panel>
                   <Panel header="手柄" size="small">
                     <Form.List name={[field.name, "gamepad"]}>
-                      {gamepad}
+                      {(...props) => gamepad(field.fieldKey, ...props)}
                     </Form.List>
                   </Panel>
                   <Panel header="手机重力感应" size="small">

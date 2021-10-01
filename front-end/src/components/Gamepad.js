@@ -10,11 +10,13 @@ let gamePadsTimerId,
 
 const gamePadsLoop = ({ index }) => {
   gamePadsTimerId = setInterval(() => {
-    const gamepad = (navigator.getGamepads
-      ? navigator.getGamepads()
-      : navigator.webkitGetGamepads
-      ? navigator.webkitGetGamepads
-      : [])[index];
+    const gamepad = (
+      navigator.getGamepads
+        ? navigator.getGamepads()
+        : navigator.webkitGetGamepads
+        ? navigator.webkitGetGamepads
+        : []
+    )[index];
     if (!gamepad) return;
     const { connected, timestamp } = gamepad;
 
@@ -84,27 +86,30 @@ export default function Gamepad({
 
   useEventListener("gamepadchange", ({ detail: { buttons, axes } }) => {
     channelList.forEach(({ gamepad = [], pin, type: pinType }) => {
-      gamepad.forEach(({ name, positive, method, speed }) => {
+      gamepad.forEach(({ name, method, speed }) => {
         const [type, index] = name.split("-");
-        const coefficient = positive ? 1 : -1;
         let value =
           type === "button" ? buttons[index - 0].value : axes[index - 0];
         if (status[name] === value) return;
         status[name] = value;
         switch (type) {
           case "button":
+            // 按钮
             if (pinType === "switch") {
+              // 电平通道
               if (value > 0) {
                 value = !channelStatus[pin];
               } else {
                 return;
               }
             } else {
-              value = coefficient * buttons[index - 0].value;
+              // pwm 通道
+              value = speed * buttons[index - 0].value;
             }
             break;
           case "axis":
-            value = coefficient * axes[index - 0];
+            // 摇杆
+            value = speed * axes[index - 0];
             break;
           default:
             return;
