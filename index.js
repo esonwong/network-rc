@@ -137,6 +137,10 @@ const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
 console.log("tslKeyPath", tslKeyPath);
 
 if (status.enabledHttps && frpServer === "gz.esonwong.com") {
+  // downloadCert()
+}
+
+function downloadCert() {
   tslKeyPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`);
   tslCertPath = path.resolve(
     __dirname,
@@ -471,6 +475,11 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       broadcast("info", { message: "开始更新" });
       updater.update();
       break;
+    
+    // case "download cert":
+    //   downloadCert()
+    //   break;
+
     default:
       console.log("怎么了？");
   }
