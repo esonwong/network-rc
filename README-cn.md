@@ -117,7 +117,6 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 ## 链接
 
 - [作者 B 站主页](https://space.bilibili.com/96740361)
-- [爱发电支持 Network RC](https://afdian.net/@esonwong)
 
 ## Credits
 
