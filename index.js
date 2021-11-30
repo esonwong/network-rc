@@ -1,14 +1,5 @@
 const path = require("path");
 const { readFileSync, existsSync, mkdirSync } = require("fs");
-if (!existsSync("/var")) {
-  mkdirSync("/var");
-}
-if (!existsSync("/var/tts")) {
-  mkdirSync("/var/tts");
-}
-if (!existsSync("/var/audio")) {
-  mkdirSync("/var/audio");
-}
 
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const package = require("./package.json");
@@ -436,11 +427,8 @@ const controllerMessageHandle = (socket, action, payload, type) => {
     case "play audio":
       if (!check(socket)) break;
       const { path, stop } = payload;
-      if (stop) {
-        audioPlayer.stop();
-      }
       if (path) {
-        audioPlayer.push({ type: "mp3 file path", data: { path } });
+        audioPlayer.playFile(path);
       }
       break;
     case "change channel":
@@ -475,7 +463,7 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       broadcast("info", { message: "开始更新" });
       updater.update();
       break;
-    
+
     // case "download cert":
     //   downloadCert()
     //   break;
