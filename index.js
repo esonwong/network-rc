@@ -1,6 +1,5 @@
 const path = require("path");
-const { readFileSync, existsSync, mkdirSync } = require("fs");
-
+const { readFileSync } = require("fs");
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const package = require("./package.json");
 const md5 = require("md5");
@@ -82,7 +81,7 @@ const argv = require("yargs")
 
 const WebRTC = require("./lib/WebRTC");
 
-console.info(`版本: ${package.version}`);
+console.info(`当前 Network RC 版本: ${package.version}`);
 
 let {
   frp,
