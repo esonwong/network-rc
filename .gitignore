@@ -218,8 +218,6 @@ users.js
 network-rc.service
 users.yml
 lib/tts/*.pcm
-deploy.js
-deploy-beta.js
 
 assets/*.mp3
 .temp
