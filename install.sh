@@ -13,8 +13,10 @@ read -p "使用内置 frp 服务器(yes/no, 默认 yes):" defaultFrp
 defaultFrp=${defaultFrp:yes}
 
 
-read -p "frp remote_port(用于访问遥控车控制界面, 如: 9088, 默认随机):" frpPort
-defaultPort=$(rand 9010 9098)
+read -p "frp remote_port(用于访问遥控车控制界面, 如: 9020-9999 可用, 默认随机):" frpPort
+defaultPort=$(rand 9020 9999)
+
+
 frpPort=${frpPort:-$defaultPort}
 read -p "Network RC 密码(默认 networkrc):" password
 password=${password:-networkrc}
@@ -22,8 +24,8 @@ password=${password:-networkrc}
 if [ "$defaultFrp" = "no" ]; then
   read -p "frp 服务器地址(默认: gz.esonwong.com):" frpServer
   read -p "frp 服务器连接端口, server_port(默认9099):" frpServerPort
-  read -p "frp user:" frpServerToken
-  read -p "frp token:" frpServerUser
+  read -p "frp user:" frpServerUser
+  read -p "frp token:" frpServerToken
   read -p "https 证书 cert 路径:" -e tslCertPath
   read -p "https 证书 key 路径:" -e tslKeyPath
 fi
@@ -45,7 +47,7 @@ echo "frp 服务器地址: $frpServer"
 echo "frp 服务器连接端口, server_port: $frpServerPort"
 echo "frp user: $frpServerUser"
 echo "frp token: $frpServerToken"
-echo "frp remote_port(用于访问遥控车控制界面, 如: 9088): $frpPort" 
+echo "frp remote_port(用于访问遥控车控制界面): $frpPort" 
 echo "https 证书 cert 路径: $tslCertPath"
 echo "https 证书 key 路径: $tslKeyPath"
 echo ""
@@ -63,6 +65,15 @@ echo "$ok"
 
 
 if [ "$ok" = "ok" ]; then
+
+echo ""
+echo ""
+echo ""
+echo "安装依赖"
+sudo apt update
+sudo apt install ffmpeg pulseaudio -y
+pulseaudio -D
+
 
 echo ""
 echo ""
@@ -126,6 +137,8 @@ echo ""
 echo ""
 echo ""
 echo "安装 Network RC 完成"
+echo "Network RC 控制界面访问地址: https://$frpServer:$frpPort"
+echo "Network RC 控制界面访问密码: $password"
 
 else 
 exit 0

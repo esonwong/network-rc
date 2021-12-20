@@ -1,15 +1,5 @@
 const path = require("path");
-const { readFileSync, existsSync, mkdirSync } = require("fs");
-if (!existsSync("/var")) {
-  mkdirSync("/var");
-}
-if (!existsSync("/var/tts")) {
-  mkdirSync("/var/tts");
-}
-if (!existsSync("/var/audio")) {
-  mkdirSync("/var/audio");
-}
-
+const { readFileSync } = require("fs");
 const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
 const package = require("./package.json");
 const md5 = require("md5");
@@ -91,7 +81,7 @@ const argv = require("yargs")
 
 const WebRTC = require("./lib/WebRTC");
 
-console.info(`版本: ${package.version}`);
+console.info(`当前 Network RC 版本: ${package.version}`);
 
 let {
   frp,
@@ -436,11 +426,8 @@ const controllerMessageHandle = (socket, action, payload, type) => {
     case "play audio":
       if (!check(socket)) break;
       const { path, stop } = payload;
-      if (stop) {
-        audioPlayer.stop();
-      }
       if (path) {
-        audioPlayer.push({ type: "mp3 file path", data: { path } });
+        audioPlayer.playFile(path);
       }
       break;
     case "change channel":
@@ -475,7 +462,7 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       broadcast("info", { message: "开始更新" });
       updater.update();
       break;
-    
+
     // case "download cert":
     //   downloadCert()
     //   break;

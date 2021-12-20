@@ -6,7 +6,7 @@ import store from "store";
 import { AudioOutlined, AudioMutedOutlined } from "@ant-design/icons";
 import { useDebounceEffect } from "ahooks";
 
-export default function CarMicphone({ url, connectType, onMicphoneChange }) {
+export default function AudioPlayer({ url, connectType, onMicphoneChange }) {
   const audioEl = useRef(null);
   const [enabled, setEnabled] = useState(
     // window.MediaSource
@@ -33,7 +33,10 @@ export default function CarMicphone({ url, connectType, onMicphoneChange }) {
         let ws;
         let buffer = [];
         function sourceopen() {
-          var sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+          var sourceBuffer = mediaSource.addSourceBuffer(
+            // "audio/webm"
+            "audio/mpeg"
+          );
           setInterval(() => {
             if (buffer.length && !sourceBuffer.updating) {
               sourceBuffer.appendBuffer(buffer.shift());

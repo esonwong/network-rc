@@ -16,7 +16,12 @@ Network RC' feature:
 
 ## Dependence
 
-- ffmpeg: Please make sure ffmpeg is installed，This installation method is `sudo apt install ffmpeg -y`
+- ffmpeg: Please make sure ffmpeg is installed, `sudo apt install ffmpeg -y`
+- pulseaudio:
+  ```sh
+  sudo apt install pulseaudio -y
+  pulseaudio -D
+  ```
 - nodejs
 
 ## Install

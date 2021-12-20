@@ -46,15 +46,18 @@ export default function Microphone({ url }) {
 
           //6)
           mimeType: "audio/wav",
-          // sampleRate: 48000,
+          sampleRate: 16000,
           // used by StereoAudioRecorder
           // the range 22050 to 96000.
           // let us force 16khz recording:
-          // desiredSampRate: 16000,
+          desiredSampRate: 16000,
+
+          bufferSize: 256,
 
           // MediaStreamRecorder, StereoAudioRecorder, WebAssemblyRecorder
           // CanvasRecorder, GifRecorder, WhammyRecorder
           recorderType: StereoAudioRecorder,
+
           // Dialogflow / STT requires mono audio
           numberOfAudioChannels: 1,
         });
