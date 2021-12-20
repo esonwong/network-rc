@@ -1,6 +1,8 @@
 import React from "react";
 import { layout } from "../unit";
-import { Form, Slider } from "antd";
+import { Form, Slider, Select } from "antd";
+
+const { Option } = Select;
 
 export default function SoundSetting({
   changeVolume,
@@ -18,6 +20,12 @@ export default function SoundSetting({
           max={100}
           onAfterChange={changeVolume}
         />
+      </Form.Item>
+      <Form.Item label="输出设备" name="audioInterface">
+        <Select disabled>
+          <Option value="1">3.5mm</Option>
+          <Option value="2">HDMI</Option>
+        </Select>
       </Form.Item>
       <Form.Item label="麦克风灵敏度" name="micVolume">
         <Slider disabled min={0} max={100} onAfterChange={changeMicVolume} />
