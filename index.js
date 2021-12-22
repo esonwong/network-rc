@@ -425,7 +425,7 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       break;
     case "play audio":
       if (!check(socket)) break;
-      const { path, stop } = payload;
+      const { path } = payload;
       if (path) {
         audioPlayer.playFile(path);
       }
