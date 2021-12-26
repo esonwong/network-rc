@@ -674,12 +674,9 @@ const disconnect = (socket) => {
 const speak = async (socket, payload) => {
   if (!check(socket)) return;
   socket.sendData("tts playing", true);
-  if (socket.webrtc) socket.webrtc.closeAudioPlayer();
   if (payload.text) {
     await TTS(payload.text, payload);
   }
-  if (socket.webrtc) socket.webrtc.openAudioPlayer();
-  await sleep(800);
   socket.sendData("tts playing", false);
 };
 
