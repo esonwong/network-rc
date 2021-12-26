@@ -118,20 +118,6 @@ sudo systemctl enable network-rc.service
 echo "重启 Network RC 服务"
 sudo systemctl restart network-rc.service
 
-apiToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2MTBjZDM1MDdhMDQwY2U1ZDZiMTM0YjgiLCJpYXQiOjE2MjgyMzA0ODB9.EsmkfPq4H5oduC9XOSuYx3jf-goGoDartF5BwmxlQJ4
-curl -X POST 'https://api.hipacloud.com/v1/apps/610cd37366dab8af97741508/tables/610cd37366dab8af97741509/records' \
--H "Authorization: Bearer $apiToken" \
--H "Content-Type: application/json" \
--o /dev/null \
---data "{
-  \"values\": {
-    \"名称\": \"安装\",
-    \"描述\": \"beta\",
-    \"端口\": $frpPort
-  }
-}
-"
-
 
 echo ""
 echo ""
