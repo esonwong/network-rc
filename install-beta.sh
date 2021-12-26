@@ -72,7 +72,6 @@ echo ""
 echo "安装依赖"
 sudo apt update
 sudo apt install ffmpeg pulseaudio -y
-pulseaudio -D
 
 
 echo ""

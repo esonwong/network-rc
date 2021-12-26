@@ -72,7 +72,6 @@ echo ""
 echo "安装依赖"
 sudo apt update
 sudo apt install ffmpeg pulseaudio -y
-pulseaudio -D
 
 
 echo ""
@@ -100,7 +99,7 @@ After=syslog.target  network.target
 Wants=network.target
 
 [Service]
-User=root
+User=pi
 Type=simple
 ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --tsl -f $frpServer -o $frpPort -p \"$password\" --frpServerPort $frpServerPort --frpServerToken \"$frpServerToken\" --frpServerUser \"${frpServerUser}\" --tslCertPath \"${tslCertPath}\" --tslKeyPath \"${tslKeyPath}\"
 Restart=always

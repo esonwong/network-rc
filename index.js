@@ -83,6 +83,9 @@ const WebRTC = require("./lib/WebRTC");
 
 console.info(`当前 Network RC 版本: ${package.version}`);
 
+execSync("pulseaudio --start");
+console.info(`pulseaudio: 已启动`);
+
 let {
   frp,
   frpPort,
