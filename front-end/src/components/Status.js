@@ -148,7 +148,7 @@ export default function Status({
 
       {version && (
         <Form.Item>
-          <Tag>v{version}-beta</Tag>
+          <Tag>v{version}</Tag>
         </Form.Item>
       )}
     </Form>
