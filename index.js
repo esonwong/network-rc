@@ -83,7 +83,6 @@ const WebRTC = require("./lib/WebRTC");
 
 console.info(`当前 Network RC 版本: ${package.version}`);
 
-
 let {
   frp,
   frpPort,
@@ -682,10 +681,10 @@ const speak = async (socket, payload) => {
 };
 
 const piPowerOff = () => {
-  spawn("halt");
+  spawn("sudo halt");
 };
 const piReboot = () => {
-  spawn("reboot");
+  spawn("sudo reboot");
 };
 
 process.on("SIGINT", async function () {
