@@ -432,7 +432,11 @@ export default class App extends Component {
     this.sendData("tts", { text });
   };
 
-  playAudio = ({ path, stop = true } = {}) => {
+  playAudio = ({ path, text, stop = false } = {}) => {
+    if (text) {
+      this.tts(text);
+      return;
+    }
     this.sendData("play audio", { path, stop });
   };
 
