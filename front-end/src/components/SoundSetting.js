@@ -1,6 +1,16 @@
 import React from "react";
 import { layout } from "../unit";
-import { Form, Slider, Select, Input, InputNumber, Space, Switch } from "antd";
+import {
+  Form,
+  Slider,
+  Select,
+  Input,
+  InputNumber,
+  Space,
+  Switch,
+  Button,
+} from "antd";
+import { MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -11,9 +21,16 @@ export default function SoundSetting({
   micVolume,
   wsConnected,
   audioList,
+  saveServerConfig,
 }) {
+  const [form] = Form.useForm();
+
   return (
-    <Form {...layout} initialValues={{ volume, micVolume, audioList }}>
+    <Form
+      form={form}
+      {...layout}
+      initialValues={{ volume, micVolume, audioList }}
+    >
       <Form.Item label="喇叭音量" name="volume">
         <Slider
           disabled={!wsConnected}
@@ -68,13 +85,13 @@ export default function SoundSetting({
                     name={[name, "gamepadButton"]}
                     extra={
                       <span>
-                        🎮
+                        🎮 编号
                         <a
                           href="https://gamepad-tester.com"
                           target="_blank"
                           rel="noreferrer"
                         >
-                          按钮编号测试网页
+                          测试网页
                         </a>
                       </span>
                     }
@@ -84,13 +101,33 @@ export default function SoundSetting({
                   <Form.Item
                     {...restField}
                     name={[name, "showFooter"]}
-                    extra="在底部显示按钮"
+                    extra="在底部显示"
                     valuePropName="checked"
                   >
                     <Switch />
                   </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(name)} />
                 </Space>
               ))}
+              <Form.Item>
+                <Space>
+                  <Button
+                    icon={<PlusCircleOutlined />}
+                    type="dashed"
+                    onClick={() => add({ showFooter: false })}
+                  ></Button>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      saveServerConfig({
+                        audioList: form.getFieldValue("audioList"),
+                      });
+                    }}
+                  >
+                    保存
+                  </Button>
+                </Space>
+              </Form.Item>
             </>
           )}
         </Form.List>
