@@ -187,13 +187,13 @@ export default function Camera({
           <Button
             size="small"
             shape="circle"
-            icon={<BorderVerticleOutlined />}
+            icon={<BorderHorizontalOutlined />}
             onClick={changeXFlip}
           />
           <Button
             size="small"
             shape="circle"
-            icon={<BorderHorizontalOutlined />}
+            icon={<BorderVerticleOutlined />}
             onClick={changeYFlip}
           />
           <Select
