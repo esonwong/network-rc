@@ -13,10 +13,14 @@ export default function Keyboard({
   channelStatus = {},
 }) {
   const { audioList } = serverConfig;
+
+  // channel
   useKeyPress(
     () => true,
     ({ type: keyType, key }) => {
       console.log(key, keyType);
+
+      // channel
       channelList.forEach((channel) => {
         const { pin, keyboard = [], type } = channel;
         keyboard.forEach((pressedKey) => {
@@ -61,11 +65,16 @@ export default function Keyboard({
     }
   );
 
-  audioList.forEach(({ path, text, keyboard }) => {
-    useKeyPress(keyboard, () => {
-      playAudio({ path, text });
-    });
-  });
+  useKeyPress(
+    () => true,
+    ({ key }) => {
+      audioList.forEach(({ path, text, keyboard }) => {
+        if (keyboard.toLocaleLowerCase() === key.toLocaleLowerCase())
+          playAudio({ path, text });
+      });
+    },
+    { events: ["keydown"] }
+  );
 
   useKeyPress("enter", onEnter);
 
