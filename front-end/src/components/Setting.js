@@ -28,6 +28,7 @@ export default function Setting({
   micVolume,
   updateVersion,
   updateStaus,
+
   ...form
 }) {
   const clearCameraSetting = () => {
@@ -93,7 +94,11 @@ export default function Setting({
           onFinish={saveServerConfig}
           initialValues={serverConfig}
         >
-          <Form.Item label="分辨率最大宽度" name="cameraMaxWidth" extra="摄像头画面采集的最大宽度">
+          <Form.Item
+            label="分辨率最大宽度"
+            name="cameraMaxWidth"
+            extra="摄像头画面采集的最大宽度"
+          >
             <Slider disabled={!wsConnected} min={0} max={1024} />
           </Form.Item>
           <Form.Item {...tailLayout}>
@@ -114,9 +119,7 @@ export default function Setting({
           volume={volume}
           wsConnected={wsConnected}
           saveServerConfig={saveServerConfig}
-          sharedCode={serverConfig.sharedCode}
-          sharedDuration={serverConfig.sharedDuration}
-          sharedEndTime={serverConfig.sharedEndTime}
+          audioList={serverConfig.audioList}
         />
       </TabPane>
       <TabPane tab="分享设置" key="shared">

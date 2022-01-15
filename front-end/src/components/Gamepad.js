@@ -123,28 +123,11 @@ export default function Gamepad({
   useEventListener("gamepadpress", ({ detail: { index, value } }) => {
     if (value < 1) return;
 
-    audioList.forEach(({ path, GamepadButton, text }) => {
-      if (GamepadButton == index) {
+    audioList.forEach(({ path, gamepadButton, text }) => {
+      if (gamepadButton - 0 === index - 0) {
         playAudio({ path, text });
       }
     });
-
-    switch (index) {
-      case 12:
-        playAudio({ path: serverConfig.audio1 });
-        break;
-      case 14:
-        playAudio({ path: serverConfig.audio2 });
-        break;
-      case 15:
-        playAudio({ path: serverConfig.audio3 });
-        break;
-      case 13:
-        playAudio({ stop: true });
-        break;
-      default:
-        break;
-    }
   });
 
   useEffect(() => {

@@ -1,8 +1,13 @@
 import React, { Component } from "react";
 import store from "store";
 import { Form, Button, Switch, Slider, Popover, Input } from "antd";
-import { SlidersOutlined, DragOutlined } from "@ant-design/icons";
-import { SendOutlined, SoundOutlined } from "@ant-design/icons";
+import {
+  SlidersOutlined,
+  DragOutlined,
+  SendOutlined,
+  SoundOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 import Keybord from "./Keyboard";
 import Ai from "./Ai";
 import { Router } from "@reach/router";
@@ -89,6 +94,7 @@ export default class Controller extends Component {
     const speedChannel = channelList.find(
       ({ id }) => id === specialChannel.speed
     );
+    const { audioList = [] } = serverConfig;
 
     return (
       <div className="controller">
@@ -171,17 +177,7 @@ export default class Controller extends Component {
                 </Form.Item>
               </>
             )}
-            <Form.Item>
-              <Switch
-                checked={isShowButton}
-                onChange={(isShowButton) => {
-                  store.set("is-show-button", isShowButton);
-                  this.setState({ isShowButton });
-                }}
-                checkedChildren={<DragOutlined />}
-                unCheckedChildren={<DragOutlined />}
-              />
-            </Form.Item>
+
             <Form.Item>
               <Gamepad
                 changeChannel={changeChannel}
@@ -257,13 +253,56 @@ export default class Controller extends Component {
               </Popover>
             </Form.Item>
 
+            {audioList
+              .filter((i) => i.showFooter)
+              .map(({ path, text, name }) => (
+                <Form.Item key={name}>
+                  <Button
+                    shape="round"
+                    onClick={() => playAudio({ path, text })}
+                    icon={<SoundOutlined />}
+                  >
+                    {name}
+                  </Button>
+                </Form.Item>
+              ))}
+
             <Form.Item>
-              <Button
-                shape="round"
-                onClick={() => playAudio({ path: serverConfig.audio1 })}
+              <Popover
+                placement="topRight"
+                content={
+                  <>
+                    <Form.Item extra="显示触控 UI">
+                      <Switch
+                        checked={isShowButton}
+                        onChange={(isShowButton) => {
+                          store.set("is-show-button", isShowButton);
+                          this.setState({ isShowButton });
+                        }}
+                        checkedChildren={<DragOutlined />}
+                        unCheckedChildren={<DragOutlined />}
+                      />
+                    </Form.Item>
+                    {audioList
+                      .filter((i) => !i.showFooter)
+                      .map(({ path, text, name }) => (
+                        <Form.Item extra={`播放${name}`} key={name}>
+                          <Button
+                            shape="round"
+                            onClick={() => playAudio({ path, text })}
+                            icon={<SoundOutlined />}
+                          >
+                            {name}
+                          </Button>
+                        </Form.Item>
+                      ))}
+                  </>
+                }
               >
-                <SoundOutlined />
-              </Button>
+                <Button shape="round">
+                  <MoreOutlined />
+                </Button>
+              </Popover>
             </Form.Item>
             <Form.Item>
               <Microphone

@@ -261,13 +261,13 @@ export default function ChannelSetting({
     return (
       <Space align="baseline" split={<Divider type="vertical" />} wrap>
         {fields.map((field) => {
-          const method = form.getFieldValue([
-            "channelList",
-            index,
-            "gamepad",
-            field.name,
-            "method",
-          ]);
+          // const method = form.getFieldValue([
+          //   "channelList",
+          //   index,
+          //   "gamepad",
+          //   field.name,
+          //   "method",
+          // ]);
           return (
             <Space key={field.key} align="baseline">
               <Form.Item
