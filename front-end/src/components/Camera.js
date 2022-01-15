@@ -14,6 +14,8 @@ import {
   RotateRightOutlined,
   CompressOutlined,
   BorderOutlined,
+  BorderVerticleOutlined,
+  BorderHorizontalOutlined,
 } from "@ant-design/icons";
 
 const { Option } = Select;
@@ -37,6 +39,8 @@ export default function Camera({
   const [inputFormatIndex, setInputFormatIndex] = useState(undefined);
   const [fps, setFps] = useState(30);
   const [rotate, setRotate] = useState(0); // 旋转
+  const [xFlip, setXFlip] = useState(false); // x 翻转
+  const [yFlip, setYFlip] = useState(false); // y 翻转
 
   const player = useCreation(() => {
     const {
@@ -44,11 +48,15 @@ export default function Camera({
       enabled = true,
       inputFormatIndex = 0,
       fps = 30,
+      xFlip = false,
+      yFlip = false,
     } = store.get(storeName) || {};
     setEnabled(enabled);
     setRotate(rotate);
     setInputFormatIndex(inputFormatIndex);
     setFps(fps);
+    setXFlip(xFlip);
+    setYFlip(yFlip);
 
     const w = new Player({
       useWorker: true,
@@ -95,6 +103,14 @@ export default function Camera({
     } else {
       setRotate(rotate + 90);
     }
+  }
+
+  function changeXFlip() {
+    setXFlip(!xFlip);
+  }
+
+  function changeYFlip() {
+    setYFlip(!yFlip);
   }
 
   useEventListener(
@@ -168,6 +184,18 @@ export default function Camera({
             icon={<RotateRightOutlined />}
             onClick={changeRotate}
           />
+          <Button
+            size="small"
+            shape="circle"
+            icon={<BorderVerticleOutlined />}
+            onClick={changeXFlip}
+          />
+          <Button
+            size="small"
+            shape="circle"
+            icon={<BorderHorizontalOutlined />}
+            onClick={changeYFlip}
+          />
           <Select
             defaultValue={inputFormatIndex}
             onChange={setInputFormatIndex}
@@ -191,7 +219,9 @@ export default function Camera({
         className="camera-box"
         ref={boxEl}
         style={{
-          transform: `rotate(${rotate}deg)`,
+          transform: `rotate(${rotate}deg) scaleX(${xFlip ? -1 : 1}) scaleY(${
+            yFlip ? -1 : 1
+          })`,
         }}
       ></div>
     </div>
