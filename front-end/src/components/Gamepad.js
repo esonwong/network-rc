@@ -47,6 +47,7 @@ export default function Gamepad({
   playAudio,
   serverConfig,
 }) {
+  const { audioList } = serverConfig;
   const [enabled, setEnabled] = useState(false);
   const [gamepadList, setGamepadList] = useState([]);
 
@@ -121,6 +122,13 @@ export default function Gamepad({
 
   useEventListener("gamepadpress", ({ detail: { index, value } }) => {
     if (value < 1) return;
+
+    audioList.forEach(({ path, GamepadButton, text }) => {
+      if (GamepadButton == index) {
+        playAudio({ path, text });
+      }
+    });
+
     switch (index) {
       case 12:
         playAudio({ path: serverConfig.audio1 });

@@ -12,6 +12,7 @@ export default function Keyboard({
   channelList = [],
   channelStatus = {},
 }) {
+  const { audioList } = serverConfig;
   useKeyPress(
     () => true,
     ({ type: keyType, key }) => {
@@ -59,17 +60,11 @@ export default function Keyboard({
       events: ["keydown", "keyup"],
     }
   );
-  useKeyPress("1", () => {
-    playAudio({ path: serverConfig.audio1 });
-  });
-  useKeyPress("2", () => {
-    playAudio({ path: serverConfig.audio2 });
-  });
-  useKeyPress("3", () => {
-    playAudio({ path: serverConfig.audio3 });
-  });
-  useKeyPress("4", () => {
-    playAudio({ stop: true });
+
+  audioList.forEach(({ path, text, keyboard }) => {
+    useKeyPress(keyboard, () => {
+      playAudio({ path, text });
+    });
   });
 
   useKeyPress("enter", onEnter);
