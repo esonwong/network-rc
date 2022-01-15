@@ -12,7 +12,7 @@ body {
   user-select: none;
 }
 
-.app-status {
+.app-status.ant-form {
   padding: 0.5em;
   padding-bottom: 0;
   width: 100%;
@@ -28,8 +28,8 @@ body {
   margin-right: 10px;
 }
 
-.app-status .ant-form-item,
-.app-status .ant-space {
+.app-status.ant-form .ant-form-item,
+.app-status.ant-form .ant-space {
   z-index: 10;
 }
 
@@ -62,14 +62,21 @@ body {
   z-index: -1;
 }
 
-.controller-form {
+.controller-form.ant-form {
   padding: 0.5em;
   position: absolute;
   bottom: 0;
 }
 
-.controller-form .ant-form-item {
+.controller-form.ant-form .ant-form-item {
   z-index: 10;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 575px) {
+  .controller-form.ant-form .ant-form-item {
+    margin-bottom: 4px;
+  }
 }
 
 .direction-slider {
