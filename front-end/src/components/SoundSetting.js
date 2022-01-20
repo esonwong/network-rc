@@ -25,24 +25,45 @@ export default function SoundSetting({
 }) {
   const [form] = Form.useForm();
 
+  const { data: currentSpeaker } = useRequest("/api/speaker/current");
+  const { data: speakerList } = useRequest("/api/speaker/list");
+  const { run: setSpeaker } = useRequest({
+    url: "/api/speaker/current",
+    method: "PUT",
+  });
+
+  const { run: setSpeakerVolume } = useRequest({
+    url: "/api/speaker/volume",
+    method: "PUT",
+  });
+
   return (
     <Form
       form={form}
       {...layout}
-      initialValues={{ volume, micVolume, audioList }}
+      initialValues={{
+        volume: speakerList.find((speaker) => speaker.id === currentSpeaker.id)
+          .value,
+        micVolume,
+        audioList,
+        currentSpeakerName: currentSpeaker?.name,
+      }}
     >
       <Form.Item label="喇叭音量" name="volume">
         <Slider
           disabled={!wsConnected}
           min={0}
           max={100}
-          onAfterChange={changeVolume}
+          onAfterChange={setSpeakerVolume}
         />
       </Form.Item>
-      <Form.Item label="输出设备" name="audioInterface">
-        <Select disabled>
-          <Option value="1">3.5mm</Option>
-          <Option value="2">HDMI</Option>
+      <Form.Item label="输出设备" name="currentSpeakerName">
+        <Select onAfterChange={setSpeaker}>
+          {speakerList.map(({ name, displayName }) => (
+            <Option key={name} value={name}>
+              {displayName}
+            </Option>
+          ))}
         </Select>
       </Form.Item>
       <Form.Item label="麦克风灵敏度" name="micVolume">
