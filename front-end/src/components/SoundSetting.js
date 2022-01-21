@@ -11,8 +11,13 @@ import {
   Button,
 } from "antd";
 import { MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { useRequest } from "ahooks";
 
 const { Option } = Select;
+
+const {
+  location: { protocol },
+} = window;
 
 export default function SoundSetting({
   changeVolume,
@@ -22,46 +27,67 @@ export default function SoundSetting({
   wsConnected,
   audioList,
   saveServerConfig,
+  host,
 }) {
   const [form] = Form.useForm();
 
-  const { data: currentSpeaker } = useRequest("/api/speaker/current");
-  const { data: speakerList } = useRequest("/api/speaker/list");
-  const { run: setSpeaker } = useRequest({
-    url: "/api/speaker/current",
-    method: "PUT",
-  });
+  const { data: currentSpeaker = {} } = useRequest(
+    `${protocol}//${host}/api/speaker/current`
+  );
 
-  const { run: setSpeakerVolume } = useRequest({
-    url: "/api/speaker/volume",
-    method: "PUT",
-  });
+  const { data: speakerList = [] } = useRequest(
+    `${protocol}//${host}/api/speaker`
+  );
+
+  const { run: setSpeaker } = useRequest(
+    () => ({
+      url: `${protocol}//${host}/api/speaker/set`,
+      method: "PUT",
+      body: JSON.stringify({ name: form.getFieldValue("currentSpeakerName") }),
+    }),
+    {
+      manual: true,
+    }
+  );
+
+  const { run: setSpeakerVolume } = useRequest(
+    () => ({
+      url: `${protocol}//${host}/api/speaker/volume`,
+      method: "PUT",
+      body: JSON.stringify({
+        name: form.getFieldValue("currentSpeakerName"),
+        volume: form.getFieldValue("volume"),
+      }),
+    }),
+    {
+      manual: true,
+    }
+  );
 
   return (
     <Form
       form={form}
       {...layout}
       initialValues={{
-        volume: speakerList.find((speaker) => speaker.id === currentSpeaker.id)
-          .value,
         micVolume,
         audioList,
         currentSpeakerName: currentSpeaker?.name,
+        currentSpeakerVolume: currentSpeaker?.volume || 0,
       }}
     >
-      <Form.Item label="喇叭音量" name="volume">
+      <Form.Item label="喇叭音量" name="currentSpeakerVolume">
         <Slider
-          disabled={!wsConnected}
           min={0}
           max={100}
+          value={currentSpeaker?.volume}
           onAfterChange={setSpeakerVolume}
         />
       </Form.Item>
       <Form.Item label="输出设备" name="currentSpeakerName">
-        <Select onAfterChange={setSpeaker}>
-          {speakerList.map(({ name, displayName }) => (
+        <Select onChange={setSpeaker}>
+          {speakerList.map(({ name, displayName, volume }) => (
             <Option key={name} value={name}>
-              {displayName}
+              {`${displayName}(${volume}%)`}
             </Option>
           ))}
         </Select>

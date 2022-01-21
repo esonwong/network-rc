@@ -6,12 +6,12 @@ const md5 = require("md5");
 const { spawn, execSync } = require("child_process");
 const app = require("./lib/app");
 const TTS = require("./lib/tts");
-const Camera = require("./lib/Camera");
-const Audio = require("./lib/Audio");
-const audioPlayer = require("./lib/AudioPlayer");
+const CameraServer = require("./lib/CameraServer");
+const AudioServer = require("./lib/AudioServer");
+const audioPlayer = require("./lib/audioPlayer");
 const status = require("./lib/status");
 const updater = require("./lib/updater");
-const Microphone = require("./lib/Microphone");
+const MicrophoneServer = require("./lib/MicrophoneServer");
 const { sleep } = require("./lib/unit");
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
@@ -179,8 +179,8 @@ server.on("upgrade", (request, socket, head) => {
     });
 });
 
-new Microphone({ server });
-new Audio({ server });
+new MicrophoneServer({ server });
+new AudioServer({ server });
 
 const clients = new Set();
 
@@ -241,15 +241,6 @@ wss.on("connection", async function (socket) {
     else this.send(JSON.stringify({ action, payload }));
   };
 
-  const volume = await audioPlayer.getVolume();
-  const sendVolume = function (volume) {
-    console.log("音量同步", volume);
-    socket.sendData("volume", volume);
-  };
-
-  sendVolume(volume);
-  audioPlayer.on("volume", sendVolume);
-
   socket.sendData("light enabled", lightEnabled);
 
   socket.sendData("power enabled", powerEnabled);
@@ -257,7 +248,6 @@ wss.on("connection", async function (socket) {
   socket.sendData("version", package.version);
 
   socket.on("close", () => {
-    audioPlayer.removeListener("volume", sendVolume);
     disconnect(socket);
   });
 
@@ -418,10 +408,6 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       });
       sessionManager.clearSharedCodeSession();
       broadcastConfig();
-      break;
-    case "volume":
-      if (!check(socket)) break;
-      audioPlayer.volume(payload);
       break;
     case "play audio":
       if (!check(socket)) break;
@@ -697,6 +683,7 @@ process.on("SIGINT", async function () {
 server.on("error", (e) => {
   if (e.code === "EADDRINUSE") {
     console.log(` ${localPort} 端口被其他程序使用了...`);
+    process.exit(1);
   }
 });
 
@@ -719,10 +706,10 @@ function getIPAdress() {
 }
 
 (async () => {
-  cameraList = await Camera.getCameraList();
+  cameraList = await CameraServer.getCameraList();
   cameraList.forEach((item, index) => {
     const { dev, size, name, cardType } = item;
-    item.server = new Camera({
+    item.server = new CameraServer({
       server,
       devPath: dev,
       name,
