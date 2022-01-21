@@ -1,6 +1,6 @@
 {
   "name": "network-rc",
-  "version": "2.4.0",
+  "version": "2.4.3",
   "description": "网络控制遥控车",
   "main": "index.js",
   "repository": "git@github.com:itiwll/network-rc.git",
@@ -21,6 +21,7 @@
     "js-yaml": "^3.13.1",
     "md5": "^2.2.1",
     "moment": "^2.25.3",
+    "multer": "^1.4.4",
     "pulseaudio2": "^0.5.2",
     "qrcode": "^1.4.4",
     "rpio": "^2.1.1",
