@@ -120,6 +120,7 @@ export default function Setting({
           wsConnected={wsConnected}
           saveServerConfig={saveServerConfig}
           audioList={serverConfig.audioList}
+          host={form.host}
         />
       </TabPane>
       <TabPane tab="分享设置" key="shared">

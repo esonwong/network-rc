@@ -552,6 +552,7 @@ export default class App extends Component {
             disabled={!isLogin}
           />
         )}
+
         <Router className="app-page">
           <Setting
             path={`${pubilcUrl}/setting`}
