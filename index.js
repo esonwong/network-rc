@@ -412,16 +412,10 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       sessionManager.clearSharedCodeSession();
       broadcastConfig();
       break;
-    case "play audio stop":
-        if (!check(socket)) break;
-        audioPlayer.stopAll()
-        break;
     case "play audio":
       if (!check(socket)) break;
-      const { path } = payload;
-      if (path) {
-        audioPlayer.playFile(path);
-      }
+      const { path, stop } = payload;
+      audioPlayer.playFile(path, stop);
       break;
     case "change channel":
       if (!check(socket)) break;
