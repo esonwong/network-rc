@@ -1,7 +1,7 @@
 import React, { Component, createRef, Fragment } from "react";
 import store from "store";
 import { message, Modal, Button } from "antd";
-import "./App.css";
+import "./App.less";
 import { Router, navigate } from "@reach/router";
 import Controller from "./components/Controller";
 import Setting from "./components/Setting";
