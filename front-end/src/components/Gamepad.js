@@ -123,9 +123,21 @@ export default function Gamepad({
   useEventListener("gamepadpress", ({ detail: { index, value } }) => {
     if (value < 1) return;
 
-    audioList.forEach(({ path, gamepadButton, text }) => {
+    audioList.forEach(({ path, gamepadButton, text, type }) => {
       if (gamepadButton - 0 === index - 0) {
-        playAudio({ path, text });
+        switch (type) {
+          case "audio":
+            playAudio({ path });
+            break;
+          case "text":
+            playAudio({ text });
+            break;
+          case "stop":
+            playAudio({ stop: true });
+            break;
+          default:
+            break;
+        }
       }
     });
   });

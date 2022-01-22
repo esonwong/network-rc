@@ -68,9 +68,21 @@ export default function Keyboard({
   useKeyPress(
     () => true,
     ({ key }) => {
-      audioList.forEach(({ path, text, keyboard }) => {
+      audioList.forEach(({ path, text, keyboard, type }) => {
         if (keyboard.toLocaleLowerCase() === key.toLocaleLowerCase())
-          playAudio({ path, text });
+          switch (type) {
+            case "audio":
+              playAudio({ path });
+              break;
+            case "text":
+              playAudio({ text });
+              break;
+            case "stop":
+              playAudio({ stop: true });
+              break;
+            default:
+              break;
+          }
       });
     },
     { events: ["keydown"] }
