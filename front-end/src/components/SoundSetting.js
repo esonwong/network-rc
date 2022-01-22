@@ -20,11 +20,8 @@ const {
 } = window;
 
 export default function SoundSetting({
-  changeVolume,
   changeMicVolume,
-  volume,
   micVolume,
-  wsConnected,
   audioList,
   saveServerConfig,
   host,
@@ -32,7 +29,12 @@ export default function SoundSetting({
   const [form] = Form.useForm();
 
   const { data: currentSpeaker = {} } = useRequest(
-    `${protocol}//${host}/api/speaker/current`
+    `${protocol}//${host}/api/speaker/current`,
+    {
+      onSuccess: () => {
+        form.resetFields();
+      },
+    }
   );
 
   const { data: speakerList = [] } = useRequest(
@@ -43,6 +45,9 @@ export default function SoundSetting({
     () => ({
       url: `${protocol}//${host}/api/speaker/set`,
       method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ name: form.getFieldValue("currentSpeakerName") }),
     }),
     {
@@ -54,9 +59,12 @@ export default function SoundSetting({
     () => ({
       url: `${protocol}//${host}/api/speaker/volume`,
       method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         name: form.getFieldValue("currentSpeakerName"),
-        volume: form.getFieldValue("volume"),
+        volume: form.getFieldValue("currentSpeakerVolume"),
       }),
     }),
     {
@@ -105,20 +113,58 @@ export default function SoundSetting({
                   style={{ display: "flex", marginBottom: 8 }}
                   align="baseline"
                 >
-                  <Form.Item
-                    {...restField}
-                    name={[name, "name"]}
-                    rules={[{ required: true, message: "写个名字日后好相见" }]}
-                    style={{ width: 80 }}
-                  >
-                    <Input placeholder="写个名字日后好相见" />
+                  <Form.Item {...restField} name={[name, "type"]} extra="类型">
+                    <Select onChange={setSpeaker}>
+                      <Option key="audio" value="audio">
+                        文件
+                      </Option>
+                      <Option key="test" value="text">
+                        语音
+                      </Option>
+                      <Option key="stop" value="stop">
+                        停止
+                      </Option>
+                    </Select>
                   </Form.Item>
-                  <Form.Item {...restField} name={[name, "path"]}>
-                    <Input placeholder="文件在树莓派上完整路径" />
-                  </Form.Item>
-                  <Form.Item {...restField} name={[name, "text"]}>
-                    <Input placeholder="语音播报文本" allowClear />
-                  </Form.Item>
+
+                  {form.getFieldValue(["audioList", name, "type"]) ===
+                    "audio" && (
+                    <>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "name"]}
+                        rules={[
+                          { required: true, message: "写个名字日后好相见" },
+                        ]}
+                        style={{ width: 80 }}
+                        extra="名称"
+                      >
+                        <Input placeholder="写个名字日后好相见" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "path"]}
+                        extra="文件在树莓派上完整路径"
+                      >
+                        <Input placeholder="文件路径" />
+                        {/* <Upload /> */}
+                      </Form.Item>
+                    </>
+                  )}
+
+                  {form.getFieldValue(["audioList", name, "type"]) ===
+                    "text" && (
+                    <>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "text"]}
+                        extra="语音播报文本"
+                      >
+                        <Input placeholder="语音播报文本" allowClear />
+                      </Form.Item>
+                    </>
+                  )}
+
                   <Form.Item
                     {...restField}
                     name={[name, "keyboard"]}
@@ -153,7 +199,11 @@ export default function SoundSetting({
                   >
                     <Switch />
                   </Form.Item>
-                  <MinusCircleOutlined onClick={() => remove(name)} />
+                  <Button
+                    icon={<MinusCircleOutlined />}
+                    type="dashed"
+                    onClick={() => remove(name)}
+                  ></Button>
                 </Space>
               ))}
               <Form.Item>
