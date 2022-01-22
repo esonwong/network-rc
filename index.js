@@ -226,7 +226,7 @@ updater.on("error", () => {
 
 wss.on("connection", async function (socket) {
   console.log("客户端连接！");
-  TTS("已建立神经连接，同步率百分之九十五");
+  TTS("已建立神经连接");
   console.log("已经设置密码", password ? "是" : "否");
 
   clients.add(socket);
@@ -269,6 +269,7 @@ wss.on("connection", async function (socket) {
             socket,
             onClose() {
               delete socket.webrtc;
+              TTS("同步率 96%");
             },
             onDataChannelOpen(channel) {
               if (socket.webrtcChannel) {
@@ -312,7 +313,9 @@ wss.on("connection", async function (socket) {
             sendCandidate(candidate) {
               socket.sendData("webrtc candidate", candidate);
             },
-            onSuccess() {},
+            onSuccess() {
+              TTS("同步率 98%");
+            },
             onClose() {
               socket.sendData("webrtc close");
               broadcast("stream_active", false);
@@ -409,6 +412,10 @@ const controllerMessageHandle = (socket, action, payload, type) => {
       sessionManager.clearSharedCodeSession();
       broadcastConfig();
       break;
+    case "play audio stop":
+        if (!check(socket)) break;
+        audioPlayer.stopAll()
+        break;
     case "play audio":
       if (!check(socket)) break;
       const { path } = payload;
@@ -458,10 +465,15 @@ const controllerMessageHandle = (socket, action, payload, type) => {
   }
 };
 
+const afterLogin = () => {
+  TTS("同步率百分之96");
+};
+
 const login = (socket, { sessionId, token, sharedCode }) => {
   console.log("Login in");
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
+    afterLogin();
     return;
   }
 
@@ -476,6 +488,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
       status: 0,
       message: "OMG 你登录啦！",
     });
+    afterLogin();
     return;
   } else {
     if (!token && !sharedCode && !sessionId) {
@@ -495,12 +508,14 @@ const login = (socket, { sessionId, token, sharedCode }) => {
         status: 0,
         message: "OMG 你登录啦！",
       });
+      afterLogin();
       return;
     } else {
       socket.sendData("error", { status: 1, message: "哎呦喂，密码错了啊！" });
       return;
     }
   }
+
   if (status.config.sharedCode && sharedCode) {
     console.log("login shared code", sharedCode);
     if (status.config.sharedCode === sharedCode) {
@@ -521,6 +536,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
         status: 0,
         message: "🏎️ 分享链接登陆成功 ！",
       });
+      afterLogin();
 
       if (!sharedEndTimerId) {
         sharedEndTimerId = setTimeout(() => {
@@ -550,6 +566,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
       return;
     }
   }
+
   if (sessionId) {
     console.log("login with session", sessionId);
     const session = sessionManager.list.find((i) => i.id === sessionId);
@@ -570,6 +587,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
         status: 0,
         message: "已登录！",
       });
+      afterLogin();
       return;
     } else {
       socket.sendData("error", {
