@@ -20,7 +20,7 @@ Network RC' feature:
 - pulseaudio:
   ```sh
   sudo apt install pulseaudio -y
-  pulseaudio -D
+  sudo apt install libpulse-dev -y
   ```
 - nodejs
 
