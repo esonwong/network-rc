@@ -74,7 +74,8 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## ToDo
 
-- [ ] 延迟添加复位通道选项
+- [ ] 音频上传
+- [ ] 延迟暂停添加复位通道选项
 - [ ] 设置麦克风灵敏度
 - [x] 摄像头 bug
 - [x] 一键安装脚本
