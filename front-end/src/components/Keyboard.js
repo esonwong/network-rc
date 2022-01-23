@@ -2,7 +2,10 @@ import { useKeyPress } from "ahooks";
 import React, { useEffect } from "react";
 import { Popover, Button } from "antd";
 import localChannelStatus from "../lib/localChannelStatus";
+import { Descriptions, Typography } from "antd";
 let pressedKeyAndChannel = [];
+
+const { Text } = Typography;
 
 export default function Keyboard({
   playAudio,
@@ -12,7 +15,7 @@ export default function Keyboard({
   channelList = [],
   channelStatus = {},
 }) {
-  const { audioList } = serverConfig;
+  const { audioList = [] } = serverConfig;
 
   // channel
   useKeyPress(
@@ -114,14 +117,51 @@ export default function Keyboard({
     <Popover
       placement="topLeft"
       content={
-        <p>
-          发送文字转语音： 回车 <br />
-          发送语音: 空格 <br />
-          播放声音：1234 <br />
-        </p>
+        <Descriptions title="键盘" bordered>
+          <Descriptions.Item label="播放声音">
+            {audioList.map(({ name, keyboard, type }) => (
+              <p>
+                {type === "stop" ? (
+                  "停止播放"
+                ) : (
+                  <>
+                    播放 <Text code>{name}</Text>
+                  </>
+                )}
+                :<Text keyboard>{keyboard}</Text>
+              </p>
+            ))}
+          </Descriptions.Item>
+          {channelList.map(({ pin, name, keyboard, type }) => (
+            <Descriptions.Item
+              label={
+                <>
+                  {name} <Text code>通道:{pin}</Text>
+                </>
+              }
+            >
+              {keyboard.map(({ name: key, speed, autoReset }) => (
+                <p>
+                  {name}
+                  <Text code>
+                    {type}:{speed}
+                  </Text>
+                  :<Text keyboard>{key}</Text>
+                  {autoReset && <Text type="secondary">释放归位</Text>}
+                </p>
+              ))}
+            </Descriptions.Item>
+          ))}
+          <Descriptions.Item label="发送文字转语音">
+            <Text keyboard>回车</Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="发送语音">
+            <Text keyboard>空格</Text>
+          </Descriptions.Item>
+        </Descriptions>
       }
     >
-      <Button shape="round">键盘</Button>
+      <Button shape="round">⌨️</Button>
     </Popover>
   );
 }
