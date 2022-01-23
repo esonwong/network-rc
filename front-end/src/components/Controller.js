@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import store from "store";
-import { Form, Button, Switch, Slider, Popover, Input } from "antd";
+import { Form, Button, Switch, Slider, Popover, Input, Space } from "antd";
 import {
   SlidersOutlined,
   DragOutlined,
   SendOutlined,
   SoundOutlined,
   MoreOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import Keybord from "./Keyboard";
 import Ai from "./Ai";
@@ -271,7 +272,7 @@ export default class Controller extends Component {
               <Popover
                 placement="topRight"
                 content={
-                  <>
+                  <Space size={[16, 16]} wrap>
                     <Form.Item extra="显示触控 UI">
                       <Switch
                         checked={isShowButton}
@@ -285,18 +286,38 @@ export default class Controller extends Component {
                     </Form.Item>
                     {audioList
                       .filter((i) => !i.showFooter)
-                      .map(({ path, text, name }) => (
+                      .map(({ path, text, name, type }) => (
                         <Form.Item extra={`播放${name}`} key={name}>
-                          <Button
-                            shape="round"
-                            onClick={() => playAudio({ path, text })}
-                            icon={<SoundOutlined />}
-                          >
-                            {name}
-                          </Button>
+                          {type === "audio" && (
+                            <Button
+                              shape="round"
+                              onClick={() => playAudio({ path })}
+                              icon={<SoundOutlined />}
+                            >
+                              {name}
+                            </Button>
+                          )}
+                          {type === "text" && (
+                            <Button
+                              shape="round"
+                              onClick={() => playAudio({ text })}
+                              icon={<SoundOutlined />}
+                            >
+                              {name}
+                            </Button>
+                          )}
+                          {type === "stop" && (
+                            <Button
+                              shape="round"
+                              onClick={() => playAudio({ stop: true })}
+                              icon={<StopOutlined />}
+                            >
+                              {name}
+                            </Button>
+                          )}
                         </Form.Item>
                       ))}
-                  </>
+                  </Space>
                 }
               >
                 <Button shape="round">
