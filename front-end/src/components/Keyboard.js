@@ -132,7 +132,7 @@ export default function Keyboard({
               </p>
             ))}
           </Descriptions.Item>
-          {channelList.map(({ pin, name, keyboard, type }) => (
+          {channelList.map(({ pin, name, keyboard = [], type }) => (
             <Descriptions.Item
               label={
                 <>
