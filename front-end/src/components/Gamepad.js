@@ -124,6 +124,7 @@ export default function Gamepad({
     if (value < 1) return;
 
     audioList.forEach(({ path, gamepadButton, text, type }) => {
+      if (gamepadButton === undefined || gamepadButton === null) return;
       if (gamepadButton - 0 === index - 0) {
         switch (type) {
           case "audio":
