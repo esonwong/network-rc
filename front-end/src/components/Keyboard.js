@@ -71,7 +71,7 @@ export default function Keyboard({
   useKeyPress(
     () => true,
     ({ key }) => {
-      audioList.forEach(({ path, text, keyboard, type }) => {
+      audioList.forEach(({ path, text, keyboard = "", type }) => {
         if (keyboard.toLocaleLowerCase() === key.toLocaleLowerCase())
           switch (type) {
             case "audio":
@@ -116,10 +116,11 @@ export default function Keyboard({
   return (
     <Popover
       placement="topLeft"
+      overlayClassName="popovertip"
       content={
         <Descriptions title="键盘" bordered>
           <Descriptions.Item label="播放声音">
-            {audioList.map(({ name, keyboard, type }) => (
+            {audioList.map(({ name, keyboard = "", type }) => (
               <p>
                 {type === "stop" ? (
                   "停止播放"
