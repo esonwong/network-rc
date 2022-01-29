@@ -685,14 +685,8 @@ const piReboot = () => {
   spawn("sudo reboot");
 };
 
-process.on("SIGINT", async function () {
-  closeChannel();
-  console.log("Goodbye!");
-  await TTS("系统关闭");
-  process.exit();
-});
-
 server.on("error", (e) => {
+  console.error("错误", e);
   if (e.code === "EADDRINUSE") {
     console.log(` ${localPort} 端口被其他程序使用了...`);
     process.exit(1);
@@ -731,6 +725,8 @@ function getIPAdress() {
     });
   });
 
+  console.log(`开始启动服务，端口：${localPort}`);
+
   server.listen(localPort, async (e) => {
     console.log("server", server.address());
     await TTS(`系统初始化完成!`);
@@ -756,3 +752,11 @@ function getIPAdress() {
     }
   });
 })();
+
+process.on("SIGINT", async function () {
+  closeChannel();
+  console.log("Goodbye!");
+  await TTS("系统关闭");
+  audioPlayer.destroy();
+  process.exit();
+});
