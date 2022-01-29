@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo $NETWORK_RC_BETA
 
 
 function rand(){
@@ -77,9 +78,14 @@ sudo apt install ffmpeg pulseaudio -y
 echo ""
 echo ""
 echo ""
-echo "下载 Network RC"
 sudo rm -f /tmp/network-rc.tar.gz
-wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc.tar.gz
+if [ $NETWORK_RC_BETA -eq 1 ]; then
+  echo "下载 Network RC beta 版本"
+  wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz
+else
+  echo "下载 Network RC"
+  wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc.tar.gz
+fi
 
 echo ""
 echo ""
