@@ -20,7 +20,6 @@ const {
 } = window;
 
 export default function SoundSetting({
-  changeMicVolume,
   micVolume,
   audioList,
   saveServerConfig,
@@ -72,15 +71,58 @@ export default function SoundSetting({
     }
   );
 
+  const { data: currentMic = {} } = useRequest(
+    `${protocol}//${host}/api/mic/current`,
+    {
+      onSuccess: () => {
+        form.resetFields();
+      },
+    }
+  );
+
+  const { data: micList = [] } = useRequest(`${protocol}//${host}/api/mic`);
+
+  const { run: setMic } = useRequest(
+    () => ({
+      url: `${protocol}//${host}/api/mic/set`,
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: form.getFieldValue("currentMicName") }),
+    }),
+    {
+      manual: true,
+    }
+  );
+
+  const { run: setMicVolume } = useRequest(
+    () => ({
+      url: `${protocol}//${host}/api/mic/volume`,
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: form.getFieldValue("currentMicName"),
+        volume: form.getFieldValue("currentMicVolume"),
+      }),
+    }),
+    {
+      manual: true,
+    }
+  );
+
   return (
     <Form
       form={form}
       {...layout}
       initialValues={{
-        micVolume,
         audioList,
         currentSpeakerName: currentSpeaker?.name,
         currentSpeakerVolume: currentSpeaker?.volume || 0,
+        currentMicName: currentMic?.name,
+        currentMicVolume: currentMic?.volume || 0,
       }}
     >
       <Form.Item label="喇叭音量" name="currentSpeakerVolume">
@@ -100,8 +142,23 @@ export default function SoundSetting({
           ))}
         </Select>
       </Form.Item>
-      <Form.Item label="麦克风灵敏度" name="micVolume">
-        <Slider disabled min={0} max={100} onAfterChange={changeMicVolume} />
+
+      <Form.Item label="麦克风音量" name="currentMicVolume">
+        <Slider
+          min={0}
+          max={100}
+          value={micVolume}
+          onAfterChange={setMicVolume}
+        />
+      </Form.Item>
+      <Form.Item label="选择麦克风" name="currentMicName">
+        <Select onChange={setMic}>
+          {micList.map(({ name, displayName, volume }) => (
+            <Option key={name} value={name}>
+              {`${displayName}(${volume}%)`}
+            </Option>
+          ))}
+        </Select>
       </Form.Item>
       <Form.Item label="快捷播放">
         <Form.List name="audioList">
