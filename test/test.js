@@ -19,8 +19,17 @@ try {
       (Math.random() * 100).toFixed()
     );
     await audioPlayer.getSpeaker();
-
     await audioPlayer.setSpeaker(speaker.name);
+
+    await microphone.getMicphoneList();
+    const mic = await microphone.getMicphone();
+    await microphone.setMicphoneVolume(
+      mic.name,
+      (Math.random() * 100).toFixed()
+    );
+    await microphone.getMicphone();
+    await microphone.setMicphone(mic.name);
+
     process.exit();
   })();
 } catch (e) {
