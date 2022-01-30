@@ -1,9 +1,9 @@
 const path = require("path");
-const { readFileSync } = require("fs");
-const { WebSocketServer, secureProtocol } = require("@clusterws/cws");
+const { WebSocketServer } = require("@clusterws/cws");
 const package = require("./package.json");
 const md5 = require("md5");
-const { spawn, execSync } = require("child_process");
+const { spawn } = require("child_process");
+const { defaultFrpc, configFrpc } = require("./lib/frpc");
 const app = require("./lib/app");
 const TTS = require("./lib/tts");
 const CameraServer = require("./lib/CameraServer");
@@ -22,10 +22,10 @@ const argv = require("yargs")
       describe: "密码",
       type: "string",
     },
-    f: {
-      alias: "frp",
-      describe: "是否开启网络穿透",
-      type: "boolean",
+    n: {
+      alias: "subDomain",
+      describe: "默认 frp 服务的子域名",
+      type: "string",
     },
     t: {
       alias: "tts",
@@ -33,47 +33,16 @@ const argv = require("yargs")
       type: "boolean",
       default: true,
     },
-    tsl: {
-      describe: "开启 HTTPS",
-      type: "boolean",
-      default: false,
-    },
-    o: {
-      alias: "frpPort",
-      describe: "frp 远程端口, 用于访问遥控车控制界面, remote_port",
-      type: "number",
-    },
-    frpServer: {
-      default: "gz.esonwong.com",
-      describe: "frp 服务器, server_addr",
-      type: "string",
-    },
-    frpServerPort: {
-      default: 9099,
-      describe: "frp 服务器连接端口, server_port",
-      type: "number",
-    },
-    frpServerUser: {
-      default: "",
-      describe: "frp 服务器认证 user, user",
-      type: "string",
-    },
-    frpServerToken: {
-      default: "eson's network-rc",
-      describe: "frp 服务器认证 token, token",
-      type: "string",
-    },
-    tslCertPath: {
-      type: "string",
-    },
-    tslKeyPath: {
-      type: "string",
-    },
     lp: {
       alias: "localPort",
       default: 8080,
       describe: "local server port",
       type: "number",
+    },
+    f: {
+      alias: "frpConfig",
+      describe: "frp 配置文件路径",
+      type: "string",
     },
   })
   .env("NETWORK_RC")
@@ -83,25 +52,9 @@ const WebRTC = require("./lib/WebRTC");
 
 console.info(`当前 Network RC 版本: ${package.version}`);
 
-let {
-  frp,
-  frpPort,
-  frpServer,
-  frpServerPort,
-  frpServerToken,
-  frpServerUser,
-  tts,
-  tsl,
-  tslCertPath,
-  tslKeyPath,
-  localPort,
-} = argv;
-let { password } = argv;
-
 status.argv = argv;
-status.enabledHttps = tsl;
 
-process.env.TTS = tts;
+const { subDomain, frpConfig, localPort, password } = argv;
 
 const sessionManager = require("./lib/session");
 
@@ -122,38 +75,10 @@ const {
 
 let sharedEndTimerId;
 
-const { createServer } = require(`http${status.enabledHttps ? "s" : ""}`);
-
-console.log("tslKeyPath", tslKeyPath);
-
-if (status.enabledHttps && frpServer === "gz.esonwong.com") {
-  // downloadCert()
-}
-
-function downloadCert() {
-  tslKeyPath = path.resolve(__dirname, `./lib/frpc/${frpServer}/privkey.pem`);
-  tslCertPath = path.resolve(
-    __dirname,
-    `./lib/frpc/${frpServer}/fullchain.pem`
-  );
-  console.info(`获取 https 证书:${frpServer}`);
-  execSync(
-    `wget https://download.esonwong.com/network-rc/cert/${frpServer}/privkey.pem -O ${tslKeyPath}`
-  );
-  execSync(
-    `wget https://download.esonwong.com/network-rc/cert/${frpServer}/fullchain.pem -O ${tslCertPath}`
-  );
-}
+const { createServer } = require(`http`);
 
 let cameraList = [];
-const server = createServer(
-  {
-    secureProtocol: status.enabledHttps ? secureProtocol : undefined,
-    key: status.enabledHttps ? readFileSync(tslKeyPath) : undefined,
-    cert: status.enabledHttps ? readFileSync(tslCertPath) : undefined,
-  },
-  app
-);
+const server = createServer({}, app);
 
 let powerEnabled = false,
   lightEnabled = false;
@@ -730,25 +655,14 @@ function getIPAdress() {
   server.listen(localPort, async (e) => {
     console.log("server", server.address());
     await TTS(`系统初始化完成!`);
-    console.log(
-      `本地访问地址 http${
-        status.enabledHttps ? "s" : ""
-      }://${getIPAdress()}:${localPort}`
-    );
+    console.log(`本地访问地址 http://${getIPAdress()}:${localPort}`);
 
-    if (frp) {
-      if (!frpPort) {
-        console.error("启用网络穿透请设置远程端口！ 例如：-f -o 9049");
-        process.exit();
-      } else {
-        process.env.FRP_REMOTE_PORT = frpPort;
-        process.env.FRP_SERVER = frpServer;
-        process.env.FRP_SERVER_PORT = frpServerPort;
-        process.env.FRP_SERVER_TOKEN = frpServerToken;
-        process.env.FRP_SERVER_USER = frpServerUser;
-        process.env.LOCAL_PORT = localPort;
-        require("./lib/frp.js")({ enabledHttps: status.enabledHttps });
-      }
+    if (subDomain) {
+      defaultFrpc(subDomain);
+    }
+
+    if (frpConfig) {
+      configFrpc(frpConfig);
     }
   });
 })();
@@ -756,7 +670,6 @@ function getIPAdress() {
 process.on("SIGINT", async function () {
   await TTS("系统关闭");
   audioPlayer.destroy();
-  closeChannel();
   console.log("Goodbye!");
   process.exit();
 });
