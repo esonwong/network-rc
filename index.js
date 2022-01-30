@@ -754,9 +754,9 @@ function getIPAdress() {
 })();
 
 process.on("SIGINT", async function () {
-  closeChannel();
-  console.log("Goodbye!");
   await TTS("系统关闭");
   audioPlayer.destroy();
+  closeChannel();
+  console.log("Goodbye!");
   process.exit();
 });
