@@ -7,7 +7,7 @@
   "author": "Eson Wong <itiwll@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "nodemon --inspect index.js --lp=8888",
+    "start": "nodemon --inspect index.js --lp=8888 --subDomain=dev",
     "server": "node index.js",
     "build": "cd front-end && yarn && yarn build && cd .. && rm -fr network-rc dist && mkdir network-rc && cp index.js network-rc/ && cp package.json network-rc/ && cp -r lib network-rc/ && cp -r assets network-rc/ && cp -r node_modules network-rc/ && mkdir network-rc/front-end && cp -r front-end/build network-rc/front-end/ && cp /usr/bin/node network-rc/ && mkdir dist && tar -zcvf dist/network-rc.tar.gz network-rc && rm -rf network-rc"
   },
