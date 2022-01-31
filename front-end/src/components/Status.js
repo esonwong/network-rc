@@ -130,7 +130,7 @@ export default function Status({
             icon={locked ? <StopOutlined /> : undefined}
             color={locked || delay > 80 ? "red" : "green"}
           >
-            {connectType}:{delay.toFixed(0)}
+            {connectType === "webrtc" ? "直连" : "中转"}:{delay.toFixed(0)}
           </Tag>
         </Form.Item>
       )}
