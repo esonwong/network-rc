@@ -132,6 +132,11 @@ export default class App extends Component {
       clearInterval(pingTime);
       clearInterval(heartbeatTime);
       this.setState({ wsConnected: false });
+
+      setTimeout(() => {
+        message.error("断开连接，正在重连！");
+        this.connect();
+      }, 2000);
     });
   };
 
