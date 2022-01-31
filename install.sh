@@ -60,7 +60,7 @@ if [ "$ok" = "ok" ]; then
   echo ""
   echo ""
   sudo rm -f /tmp/network-rc.tar.gz
-  if [ $NETWORK_RC_BETA -eq 1 ]; then
+  if [ $NETWORK_RC_BETA = 1 ]; then
     echo "下载 Network RC beta 版本"
     wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz
   else
