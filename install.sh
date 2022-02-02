@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $NETWORK_RC_BETA = 1 ]; then
+if test "$NETWORK_RC_BETA" = "1"; then
   echo '安装 Beta 版'
 else
   echo '开始安装 Network RC'
@@ -30,9 +30,9 @@ echo ""
 echo ""
 echo "你的设置如下"
 echo "----------------------------------------"
-if $defaultFrp; then
+if [ $defaultFrp = true ]; then
   echo "域名前缀: $subDomain"
-  echo "Network RC 控制界面访问地址: https://${subDomain}.nrc.esonwong.com:9000"
+  echo "Network RC 控制界面访问地址: https://${subDomain}.nrc.esonwong.com:9000";
 else
   echo "使用自定义 frp 服务器"
   echo "frpc 配置文件地址: $frpcConfig"
@@ -60,7 +60,7 @@ if [ "$ok" = "ok" ]; then
   echo ""
   echo ""
   sudo rm -f /tmp/network-rc.tar.gz
-  if [ $NETWORK_RC_BETA = 1 ]; then
+  if test "$NETWORK_RC_BETA" = "1"; then
     echo "下载 Network RC beta 版本"
     wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz
   else
@@ -109,7 +109,7 @@ if [ "$ok" = "ok" ]; then
   echo ""
   echo ""
   echo "安装完成"
-  if $defaultFrp; then
+  if [ $defaultFrp = true ]; then
     echo "域名前缀: $subDomain"
     echo "Network RC 控制界面访问地址: https://${subDomain}.nrc.esonwong.com:9000"
   else
