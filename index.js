@@ -1,3 +1,4 @@
+require("./lib/logger");
 const path = require("path");
 const { WebSocketServer } = require("@clusterws/cws");
 const package = require("./package.json");
@@ -13,6 +14,7 @@ const status = require("./lib/status");
 const updater = require("./lib/updater");
 const MicrophoneServer = require("./lib/MicrophoneServer");
 const { sleep } = require("./lib/unit");
+
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
   .example("$0 -f -o 9058", "开启网络穿透")
@@ -89,12 +91,12 @@ const wss = new WebSocketServer(
     path: "/control",
   },
   () => {
-    console.log("控制 websocket 服务已启动");
+    logger.info("控制 websocket 服务已启动");
   }
 );
 
 wss.on("error", (err) => {
-  console.error("Websocket 服务器错误", err);
+  logger.error(`Websocket 服务器错误${err.message}`);
 });
 
 server.on("upgrade", (request, socket, head) => {
@@ -150,9 +152,9 @@ updater.on("error", () => {
 });
 
 wss.on("connection", async function (socket) {
-  console.log("客户端连接！");
+  logger.info("客户端连接！");
   TTS("已建立神经连接");
-  console.log("已经设置密码", password ? "是" : "否");
+  logger.info("已经设置密码", password ? "是" : "否");
 
   clients.add(socket);
 
@@ -177,13 +179,13 @@ wss.on("connection", async function (socket) {
   });
 
   socket.on("error", (err) => {
-    console.log("Received error: ", err);
+    logger.info("Received error: ", err);
   });
 
   socket.on("message", (m) => {
     const { action, payload } = JSON.parse(m);
 
-    // console.log("Websocket recived message", action, payload);
+    // logger.info("Websocket recived message", action, payload);
 
     if (action.indexOf("webrtc") !== -1) {
       if (!check(socket)) return;
@@ -225,7 +227,7 @@ wss.on("connection", async function (socket) {
                 onMessage(data) {
                   const { action, payload } = JSON.parse(data);
                   // if (action !== "heartbeat") {
-                  //   console.log("RTC message", action, payload);
+                  //   logger.info("RTC message", action, payload);
                   // }
                   controllerMessageHandle(socket, action, payload, "rtc");
                 },
@@ -264,7 +266,7 @@ wss.on("connection", async function (socket) {
           socket.webrtc && socket.webrtc.close();
           break;
         default:
-          console.log("怎么了？ webrtc", type);
+          logger.info("怎么了？ webrtc", type);
           break;
       }
       return;
@@ -380,7 +382,7 @@ const controllerMessageHandle = (socket, action, payload, type) => {
     //   break;
 
     default:
-      console.log("怎么了？");
+      logger.info("怎么了？");
   }
 };
 
@@ -389,7 +391,7 @@ const afterLogin = () => {
 };
 
 const login = (socket, { sessionId, token, sharedCode }) => {
-  console.log("Login in");
+  logger.info("Login in");
   if (socket.islogin) {
     socket.sendData("login", { status: 1, message: "已登陆！" });
     afterLogin();
@@ -436,7 +438,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
   }
 
   if (status.config.sharedCode && sharedCode) {
-    console.log("login shared code", sharedCode);
+    logger.info("login shared code", sharedCode);
     if (status.config.sharedCode === sharedCode) {
       socket.isLogin = true;
       const userType = "guest";
@@ -487,7 +489,7 @@ const login = (socket, { sessionId, token, sharedCode }) => {
   }
 
   if (sessionId) {
-    console.log("login with session", sessionId);
+    logger.info("login with session", sessionId);
     const session = sessionManager.list.find((i) => i.id === sessionId);
     if (session) {
       const { noPassword } = session;
@@ -532,7 +534,7 @@ const makeHeartbeatTimer = (socket) => {
   if (socket.autoLocking) {
     /** 刹车锁定后 正常心跳统计， 大于 10 就解锁 */
     socket.unlockHearbertCount++;
-    console.log("socket.unlockHearbertCount", socket.unlockHearbertCount);
+    logger.info("socket.unlockHearbertCount", socket.unlockHearbertCount);
     if (socket.unlockHearbertCount > 10) {
       socket.autoLocking = false;
       socket.unlockHearbertCount = 0;
@@ -542,7 +544,7 @@ const makeHeartbeatTimer = (socket) => {
   }
   socket.heartbeatTimeoutId = setTimeout(async () => {
     socket.unlockHearbertCount = 0;
-    console.log("socket.unlockHearbertCount", socket.unlockHearbertCount);
+    logger.info("socket.unlockHearbertCount", socket.unlockHearbertCount);
     if (socket.autoLocking === true) return;
     socket.autoLocking = true;
     console.warn("网络连接不稳定，自动刹车");
@@ -566,7 +568,7 @@ const check = (socket) => {
   if (socket.isLogin) {
     return true;
   } else {
-    console.error("未登录！");
+    logger.error("未登录！");
     socket.sendData("error", {
       status: 1,
       type: "auth error",
@@ -577,7 +579,7 @@ const check = (socket) => {
 };
 
 const disconnect = (socket) => {
-  console.log("客户端断开连接！");
+  logger.info("客户端断开连接！");
   TTS("神经连接已断开");
   if (socket.webrtc) socket.webrtc.close();
   clearTimeout(socket.timeout);
@@ -586,7 +588,7 @@ const disconnect = (socket) => {
   clients.forEach(({ isLogin }) => {
     if (isLogin) num++;
   });
-  console.log("已连接客户端", num);
+  logger.info("已连接客户端", num);
   if (num < 1) {
     closeChannel();
     lightEnabled = false;
@@ -611,9 +613,9 @@ const piReboot = () => {
 };
 
 server.on("error", (e) => {
-  console.error("错误", e);
+  logger.error(`Server error: ${e.message}`);
   if (e.code === "EADDRINUSE") {
-    console.log(` ${localPort} 端口被其他程序使用了...`);
+    logger.info(` ${localPort} 端口被其他程序使用了...`);
     process.exit(1);
   }
 });
@@ -650,12 +652,12 @@ function getIPAdress() {
     });
   });
 
-  console.log(`开始启动服务，端口：${localPort}`);
+  logger.info(`开始启动服务，端口：${localPort}`);
 
   server.listen(localPort, async (e) => {
-    console.log("server", server.address());
+    logger.info("server", server.address());
     await TTS(`系统初始化完成!`);
-    console.log(`本地访问地址 http://${getIPAdress()}:${localPort}`);
+    logger.info(`本地访问地址 http://${getIPAdress()}:${localPort}`);
 
     if (subDomain) {
       defaultFrpc(subDomain);
@@ -670,6 +672,6 @@ function getIPAdress() {
 process.on("SIGINT", async function () {
   await TTS("系统关闭");
   audioPlayer.destroy();
-  console.log("Goodbye!");
+  logger.info("Goodbye!");
   process.exit();
 });
