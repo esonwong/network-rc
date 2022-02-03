@@ -43,7 +43,7 @@ echo ""
 echo ""
 
 
-read -p "输入 ok 继续， 输入其他结束:" ok
+read -p "输入 ok 继续安装， 输入其他结束:" ok
 echo "$ok"
 
 
