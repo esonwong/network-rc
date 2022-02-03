@@ -194,7 +194,7 @@ wss.on("connection", async function (socket) {
             socket,
             onClose() {
               delete socket.webrtc;
-              TTS("同步率 96%");
+              TTS("同步率 96%", { stop: true });
             },
             onDataChannelOpen(channel) {
               if (socket.webrtcChannel) {
@@ -239,7 +239,7 @@ wss.on("connection", async function (socket) {
               socket.sendData("webrtc candidate", candidate);
             },
             onSuccess() {
-              TTS("同步率 98%");
+              TTS("同步率 98%", { stop: true });
             },
             onClose() {
               socket.sendData("webrtc close");
@@ -385,7 +385,7 @@ const controllerMessageHandle = (socket, action, payload, type) => {
 };
 
 const afterLogin = () => {
-  TTS("同步率百分之96");
+  TTS("同步率 96%", { stop: true });
 };
 
 const login = (socket, { sessionId, token, sharedCode }) => {
