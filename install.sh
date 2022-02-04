@@ -17,8 +17,9 @@ if [ "$defaultFrp" = "yes" ] || [ "$defaultFrp" = "y"  ]; then
   read -p "域名前缀(默认 $defaultSubDomain):" subDomain
   subDomain=${subDomain:-$defaultSubDomain}
 else
-  frpcConfig="/home/pi/frpc.ini"
-  read -p "frpc 配置文件地址(默认 $frpcConfig):" frpcConfig
+  defaultFrpcConfig="/home/pi/frpc.ini"
+  read -p "frpc 配置文件地址(默认 $defaultFrpcConfig):" frpcConfig
+  frpcConfig=${frpcConfig:-$defaultFrpcConfig}
 fi
 
 read -p "Network RC 密码(默认 networkrc):" password
