@@ -54,6 +54,7 @@ export default class App extends Component {
       updateStaus: undefined,
       webrtcChannel: [],
       locaked: false,
+      enabledControllerMicphone: true,
     };
 
     const { changeLight, changePower } = this;
@@ -342,6 +343,13 @@ export default class App extends Component {
     this.webrtc?.playAudio?.(playing);
   };
 
+  changeControllerMicphone = () => {
+    this.setState({
+      enabledControllerMicphone: !this.state.enabledControllerMicphone,
+    });
+    this.webrtc?.changeMicrophone();
+  };
+
   disconnect = (e) => {
     e && e.preventDefault();
     this.setState({ wsConnected: false });
@@ -478,7 +486,6 @@ export default class App extends Component {
 
   render() {
     const {
-      connect,
       disconnect,
       controller,
       changeChannel,
@@ -518,10 +525,12 @@ export default class App extends Component {
         connectType,
         webrtcChannel,
         locked,
+        enabledControllerMicphone,
       },
       tts,
       playAudio,
       playCarMicphonne,
+      changeControllerMicphone,
     } = this;
 
     return (
@@ -531,7 +540,8 @@ export default class App extends Component {
             channelStatus={gpioChannelStatus}
             delay={delay}
             connectType={connectType}
-            onMicphoneChange={playCarMicphonne}
+            onCarMicphoneChange={playCarMicphonne}
+            onControllerMicphoneChange={changeControllerMicphone}
             locked={locked}
             {...{
               version,
@@ -543,8 +553,6 @@ export default class App extends Component {
               changePower,
               changeLight,
               piPowerOff,
-              connect,
-              disconnect,
               setting,
               isLogin,
               session,
@@ -553,6 +561,7 @@ export default class App extends Component {
               changeChannel,
               serverConfig,
               updateStaus,
+              enabledControllerMicphone,
             }}
             disabled={!isLogin}
           />
@@ -583,6 +592,7 @@ export default class App extends Component {
           {isLogin ? (
             <>
               <Controller
+                connectType={connectType}
                 session={session}
                 path={`${pubilcUrl}/controller`}
                 controller={controller}

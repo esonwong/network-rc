@@ -120,8 +120,8 @@ export default function Keyboard({
       content={
         <Descriptions title="键盘" bordered>
           <Descriptions.Item label="播放声音">
-            {audioList.map(({ name, keyboard = "", type }) => (
-              <p>
+            {audioList.map(({ name, keyboard = "", type }, index) => (
+              <p key={`${name}-${index}`}>
                 {type === "stop" ? (
                   "停止播放"
                 ) : (
@@ -135,6 +135,7 @@ export default function Keyboard({
           </Descriptions.Item>
           {channelList.map(({ pin, name, keyboard = [], type }) => (
             <Descriptions.Item
+              key={pin}
               label={
                 <>
                   {name} <Text code>通道:{pin}</Text>
@@ -142,7 +143,7 @@ export default function Keyboard({
               }
             >
               {keyboard.map(({ name: key, speed, autoReset }) => (
-                <p>
+                <p key={key}>
                   {name}
                   <Text code>
                     {type}:{speed}
