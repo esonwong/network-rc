@@ -122,7 +122,10 @@ export default class WebRTC {
         audio: true,
         video: false,
       });
-      this.localStream.getTracks().forEach((track) => rc.addTrack(track));
+      this.localStream.getTracks().forEach((track) => {
+        track.enabled = this.micphoneEanbled;
+        rc.addTrack(track);
+      });
     } catch (error) {
       this.onError?.(
         new Error(
@@ -145,9 +148,10 @@ export default class WebRTC {
   }
 
   playAudio(playing) {
-    this.audioEl.srcObject
-      .getTracks()
-      .forEach((track) => (track.enabled = playing));
+    playing ? this.audioEl.play() : this.audioEl.pause();
+    // this.audioEl.srcObject
+    //   .getTracks()
+    //   .forEach((track) => (track.enabled = playing));
   }
 
   changeMicrophone() {

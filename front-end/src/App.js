@@ -37,7 +37,6 @@ export default class App extends Component {
       canvasRef: undefined,
       isAiControlling: false,
       isFullscreen: false,
-      localMicrphoneEnabled: true,
       videoSize: 50,
       delay: undefined,
       connectType: "ws",
@@ -54,7 +53,7 @@ export default class App extends Component {
       updateStaus: undefined,
       webrtcChannel: [],
       locaked: false,
-      enabledControllerMicphone: true,
+      enabledControllerMicphone: false,
     };
 
     const { changeLight, changePower } = this;
@@ -136,8 +135,9 @@ export default class App extends Component {
 
       setTimeout(() => {
         message.error("断开连接，正在重连！");
+        debugger;
         this.connect();
-      }, 2000);
+      }, 3000);
     });
   };
 
@@ -310,7 +310,7 @@ export default class App extends Component {
     this.webrtc?.close?.();
     if (!this.state.isLogin) return;
     this.webrtc = new WebRTC({
-      micphoneEanbled: this.state.localMicrphoneEnabled,
+      micphoneEanbled: this.state.enabledControllerMicphone,
       socket: this.socket,
       onClose() {
         delete this.webrtc;
@@ -513,7 +513,6 @@ export default class App extends Component {
         lightEnabled,
         delay,
         powerEnabled,
-        localMicrphoneEnabled,
         isLogin,
         ttsPlaying,
         volume,
@@ -549,7 +548,6 @@ export default class App extends Component {
               isFullscreen,
               lightEnabled,
               powerEnabled,
-              localMicrphoneEnabled,
               changePower,
               changeLight,
               piPowerOff,
