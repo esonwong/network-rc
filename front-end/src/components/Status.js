@@ -4,21 +4,23 @@ import { Link } from "@reach/router";
 import {
   SettingOutlined,
   FullscreenOutlined,
-  ApiOutlined,
+  LinkOutlined,
   FullscreenExitOutlined,
   PoweroffOutlined,
   FormOutlined,
   HourglassOutlined,
   StopOutlined,
+  DisconnectOutlined,
+  DesktopOutlined,
+  AudioOutlined,
+  AudioMutedOutlined,
 } from "@ant-design/icons";
 import AudioPlayer from "./AudioPlayer";
 
 export default function Status({
   piPowerOff,
   wsConnected,
-  connect,
-  disconnect,
-  delay,
+  delay = 0,
   isFullscreen,
   setting,
   isLogin,
@@ -29,9 +31,12 @@ export default function Status({
   serverConfig,
   version,
   connectType,
-  onMicphoneChange,
+  onCarMicphoneChange,
   locked,
+  onControllerMicphoneChange = () => {},
+  enabledControllerMicphone = true,
 }) {
+  const isWebRTC = connectType === "webrtc";
   const { sharedEndTime } = serverConfig;
   return (
     <Form layout="inline" className="app-status" size="small">
@@ -42,15 +47,21 @@ export default function Status({
         <span>N RC</span>
       </Form.Item>
       <Form.Item>
-        <Switch
-          checked={wsConnected}
-          onChange={(v) => {
-            if (v) connect();
-            else disconnect();
-          }}
-          unCheckedChildren={<ApiOutlined />}
-          checkedChildren={<ApiOutlined />}
-        />
+        <Tag
+          icon={
+            locked ? (
+              <StopOutlined />
+            ) : wsConnected ? (
+              <LinkOutlined />
+            ) : (
+              <DisconnectOutlined />
+            )
+          }
+          color={locked || delay > 80 || !wsConnected ? "red" : "green"}
+          size="xs"
+        >
+          {isWebRTC ? "直连" : "中转"}:{delay.toFixed(0)}
+        </Tag>
       </Form.Item>
       {(serverConfig.channelList || [])
         .filter(({ enabled, type }) => enabled && type === "switch")
@@ -64,12 +75,32 @@ export default function Status({
             />
           </Form.Item>
         ))}
+
+      {isLogin && isWebRTC && (
+        <Form.Item>
+          <Switch
+            checked={enabledControllerMicphone}
+            onChange={onControllerMicphoneChange}
+            checkedChildren={
+              <>
+                <DesktopOutlined /> <AudioOutlined />
+              </>
+            }
+            unCheckedChildren={
+              <>
+                <DesktopOutlined /> <AudioMutedOutlined />
+              </>
+            }
+          />
+        </Form.Item>
+      )}
+
       {isLogin && (
         <Form.Item>
           <AudioPlayer
             session={session}
             connectType={connectType}
-            onMicphoneChange={onMicphoneChange}
+            onMicphoneChange={onCarMicphoneChange}
             url={`${
               window.location.protocol === "https:" ? "wss://" : "ws://"
             }${setting.host}/microphone`}
@@ -122,16 +153,6 @@ export default function Status({
             icon={<PoweroffOutlined />}
             onClick={piPowerOff}
           ></Button>
-        </Form.Item>
-      )}
-      {wsConnected && delay && (
-        <Form.Item>
-          <Tag
-            icon={locked ? <StopOutlined /> : undefined}
-            color={locked || delay > 80 ? "red" : "green"}
-          >
-            {connectType === "webrtc" ? "直连" : "中转"}:{delay.toFixed(0)}
-          </Tag>
         </Form.Item>
       )}
 

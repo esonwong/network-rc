@@ -3,7 +3,11 @@ import { useState } from "react";
 import { Switch, message } from "antd";
 import store from "store";
 
-import { AudioOutlined, AudioMutedOutlined } from "@ant-design/icons";
+import {
+  AudioOutlined,
+  AudioMutedOutlined,
+  CarOutlined,
+} from "@ant-design/icons";
 import { useDebounceEffect } from "ahooks";
 
 export default function AudioPlayer({ url, connectType, onMicphoneChange }) {
@@ -64,7 +68,6 @@ export default function AudioPlayer({ url, connectType, onMicphoneChange }) {
           ws.addEventListener("message", onAudioLoaded);
 
           ws.addEventListener("open", () => {
-            // message.success("已连接到麦克风");
             setEnabled(true);
           });
           ws.addEventListener("close", () => {
@@ -96,8 +99,16 @@ export default function AudioPlayer({ url, connectType, onMicphoneChange }) {
           setEnabled(v);
           store.set("audio-enabled", v);
         }}
-        checkedChildren={<AudioOutlined />}
-        unCheckedChildren={<AudioMutedOutlined />}
+        checkedChildren={
+          <>
+            <CarOutlined /> <AudioOutlined />
+          </>
+        }
+        unCheckedChildren={
+          <>
+            <CarOutlined /> <AudioMutedOutlined />
+          </>
+        }
       />
     </div>
   );

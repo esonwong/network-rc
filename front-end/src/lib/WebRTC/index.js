@@ -148,6 +148,14 @@ export default class WebRTC {
     playing ? this.audioEl.play() : this.audioEl.pause();
   }
 
+  changeMicrophone() {
+    this.micphoneEanbled = !this.micphoneEanbled;
+    this.localStream &&
+      this.localStream
+        .getTracks()
+        .forEach((track) => (track.enabled = this.micphoneEanbled));
+  }
+
   close() {
     this.socket.removeEventListener("message", this.onSocketMessage);
     this.localStream &&

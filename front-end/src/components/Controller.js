@@ -88,6 +88,7 @@ export default class Controller extends Component {
         isFullscreen,
         session,
         webrtcChannel,
+        connectType,
       },
     } = this;
     const { isShowButton, ttsInputVisible, text } = this.state;
@@ -325,16 +326,18 @@ export default class Controller extends Component {
                 </Button>
               </Popover>
             </Form.Item>
-            <Form.Item>
-              <Microphone
-                url={
-                  setting.host &&
-                  `${
-                    window.location.protocol === "https:" ? "wss://" : "ws://"
-                  }${setting.host}/audio`
-                }
-              />
-            </Form.Item>
+            {connectType === "ws" && (
+              <Form.Item>
+                <Microphone
+                  url={
+                    setting.host &&
+                    `${
+                      window.location.protocol === "https:" ? "wss://" : "ws://"
+                    }${setting.host}/audio`
+                  }
+                />
+              </Form.Item>
+            )}
           </Form>
         )}
         <ControlUI
