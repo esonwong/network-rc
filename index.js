@@ -538,7 +538,7 @@ const makeHeartbeatTimer = (socket) => {
     if (socket.unlockHearbertCount > 10) {
       socket.autoLocking = false;
       socket.unlockHearbertCount = 0;
-      console.info("网络恢复");
+      logger.info("网络恢复");
       socket.sendData("locked", false);
     }
   }
@@ -547,7 +547,7 @@ const makeHeartbeatTimer = (socket) => {
     logger.info("socket.unlockHearbertCount", socket.unlockHearbertCount);
     if (socket.autoLocking === true) return;
     socket.autoLocking = true;
-    console.warn("网络连接不稳定，自动刹车");
+    logger.warn("网络连接不稳定，自动刹车");
     socket.sendData("locked", true);
     const { channelList = [], specialChannel } = status.config;
     const speedChannel = channelList.find(
