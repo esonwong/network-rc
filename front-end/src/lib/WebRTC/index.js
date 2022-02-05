@@ -145,7 +145,9 @@ export default class WebRTC {
   }
 
   playAudio(playing) {
-    playing ? this.audioEl.play() : this.audioEl.pause();
+    this.audioEl.srcObject
+      .getTracks()
+      .forEach((track) => (track.enabled = playing));
   }
 
   changeMicrophone() {
