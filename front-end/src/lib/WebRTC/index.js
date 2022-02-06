@@ -139,6 +139,7 @@ export default class WebRTC {
     //   .forEach((track) => (track.enabled = playing));
   }
 
+  //  20220206 测试即使通过交互触发，ios safari 仍然不支持音频
   async addAudioTrack() {
     try {
       this.localStream = await window.navigator.mediaDevices
