@@ -534,7 +534,6 @@ const makeHeartbeatTimer = (socket) => {
   if (socket.autoLocking) {
     /** 刹车锁定后 正常心跳统计， 大于 10 就解锁 */
     socket.unlockHearbertCount++;
-    logger.info("socket.unlockHearbertCount", socket.unlockHearbertCount);
     if (socket.unlockHearbertCount > 10) {
       socket.autoLocking = false;
       socket.unlockHearbertCount = 0;
@@ -544,7 +543,6 @@ const makeHeartbeatTimer = (socket) => {
   }
   socket.heartbeatTimeoutId = setTimeout(async () => {
     socket.unlockHearbertCount = 0;
-    logger.info("socket.unlockHearbertCount", socket.unlockHearbertCount);
     if (socket.autoLocking === true) return;
     socket.autoLocking = true;
     logger.warn("网络连接不稳定，自动刹车");

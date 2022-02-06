@@ -117,6 +117,8 @@ export default class WebRTC {
     this.audioEl.srcObject = remoteStream;
     // this.video.srcObject = remoteStream;
 
+    await this.addAudioTrack();
+
     // # 7 设置客户端本地 description 传递本地回答详情
     const answer = await rc.createAnswer();
     console.log("WebRTC answer", answer);
@@ -145,7 +147,6 @@ export default class WebRTC {
           video: false,
         })
         .catch((e) => {
-          debugger;
           console.error(e);
           throw e;
         });
@@ -161,9 +162,6 @@ export default class WebRTC {
 
   async changeMicrophone() {
     this.micphoneEanbled = !this.micphoneEanbled;
-    if (this.micphoneEanbled) {
-      await this.addAudioTrack();
-    }
     this.localStream &&
       this.localStream
         .getTracks()
