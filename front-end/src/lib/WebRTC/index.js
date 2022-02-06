@@ -1,16 +1,16 @@
+import { message } from "antd";
+
 export default class WebRTC {
   constructor({
     video,
     micphoneEanbled = false,
     socket,
-    onError,
     onSuccess,
     onClose,
     onDataChannel,
   }) {
     this.video = video;
     this.socket = socket;
-    this.onError = onError;
     this.onSuccess = onSuccess;
     this.onClose = onClose;
     this.onDataChannel = onDataChannel;
@@ -117,23 +117,6 @@ export default class WebRTC {
     this.audioEl.srcObject = remoteStream;
     // this.video.srcObject = remoteStream;
 
-    try {
-      this.localStream = await window.navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
-      this.localStream.getTracks().forEach((track) => {
-        track.enabled = this.micphoneEanbled;
-        rc.addTrack(track);
-      });
-    } catch (error) {
-      this.onError?.(
-        new Error(
-          "控制端麦克风打开失败 ヾ(°д°)ノ゛！需要 https。你可以使用文字发语音。"
-        )
-      );
-    }
-
     // # 7 设置客户端本地 description 传递本地回答详情
     const answer = await rc.createAnswer();
     console.log("WebRTC answer", answer);
@@ -154,8 +137,33 @@ export default class WebRTC {
     //   .forEach((track) => (track.enabled = playing));
   }
 
-  changeMicrophone() {
+  async addAudioTrack() {
+    try {
+      this.localStream = await window.navigator.mediaDevices
+        .getUserMedia({
+          audio: true,
+          video: false,
+        })
+        .catch((e) => {
+          debugger;
+          console.error(e);
+          throw e;
+        });
+      this.localStream.getTracks().forEach((track) => {
+        track.enabled = this.micphoneEanbled;
+        this.rc.addTrack(track);
+      });
+    } catch (error) {
+      console.error(error);
+      message.error("开启语音失败 " + error.message);
+    }
+  }
+
+  async changeMicrophone() {
     this.micphoneEanbled = !this.micphoneEanbled;
+    if (this.micphoneEanbled) {
+      await this.addAudioTrack();
+    }
     this.localStream &&
       this.localStream
         .getTracks()

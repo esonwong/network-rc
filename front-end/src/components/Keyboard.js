@@ -157,7 +157,7 @@ export default function Keyboard({
           <Descriptions.Item label="发送文字转语音">
             <Text keyboard>回车</Text>
           </Descriptions.Item>
-          <Descriptions.Item label="发送语音">
+          <Descriptions.Item label="发送语音/开关控制端麦克风">
             <Text keyboard>空格</Text>
           </Descriptions.Item>
         </Descriptions>

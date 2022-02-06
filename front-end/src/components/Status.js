@@ -16,6 +16,7 @@ import {
   AudioMutedOutlined,
 } from "@ant-design/icons";
 import AudioPlayer from "./AudioPlayer";
+import { useEventListener, useKeyPress } from "ahooks";
 
 export default function Status({
   piPowerOff,
@@ -38,6 +39,23 @@ export default function Status({
 }) {
   const isWebRTC = connectType === "webrtc";
   const { sharedEndTime } = serverConfig;
+
+  const gamepadPress = ({ detail: { index, value } }) => {
+    if (index === 2 && value > 0.5) {
+      onControllerMicphoneChange(!enabledControllerMicphone);
+    }
+  };
+
+  useKeyPress(
+    "space",
+    () => onControllerMicphoneChange(!enabledControllerMicphone),
+    {
+      events: ["keyup"],
+    }
+  );
+
+  useEventListener("gamepadpress", gamepadPress);
+
   return (
     <Form layout="inline" className="app-status" size="small">
       <Form.Item>
