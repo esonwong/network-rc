@@ -41,7 +41,7 @@ export default function Status({
   const { sharedEndTime } = serverConfig;
 
   const gamepadPress = ({ detail: { index, value } }) => {
-    if (index === 2 && value > 0.5) {
+    if (index === 3 && value > 0.5) {
       onControllerMicphoneChange(!enabledControllerMicphone);
     }
   };
