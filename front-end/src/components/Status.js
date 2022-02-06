@@ -47,7 +47,7 @@ export default function Status({
   };
 
   useKeyPress(
-    "space",
+    "t",
     () => onControllerMicphoneChange(!enabledControllerMicphone),
     {
       events: ["keyup"],
