@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import "./Joystick.scss";
 import classnames from "classnames";
+import { useCallback } from "react";
+import _debounce from "debounce";
 
 const getOffsetLeft = (el) => {
   if (el.offsetParent === null) {
@@ -33,6 +35,9 @@ export default function Joystick({
   const [mouseStarting, setMouseStarting] = useState(false);
   const [tochTime, setTochTime] = useState();
   const [mode, setMode] = useState(undefined);
+  const _onChange = useCallback(_debounce(onChange, 100, { leading: true }), [
+    onChange,
+  ]);
   const change = ({ x, y } = { x: 0, y: 0 }) => {
     if (enabledX) {
       const railLeft = getOffsetLeft(joytick.current) + position.x;
@@ -63,7 +68,7 @@ export default function Joystick({
       y = 0;
     }
     setValue({ x, y });
-    onChange({ x, y });
+    _onChange({ x, y });
   };
 
   const start = ({ x, y }) => {
@@ -71,7 +76,7 @@ export default function Joystick({
     const now = new Date().getTime();
     if (Math.abs(now - tochTime) < 200) {
       setValue({ x: 0, y: 0 });
-      onChange({ x: 0, y: 0 });
+      _onChange({ x: 0, y: 0 });
       return;
     }
     setTochTime(now);
@@ -87,7 +92,7 @@ export default function Joystick({
     if (disabled) return;
     if (!autoReset) return;
     setValue({ x: 0, y: 0 });
-    onChange({ x: 0, y: 0 });
+    _onChange({ x: 0, y: 0 });
   };
 
   return (
