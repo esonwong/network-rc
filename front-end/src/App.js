@@ -80,6 +80,7 @@ export default class App extends Component {
         this.setState({ action: { ...action } });
       },
     };
+    this.changeChannel = debounce(this._changeChannel, 20);
     this.saveServerConfig = debounce(this._saveServerConfig, 300);
     this.resetChannel = debounce(this._resetChannel, 300);
   }
@@ -135,7 +136,6 @@ export default class App extends Component {
 
       setTimeout(() => {
         message.error("断开连接，正在重连！");
-        debugger;
         this.connect();
       }, 3000);
     });
@@ -263,48 +263,10 @@ export default class App extends Component {
 
     this.getServerConfig();
 
-    // video 标签
-    // const time = setInterval(() => {
-    //   if (!this.video.current) return;
-    //   clearInterval(time);
-    //   this.mediaSource1 = new MediaSource();
-    //   const mediaSource = this.mediaSource1;
-    //   mediaSource.addEventListener('sourceopen', function (e) { console.log('sourceopen: ' + mediaSource.readyState); });
-    //   mediaSource.addEventListener('sourceended', function (e) { console.log('sourceended: ' + mediaSource.readyState); });
-    //   mediaSource.addEventListener('sourceclose', function (e) { console.log('sourceclose: ' + mediaSource.readyState); });
-    //   mediaSource.addEventListener('error', function (e) { console.log('error: ' + mediaSource.readyState); });
-    //   this.video.current.src = window.URL.createObjectURL(this.mediaSource1);
-    //   this.mediaSource1.addEventListener("sourceopen", () => {
-    //     this.queue1 = [];
-    //     // this.sourceBuffer1 = this.mediaSource1.addSourceBuffer('video/mp4; codecs="avc1.640028"');
-    //     this.sourceBuffer1 = this.mediaSource1.addSourceBuffer('video/mp4; codecs="mp4a.40.2, avc1.640028"');
-
-    //     // this.video.current.play();
-    //     this.sourceBuffer1.addEventListener("updateend", () => {
-    //       this.loadPacket();
-    //     });
-    //     this.changeCamera(true);
-    //   })
-    // }, 100)
     if (this.state.setting.webrtcEnabled) {
       this.openWebRTC();
     }
   };
-
-  // loadPacket = (data) => {
-  //   if (this.sourceBuffer1.updating) {
-  //     data && this.queue1.push(data);
-  //     return;
-  //   }
-  //   if (this.queue1.length) {
-  //     console.log("queue", this.queue1.length);
-  //     const bufferData = this.queue1.shift(); // pop from the beginning
-  //     this.sourceBuffer1.appendBuffer(bufferData);
-  //     data && this.queue1.push(data);
-  //   } else {
-  //     data && this.sourceBuffer1.appendBuffer(data);
-  //   }
-  // }
 
   openWebRTC() {
     this.webrtc?.close?.();
@@ -461,7 +423,7 @@ export default class App extends Component {
     this.sendData("micVolume", v);
   };
 
-  changeChannel = (payload) => {
+  _changeChannel = (payload) => {
     const { pin, value } = payload;
     localChannelStatus[pin] = value;
     this.sendData("change channel", payload);
@@ -471,9 +433,14 @@ export default class App extends Component {
     const {
       setting: { host },
     } = this.state;
-    axios.post(`//${host}/config`, config).catch((e) => {
-      console.error(e);
-    });
+    axios
+      .post(`//${host}/config`, config)
+      .then(() => {
+        message.success("保存成功");
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   };
 
   resetServerConfig = () => {
