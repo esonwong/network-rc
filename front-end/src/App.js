@@ -80,7 +80,6 @@ export default class App extends Component {
         this.setState({ action: { ...action } });
       },
     };
-    this.changeChannel = debounce(this._changeChannel, 20);
     this.saveServerConfig = debounce(this._saveServerConfig, 300);
     this.resetChannel = debounce(this._resetChannel, 300);
   }
@@ -423,7 +422,7 @@ export default class App extends Component {
     this.sendData("micVolume", v);
   };
 
-  _changeChannel = (payload) => {
+  changeChannel = (payload) => {
     const { pin, value } = payload;
     localChannelStatus[pin] = value;
     this.sendData("change channel", payload);
