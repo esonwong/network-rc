@@ -78,6 +78,7 @@ const {
 let sharedEndTimerId;
 
 const { createServer } = require(`http`);
+const { changeLedStatus } = require("./lib/led");
 
 let cameraList = [];
 const server = createServer({}, app);
@@ -157,6 +158,8 @@ wss.on("connection", async function (socket) {
   logger.info("已经设置密码", password ? "是" : "否");
 
   clients.add(socket);
+
+  changeLedStatus("connected");
 
   socket.sendData = function (action, payload) {
     if (
@@ -591,6 +594,7 @@ const disconnect = (socket) => {
     closeChannel();
     lightEnabled = false;
     powerEnabled = false;
+    changeLedStatus("penetrated");
   }
 };
 
@@ -611,10 +615,10 @@ const piReboot = () => {
 };
 
 server.on("error", (e) => {
+  changeLedStatus("error");
   logger.error(`Server error: ${e.message}`);
   if (e.code === "EADDRINUSE") {
     logger.info(` ${localPort} 端口被其他程序使用了...`);
-    process.exit(1);
   }
 });
 
@@ -657,6 +661,8 @@ function getIPAdress() {
     await TTS(`系统初始化完成!`);
     logger.info(`本地访问地址 http://${getIPAdress()}:${localPort}`);
 
+    changeLedStatus("running");
+
     if (subDomain) {
       defaultFrpc(subDomain);
     }
@@ -667,9 +673,31 @@ function getIPAdress() {
   });
 })();
 
-process.on("SIGINT", async function () {
-  await TTS("系统关闭");
-  audioPlayer.destroy();
-  logger.info("Goodbye!");
-  process.exit();
-});
+// process.on("SIGHUP", async function () {
+//   process.exit();
+// });
+
+async function exitHandler(options, exitCode) {
+  if (options.cleanup) {
+    logger.info("Exit Clean");
+    audioPlayer.destroy();
+    changeLedStatus("close");
+    await TTS("系统关闭");
+    await sleep(1000);
+  }
+  if (exitCode || exitCode === 0) console.log(exitCode);
+  if (options.exit) process.exit();
+}
+
+//do something when app is closing
+process.on("exit", exitHandler.bind(null, { cleanup: true }));
+
+//catches ctrl+c event
+process.on("SIGINT", exitHandler.bind(null, { exit: true }));
+
+// catches "kill pid" (for example: nodemon restart)
+process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
+process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
+
+//catches uncaught exceptions
+process.on("uncaughtException", exitHandler.bind(null, { exit: true }));
