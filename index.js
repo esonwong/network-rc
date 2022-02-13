@@ -197,10 +197,7 @@ wss.on("connection", async function (socket) {
         case "connect":
           socket.webrtc = new WebRTC({
             socket,
-            onClose() {
-              delete socket.webrtc;
-              TTS("同步率 96%", { stop: true });
-            },
+            onClose() {},
             onDataChannelOpen(channel) {
               if (socket.webrtcChannel) {
                 socket.webrtcChannel[channel.label] = channel;
@@ -210,13 +207,17 @@ wss.on("connection", async function (socket) {
                 };
               }
               socket.sendData("connect type", "webrtc");
-              const camServer = cameraList.find((i) => i.name == channel.label);
+              const camServer = cameraList.find(
+                (i) => i.label == channel.label
+              );
               if (camServer) {
                 camServer.server.pushRTCDataChannel(channel);
               }
             },
             onDataChannelClose(channel) {
-              const camServer = cameraList.find((i) => i.name == channel.label);
+              const camServer = cameraList.find(
+                (i) => i.label == channel.label
+              );
               if (camServer) {
                 camServer.server.removeRTCDataChannel(channel);
               }
@@ -235,7 +236,7 @@ wss.on("connection", async function (socket) {
                   controllerMessageHandle(socket, action, payload, "rtc");
                 },
               },
-              ...cameraList.map(({ name }) => ({ label: name })),
+              ...cameraList.map(({ label }) => ({ label })),
             ],
             onOffer(offer) {
               socket.sendData("webrtc offer", offer);
@@ -248,7 +249,9 @@ wss.on("connection", async function (socket) {
             },
             onClose() {
               socket.sendData("webrtc close");
-              broadcast("stream_active", false);
+              delete socket.webrtc;
+              TTS("同步率 96%", { stop: true });
+              // broadcast("stream_active", false);
               socket.sendData("connect type", "ws");
             },
             onError({ message }) {
@@ -294,7 +297,12 @@ const controllerMessageHandle = (socket, action, payload, type) => {
         if (socket.isLogin) {
           socket.sendData(
             "camera list",
-            cameraList.map(({ name, size }, index) => ({ name, size, index }))
+            cameraList.map(({ name, size, label }, index) => ({
+              name,
+              size,
+              label,
+              index,
+            }))
           );
           broadcastConfig();
           socket.sendData("channel status", channelStatus);
@@ -643,11 +651,12 @@ function getIPAdress() {
 (async () => {
   cameraList = await CameraServer.getCameraList();
   cameraList.forEach((item, index) => {
-    const { dev, size, name, cardType } = item;
+    const { dev, size, name, cardType, label } = item;
     item.server = new CameraServer({
       server,
       devPath: dev,
       name,
+      label,
       cardType,
       deviceSize: size,
       cameraIndex: index,
