@@ -2,8 +2,14 @@
 
 if test "$NETWORK_RC_BETA" = "1"; then
   echo '安装 Beta 版'
+fi
+
+if test "$NETWORK_RC_VERSION" = ""; then
+  echo '安装最新版本'
+  DOWNLOAD_LINK='https://download.esonwong.com/network-rc/network-rc.tar.gz'
 else
-  echo '开始安装 Network RC'
+  echo '开始安装 Network RC 版本: '$NETWORK_RC_VERSION
+  DOWNLOAD_LINK="https://download.esonwong.com/network-rc/network-rc-${NETWORK_RC_VERSION}.tar.gz"
 fi
 
 read -p "使用内置 frp 服务器(yes/no, 默认 yes):" defaultFrp
@@ -66,7 +72,7 @@ if [ "$ok" = "ok" ]; then
     wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz
   else
     echo "下载 Network RC"
-    wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc.tar.gz
+    wget -O /tmp/network-rc.tar.gz $DOWNLOAD_LINK
   fi
 
   echo ""
