@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import "./Joystick.scss";
 import classnames from "classnames";
 import { useCallback } from "react";
-import _debounce from "debounce";
+import throttle from "lodash.throttle";
 
 const getOffsetLeft = (el) => {
   if (el.offsetParent === null) {
@@ -35,9 +35,10 @@ export default function Joystick({
   const [mouseStarting, setMouseStarting] = useState(false);
   const [tochTime, setTochTime] = useState();
   const [mode, setMode] = useState(undefined);
-  const _onChange = useCallback(_debounce(onChange, 100, { leading: true }), [
-    onChange,
-  ]);
+  const _onChange = useCallback(
+    throttle(onChange, 50, { leading: true, trailing: false }),
+    [onChange]
+  );
   const change = ({ x, y } = { x: 0, y: 0 }) => {
     if (enabledX) {
       const railLeft = getOffsetLeft(joytick.current) + position.x;

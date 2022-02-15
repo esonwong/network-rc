@@ -21,6 +21,7 @@
     "debounce": "^1.2.0",
     "file-saver": "^2.0.5",
     "is-mobile": "^2.2.1",
+    "lodash.throttle": "^4.1.1",
     "md5": "^2.2.1",
     "node-sass": "^6.0.0",
     "qrcode.react": "^1.0.1",
