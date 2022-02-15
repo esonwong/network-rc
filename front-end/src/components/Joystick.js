@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import "./Joystick.scss";
 import classnames from "classnames";
-import { useCallback } from "react";
+import { useMemo } from "react";
 import throttle from "lodash.throttle";
 
 const getOffsetLeft = (el) => {
@@ -35,8 +35,16 @@ export default function Joystick({
   const [mouseStarting, setMouseStarting] = useState(false);
   const [tochTime, setTochTime] = useState();
   const [mode, setMode] = useState(undefined);
-  const _onChange = useCallback(
-    throttle(onChange, 50, { leading: true, trailing: false }),
+  const _onChange = useMemo(
+    () =>
+      throttle(
+        (...args) => {
+          console.log("onChange", ...args);
+          onChange(...args);
+        },
+        50,
+        { leading: false, trailing: true }
+      ),
     [onChange]
   );
   const change = ({ x, y } = { x: 0, y: 0 }) => {
@@ -86,12 +94,14 @@ export default function Joystick({
 
   const move = ({ x, y }) => {
     if (disabled) return;
+    console.log("move");
     change({ x, y });
   };
 
   const end = () => {
     if (disabled) return;
     if (!autoReset) return;
+    console.log("end");
     setValue({ x: 0, y: 0 });
     _onChange({ x: 0, y: 0 });
   };
