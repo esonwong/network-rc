@@ -13,7 +13,7 @@ const argv = require("yargs").options({
 
 const beta = argv.beta;
 
-const fullFileName = `${pkg.name}-${pkg.version}${beta ? "-beta" : ""}.tar.gz`;
+const fullFileName = `${pkg.name}-v${pkg.version}${beta ? "-beta" : ""}.tar.gz`;
 const fileName = `${pkg.name}${beta ? "-beta" : ""}.tar.gz`;
 
 (async function () {
