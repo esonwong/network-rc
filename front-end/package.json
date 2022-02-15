@@ -23,7 +23,7 @@
     "is-mobile": "^2.2.1",
     "lodash.throttle": "^4.1.1",
     "md5": "^2.2.1",
-    "node-sass": "^6.0.0",
+    "node-sass": "^7.0.0",
     "qrcode.react": "^1.0.1",
     "query-string": "^6.13.8",
     "react": "^16.13.1",
