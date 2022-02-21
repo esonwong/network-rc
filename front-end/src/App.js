@@ -54,6 +54,7 @@ export default class App extends Component {
       webrtcChannel: [],
       locaked: false,
       enabledControllerMicphone: false,
+      statusInfo: {},
     };
 
     const { changeLight, changePower } = this;
@@ -141,7 +142,7 @@ export default class App extends Component {
   };
 
   messageHandle(data) {
-    const { gpioChannelStatus, serverConfig } = this.state;
+    const { gpioChannelStatus, serverConfig, statusInfo } = this.state;
 
     if (typeof data === "string") {
       const { action, payload } = JSON.parse(data);
@@ -182,6 +183,10 @@ export default class App extends Component {
         case "locked":
           this.setState({ locked: payload });
           break;
+
+        case "status info":
+          this.setState({ statusInfo: { ...statusInfo, [payload.label]: payload} });
+          break
 
         case "update-status":
           this.setState({ updateStaus: payload });
@@ -491,6 +496,7 @@ export default class App extends Component {
         webrtcChannel,
         locked,
         enabledControllerMicphone,
+        statusInfo
       },
       tts,
       playAudio,
@@ -502,6 +508,7 @@ export default class App extends Component {
       <div className="App" ref={this.appRef}>
         {!isFullscreen && (
           <Status
+          statusInfo={statusInfo}
             channelStatus={gpioChannelStatus}
             delay={delay}
             connectType={connectType}

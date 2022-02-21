@@ -1,11 +1,9 @@
 require("./lib/logger");
-const path = require("path");
 const { WebSocketServer } = require("@clusterws/cws");
 const package = require("./package.json");
 const md5 = require("md5");
 const { spawn } = require("child_process");
 const { defaultFrpc, configFrpc } = require("./lib/frpc");
-const app = require("./lib/app");
 const TTS = require("./lib/tts");
 const CameraServer = require("./lib/CameraServer");
 const AudioServer = require("./lib/AudioServer");
@@ -14,6 +12,16 @@ const status = require("./lib/status");
 const updater = require("./lib/updater");
 const MicrophoneServer = require("./lib/MicrophoneServer");
 const { sleep } = require("./lib/unit");
+const { changeLedStatus } = require("./lib/led");
+const { createServer } = require(`http`);
+const sessionManager = require("./lib/session");
+const {
+  changePwmPin,
+  closeChannel,
+  changeSwitchPin,
+  channelStatus,
+} = require("./lib/channel");
+const WebRTC = require("./lib/WebRTC");
 
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
@@ -50,68 +58,14 @@ const argv = require("yargs")
   .env("NETWORK_RC")
   .help().argv;
 
-const WebRTC = require("./lib/WebRTC");
-
 console.info(`当前 Network RC 版本: ${package.version}`);
 
-status.argv = argv;
-
 const { subDomain, frpConfig, localPort, password } = argv;
-
-const sessionManager = require("./lib/session");
-
-sessionManager.clearTimeoutSession();
-if (
-  status.config.sharedEndTime &&
-  status.config.sharedEndTime < new Date().getTime()
-) {
-  status.saveConfig({ sharedEndTime: undefined });
-}
-
-const {
-  changePwmPin,
-  closeChannel,
-  changeSwitchPin,
-  channelStatus,
-} = require("./lib/channel");
-
-let sharedEndTimerId;
-
-const { createServer } = require(`http`);
-const { changeLedStatus } = require("./lib/led");
-
+const clients = new Set();
 let cameraList = [];
-const server = createServer({}, app);
-
+let sharedEndTimerId;
 let powerEnabled = false,
   lightEnabled = false;
-
-const wss = new WebSocketServer(
-  {
-    noServer: true,
-    path: "/control",
-  },
-  () => {
-    logger.info("控制 websocket 服务已启动");
-  }
-);
-
-wss.on("error", (err) => {
-  logger.error(`Websocket 服务器错误${err.message}`);
-});
-
-server.on("upgrade", (request, socket, head) => {
-  if (request.url === "/control")
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit("connection", ws, request);
-    });
-});
-
-new MicrophoneServer({ server });
-new AudioServer({ server });
-
-const clients = new Set();
-
 const broadcast = (action, payload) => {
   clients.forEach(
     (socket) => socket.isLogin && socket.sendData(action, payload)
@@ -123,164 +77,19 @@ const broadcastConfig = () => {
   broadcast("config", other);
 };
 
-status.on("update", () => {
-  broadcast("config update");
-});
+status.argv = argv;
 
-updater.on("downloading", () => {
-  broadcast("update-status", "下载中");
-});
-updater.on("downloaded", () => {
-  broadcast("success", { message: "下载完成" });
-  broadcast("update-status", "解压中");
-});
+exports.broadcast = broadcast;
+const app = require("./lib/app");
+const server = createServer({}, app);
 
-updater.on("untared", () => {
-  broadcast("success", { message: "解压完成" });
-});
-
-updater.on("updated", () => {
-  broadcast("success", { message: "升级玩完成了！重启中！" });
-  broadcast("update-status", "重启中");
-});
-
-updater.on("before-restart", () => {
-  broadcast("before-restart");
-});
-
-updater.on("error", () => {
-  broadcast("error", { message: "升级错误" });
-});
-
-wss.on("connection", async function (socket) {
-  logger.info("客户端连接！");
-  TTS("已建立神经连接");
-  logger.info("已经设置密码", password ? "是" : "否");
-
-  clients.add(socket);
-
-  changeLedStatus("connected");
-
-  socket.sendData = function (action, payload) {
-    if (
-      socket.webrtcChannel &&
-      socket.webrtcChannel.controller &&
-      socket.webrtcChannel.controller.readyState === "open"
-    )
-      socket.webrtcChannel.controller.send(JSON.stringify({ action, payload }));
-    else this.send(JSON.stringify({ action, payload }));
-  };
-
-  socket.sendData("light enabled", lightEnabled);
-
-  socket.sendData("power enabled", powerEnabled);
-
-  socket.sendData("version", package.version);
-
-  socket.on("close", () => {
-    disconnect(socket);
-  });
-
-  socket.on("error", (err) => {
-    logger.info("Received error: ", err);
-  });
-
-  socket.on("message", (m) => {
-    const { action, payload } = JSON.parse(m);
-
-    // logger.info("Websocket recived message", action, payload);
-
-    if (action.indexOf("webrtc") !== -1) {
-      if (!check(socket)) return;
-      const type = action.split(" ")[1];
-      switch (type) {
-        case "connect":
-          socket.webrtc = new WebRTC({
-            socket,
-            onClose() {},
-            onDataChannelOpen(channel) {
-              if (socket.webrtcChannel) {
-                socket.webrtcChannel[channel.label] = channel;
-              } else {
-                socket.webrtcChannel = {
-                  [channel.label]: channel,
-                };
-              }
-              socket.sendData("connect type", "webrtc");
-              const camServer = cameraList.find(
-                (i) => i.label == channel.label
-              );
-              if (camServer) {
-                camServer.server.pushRTCDataChannel(channel);
-              }
-            },
-            onDataChannelClose(channel) {
-              const camServer = cameraList.find(
-                (i) => i.label == channel.label
-              );
-              if (camServer) {
-                camServer.server.removeRTCDataChannel(channel);
-              }
-              if (socket.webrtcChannel && socket.webrtcChannel[channel.label]) {
-                delete socket.webrtcChannel[channel.label];
-              }
-            },
-            rtcDataChannelList: [
-              {
-                label: "controller",
-                onMessage(data) {
-                  const { action, payload } = JSON.parse(data);
-                  // if (action !== "heartbeat") {
-                  //   logger.info("RTC message", action, payload);
-                  // }
-                  controllerMessageHandle(socket, action, payload, "rtc");
-                },
-              },
-              ...cameraList.map(({ label }) => ({ label })),
-            ],
-            onOffer(offer) {
-              socket.sendData("webrtc offer", offer);
-            },
-            sendCandidate(candidate) {
-              socket.sendData("webrtc candidate", candidate);
-            },
-            onSuccess() {
-              TTS("同步率 98%", { stop: true });
-            },
-            onClose() {
-              socket.sendData("webrtc close");
-              delete socket.webrtc;
-              TTS("同步率 96%", { stop: true });
-              // broadcast("stream_active", false);
-              socket.sendData("connect type", "ws");
-            },
-            onError({ message }) {
-              socket.sendData("switch", { protocol: "websocket" });
-            },
-            onWarnning({ message }) {
-              socket.sendData("warn", { status: 1, message });
-            },
-          });
-          break;
-        case "answer":
-          socket.webrtc.onAnswer(payload);
-          break;
-        case "candidate":
-          socket.webrtc.addCandidate(payload);
-          break;
-        case "close":
-          socket.webrtc && socket.webrtc.close();
-          break;
-        default:
-          logger.info("怎么了？ webrtc", type);
-          break;
-      }
-      return;
-    }
-
-    controllerMessageHandle(socket, action, payload, "ws");
-  });
-});
+sessionManager.clearTimeoutSession();
+if (
+  status.config.sharedEndTime &&
+  status.config.sharedEndTime < new Date().getTime()
+) {
+  status.saveConfig({ sharedEndTime: undefined });
+}
 
 const controllerMessageHandle = (socket, action, payload, type) => {
   switch (action) {
@@ -622,14 +431,6 @@ const piReboot = () => {
   spawn("sudo reboot");
 };
 
-server.on("error", (e) => {
-  changeLedStatus("error");
-  logger.error(`Server error: ${e.message}`);
-  if (e.code === "EADDRINUSE") {
-    logger.info(` ${localPort} 端口被其他程序使用了...`);
-  }
-});
-
 //获取本机ip地址
 function getIPAdress() {
   var interfaces = require("os").networkInterfaces();
@@ -647,6 +448,197 @@ function getIPAdress() {
     }
   }
 }
+
+const wss = new WebSocketServer(
+  {
+    noServer: true,
+    path: "/control",
+  },
+  () => {
+    logger.info("控制 websocket 服务已启动");
+  }
+);
+
+wss.on("error", (err) => {
+  logger.error(`Websocket 服务器错误${err.message}`);
+});
+
+server.on("upgrade", (request, socket, head) => {
+  if (request.url === "/control")
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+});
+
+new MicrophoneServer({ server });
+new AudioServer({ server });
+
+status.on("update", () => {
+  broadcast("config update");
+});
+
+updater.on("downloading", () => {
+  broadcast("update-status", "下载中");
+});
+updater.on("downloaded", () => {
+  broadcast("success", { message: "下载完成" });
+  broadcast("update-status", "解压中");
+});
+
+updater.on("untared", () => {
+  broadcast("success", { message: "解压完成" });
+});
+
+updater.on("updated", () => {
+  broadcast("success", { message: "升级玩完成了！重启中！" });
+  broadcast("update-status", "重启中");
+});
+
+updater.on("before-restart", () => {
+  broadcast("before-restart");
+});
+
+updater.on("error", () => {
+  broadcast("error", { message: "升级错误" });
+});
+
+wss.on("connection", async function (socket) {
+  logger.info("客户端连接！");
+  TTS("已建立神经连接");
+  logger.info("已经设置密码", password ? "是" : "否");
+
+  clients.add(socket);
+
+  changeLedStatus("connected");
+
+  socket.sendData = function (action, payload) {
+    if (
+      socket.webrtcChannel &&
+      socket.webrtcChannel.controller &&
+      socket.webrtcChannel.controller.readyState === "open"
+    )
+      socket.webrtcChannel.controller.send(JSON.stringify({ action, payload }));
+    else this.send(JSON.stringify({ action, payload }));
+  };
+
+  socket.sendData("light enabled", lightEnabled);
+
+  socket.sendData("power enabled", powerEnabled);
+
+  socket.sendData("version", package.version);
+
+  socket.on("close", () => {
+    disconnect(socket);
+  });
+
+  socket.on("error", (err) => {
+    logger.info("Received error: ", err);
+  });
+
+  socket.on("message", (m) => {
+    const { action, payload } = JSON.parse(m);
+
+    // logger.info("Websocket recived message", action, payload);
+
+    if (action.indexOf("webrtc") !== -1) {
+      if (!check(socket)) return;
+      const type = action.split(" ")[1];
+      switch (type) {
+        case "connect":
+          socket.webrtc = new WebRTC({
+            socket,
+            onClose() {},
+            onDataChannelOpen(channel) {
+              if (socket.webrtcChannel) {
+                socket.webrtcChannel[channel.label] = channel;
+              } else {
+                socket.webrtcChannel = {
+                  [channel.label]: channel,
+                };
+              }
+              socket.sendData("connect type", "webrtc");
+              const camServer = cameraList.find(
+                (i) => i.label == channel.label
+              );
+              if (camServer) {
+                camServer.server.pushRTCDataChannel(channel);
+              }
+            },
+            onDataChannelClose(channel) {
+              const camServer = cameraList.find(
+                (i) => i.label == channel.label
+              );
+              if (camServer) {
+                camServer.server.removeRTCDataChannel(channel);
+              }
+              if (socket.webrtcChannel && socket.webrtcChannel[channel.label]) {
+                delete socket.webrtcChannel[channel.label];
+              }
+            },
+            rtcDataChannelList: [
+              {
+                label: "controller",
+                onMessage(data) {
+                  const { action, payload } = JSON.parse(data);
+                  // if (action !== "heartbeat") {
+                  //   logger.info("RTC message", action, payload);
+                  // }
+                  controllerMessageHandle(socket, action, payload, "rtc");
+                },
+              },
+              ...cameraList.map(({ label }) => ({ label })),
+            ],
+            onOffer(offer) {
+              socket.sendData("webrtc offer", offer);
+            },
+            sendCandidate(candidate) {
+              socket.sendData("webrtc candidate", candidate);
+            },
+            onSuccess() {
+              TTS("同步率 98%", { stop: true });
+            },
+            onClose() {
+              socket.sendData("webrtc close");
+              delete socket.webrtc;
+              TTS("同步率 96%", { stop: true });
+              // broadcast("stream_active", false);
+              socket.sendData("connect type", "ws");
+            },
+            onError({ message }) {
+              socket.sendData("switch", { protocol: "websocket" });
+            },
+            onWarnning({ message }) {
+              socket.sendData("warn", { status: 1, message });
+            },
+          });
+          break;
+        case "answer":
+          socket.webrtc.onAnswer(payload);
+          break;
+        case "candidate":
+          socket.webrtc.addCandidate(payload);
+          break;
+        case "close":
+          socket.webrtc && socket.webrtc.close();
+          break;
+        default:
+          logger.info("怎么了？ webrtc", type);
+          break;
+      }
+      return;
+    }
+
+    controllerMessageHandle(socket, action, payload, "ws");
+  });
+});
+
+server.on("error", (e) => {
+  changeLedStatus("error");
+  logger.error(`Server error: ${e.message}`);
+  if (e.code === "EADDRINUSE") {
+    logger.info(` ${localPort} 端口被其他程序使用了...`);
+  }
+});
 
 (async () => {
   cameraList = await CameraServer.getCameraList();

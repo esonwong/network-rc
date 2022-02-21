@@ -19,6 +19,7 @@ import AudioPlayer from "./AudioPlayer";
 import { useEventListener, useKeyPress } from "ahooks";
 
 export default function Status({
+  statusInfo,
   piPowerOff,
   wsConnected,
   delay = 0,
@@ -163,7 +164,7 @@ export default function Status({
         </Form.Item>
       )}
 
-      {wsConnected && (
+      {wsConnected && isLogin && (
         <Form.Item>
           <Button
             type="danger"
@@ -173,6 +174,19 @@ export default function Status({
           ></Button>
         </Form.Item>
       )}
+
+      {wsConnected &&
+        isLogin &&
+        Object.keys(statusInfo).map((key) => {
+          const { color, label, value } = statusInfo[key];
+          return (
+            <Form.Item key={key}>
+              <Tag color={color}>
+                {label}:{value}
+              </Tag>
+            </Form.Item>
+          );
+        })}
 
       {wsConnected && sharedEndTime && (
         <Form.Item>
