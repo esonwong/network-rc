@@ -1,2 +1,2 @@
-const { execSync } = require("child_process");
-console.info(execSync("pulseaudio --start -D").toString());
+require("../lib/logger");
+const audioPlayer = require("../lib/audioPlayer");
