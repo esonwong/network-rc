@@ -1,5 +1,13 @@
 #!/bin/bash
 
+
+
+VERSION_CODENAME=$(lsb_release -cs);
+if [ "$VERSION_CODENAME" != "buster" ]; then
+    echo "只支持 buster 系统"
+    exit 1
+fi
+
 if test "$NETWORK_RC_BETA" = "1"; then
   echo '安装 Beta 版'
 fi
@@ -69,10 +77,20 @@ if [ "$ok" = "ok" ]; then
   sudo rm -f /tmp/network-rc.tar.gz
   if test "$NETWORK_RC_BETA" = "1"; then
     echo "下载 Network RC beta 版本"
-    wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz
+    if wget -O /tmp/network-rc.tar.gz https://download.esonwong.com/network-rc/network-rc-beta.tar.gz; then
+      echo "下载成功"
+    else
+      echo "下载失败"
+      exit 1
+    fi 
   else
     echo "下载 Network RC"
-    wget -O /tmp/network-rc.tar.gz $DOWNLOAD_LINK
+    if wget -O /tmp/network-rc.tar.gz $DOWNLOAD_LINK; then
+      echo "下载成功"
+    else
+      echo "下载失败"
+      exit 1
+    fi
   fi
 
   echo ""
