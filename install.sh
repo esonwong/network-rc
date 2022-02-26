@@ -66,9 +66,20 @@ if [ "$ok" = "ok" ]; then
   echo ""
   echo ""
   echo ""
-  echo "安装依赖"
-  sudo apt update
-  sudo apt install ffmpeg pulseaudio -y
+  if sudo apt update; then
+    echo "apt update 成功"
+  else
+    echo "apt update 失败"
+    exit 1
+  fi
+
+  echo "安装依赖..."
+  if sudo apt install ffmpeg pulseaudio -y; then
+    echo "安装依赖成功"
+  else
+    echo "安装依赖失败"
+    exit 1
+  fi
 
 
   echo ""
