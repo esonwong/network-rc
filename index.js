@@ -208,7 +208,14 @@ const controllerMessageHandle = (socket, action, payload, type) => {
 };
 
 const afterLogin = () => {
-  TTS("同步率 96%", { stop: true });
+	TTS("同步率 96%", { stop: true });
+	if(ad.voltage !==0) {
+		broadcast("status info", {
+			label: "电压",
+			value: ad.voltage.toFixed(1)  + 'v',
+			type: "tag",
+		});
+	}
 };
 
 const login = (socket, { sessionId, token, sharedCode }) => {
