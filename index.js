@@ -22,6 +22,7 @@ const {
   channelStatus,
 } = require("./lib/channel");
 const WebRTC = require("./lib/WebRTC");
+const ad = require("./lib/ads1115");
 
 const argv = require("yargs")
   .usage("Usage: $0 [options]")
@@ -468,6 +469,14 @@ server.on("upgrade", (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit("connection", ws, request);
     });
+});
+
+ad.on("voltage-change", (v) => {
+  broadcast("status info", {
+    label: "电压",
+    value: v.toFixed(1) + 'v',
+    type: "tag",
+  });
 });
 
 new MicrophoneServer({ server });
