@@ -6,6 +6,7 @@ import { useCreation, useEventListener } from "ahooks";
 import "./ControlUI.scss";
 import classnames from "classnames";
 import JoystickSlider from "./JoystickSlider";
+import Map from "./Map";
 import { useSelector, useDispatch } from "react-redux";
 import { updatePositionMap, setOrientation } from "../store/ui";
 
@@ -19,6 +20,7 @@ export default function ControlUI({
   setting,
   isShowButton,
   channelStatus,
+  statusInfo,
   session,
   webrtcChannel,
 }) {
@@ -60,10 +62,15 @@ export default function ControlUI({
       i.type = "camera";
       i.cameraIndex = i.index;
       i.enabled = true;
-      i.x = 0;
-      i.y = 0;
       return i;
     }),
+    {
+      id: "map",
+      type: "map",
+      x: 80,
+      y: 80,
+      enabled: true,
+    },
     ...(isShowButton ? uiComponentList : []),
   ];
 
@@ -75,6 +82,7 @@ export default function ControlUI({
 
         return (
           <Item
+            statusInfo={statusInfo}
             key={i.id}
             index={index}
             editabled={editabled}
@@ -103,21 +111,22 @@ const Item = ({
   cameraIndex,
   vertical,
   index,
-  position = { x: index * 20, y: index * 20, z: index + 2, videoRate: 4 / 3 },
+  position = {},
   onPositionChange,
   editabled,
   onControl,
   session,
   webrtcChannel,
   setting,
+  statusInfo,
 }) => {
   const {
-    x = index * 20,
-    y = index * 20,
+    x = 50 + index * 60,
+    y = 50 + index * 60,
     z = index + 2,
     videoRate = 4 / 3,
     ratio,
-    size = undefined,
+    size = type === "map" ? { width: 300, height: 300 } : undefined,
   } = position;
 
   const onChangeVideoRatio = useCallback(
@@ -230,6 +239,8 @@ const Item = ({
           rtcChannel={webrtcChannel[name]}
         />
       )}
+
+      {type === "map" && <Map statusInfo={statusInfo} />}
     </Rnd>
   ) : null;
 };

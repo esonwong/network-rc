@@ -67,6 +67,9 @@ export default function Status({
       </Form.Item>
       <Form.Item>
         <Tag
+          style={{
+            width: "7em",
+          }}
           icon={
             locked ? (
               <StopOutlined />
@@ -179,13 +182,13 @@ export default function Status({
         isLogin &&
         Object.keys(statusInfo).map((key) => {
           const { color, label, value } = statusInfo[key];
-          return (
+          return !["gps"].includes(label) ? (
             <Form.Item key={key}>
               <Tag color={color}>
                 {label}:{value}
               </Tag>
             </Form.Item>
-          );
+          ) : undefined;
         })}
 
       {wsConnected && sharedEndTime && (

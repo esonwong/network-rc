@@ -185,8 +185,10 @@ export default class App extends Component {
           break;
 
         case "status info":
-          this.setState({ statusInfo: { ...statusInfo, [payload.label]: payload} });
-          break
+          this.setState({
+            statusInfo: { ...statusInfo, [payload.label]: payload },
+          });
+          break;
 
         case "update-status":
           this.setState({ updateStaus: payload });
@@ -496,7 +498,7 @@ export default class App extends Component {
         webrtcChannel,
         locked,
         enabledControllerMicphone,
-        statusInfo
+        statusInfo,
       },
       tts,
       playAudio,
@@ -508,7 +510,7 @@ export default class App extends Component {
       <div className="App" ref={this.appRef}>
         {!isFullscreen && (
           <Status
-          statusInfo={statusInfo}
+            statusInfo={statusInfo}
             channelStatus={gpioChannelStatus}
             delay={delay}
             connectType={connectType}
@@ -563,6 +565,7 @@ export default class App extends Component {
           {isLogin ? (
             <>
               <Controller
+                statusInfo={statusInfo}
                 connectType={connectType}
                 session={session}
                 path={`${pubilcUrl}/controller`}

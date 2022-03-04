@@ -72,6 +72,7 @@ export default class Controller extends Component {
       fixContent,
       ttsInput,
       props: {
+        statusInfo,
         action,
         cameraEnabled,
         videoEl,
@@ -349,6 +350,7 @@ export default class Controller extends Component {
           cameraList={cameraList}
           setting={setting}
           isFullscreen={isFullscreen}
+          statusInfo={statusInfo}
         />
       </div>
     );
