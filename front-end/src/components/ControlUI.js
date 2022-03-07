@@ -240,7 +240,7 @@ const Item = ({
         />
       )}
 
-      {type === "map" && <Map statusInfo={statusInfo} />}
+      {type === "map" && <Map editabled={editabled} statusInfo={statusInfo} />}
     </Rnd>
   ) : null;
 };
