@@ -39,6 +39,8 @@ fi
 read -p "Network RC 密码(默认 networkrc):" password
 password=${password:-networkrc}
 
+read -p "本地端口(默认 8080):" localPort
+localPort=${localPort:-8080}
 
 echo ""
 echo ""
@@ -53,6 +55,7 @@ else
   echo "frpc 配置文件地址: $frpcConfig"
 fi
 echo "Network RC 控制界面访问密码: $password"
+echo "本地端口: $localPort"
 echo ""
 echo ""
 echo ""
@@ -124,7 +127,7 @@ if [ "$ok" = "ok" ]; then
   [Service]
   User=pi
   Type=simple
-  ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --frpConfig \"$frpcConfig\" --password \"$password\" --subDomain \"$subDomain\"
+  ExecStart=/home/pi/network-rc/node /home/pi/network-rc/index.js --frpConfig \"$frpcConfig\" --password \"$password\" --subDomain \"$subDomain\" --localPort \"$localPort\"
   Restart=always
   RestartSec=15s
 
