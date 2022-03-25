@@ -1,5 +1,7 @@
 import { createContext } from "react";
 
 const userContext = createContext({
-	session: undefined,
-}
+  session: {},
+});
+
+export default userContext;
