@@ -9,6 +9,7 @@ import BasicSetting from "./BasicSetting";
 import Backup from "./Backup";
 import SoundSetting from "./SoundSetting";
 import Nav from "./Nav";
+import Extension from "./Extension";
 const { TabPane } = Tabs;
 
 export default function Setting({
@@ -23,12 +24,10 @@ export default function Setting({
   fixedController,
   changeVolume,
   changeMicVolume,
-  clearAudioTemp,
   volume,
   micVolume,
   updateVersion,
   updateStaus,
-
   ...form
 }) {
   const clearCameraSetting = () => {
@@ -131,6 +130,9 @@ export default function Setting({
           sharedDuration={serverConfig.sharedDuration}
           sharedEndTime={serverConfig.sharedEndTime}
         />
+      </TabPane>
+      <TabPane tab="拓展" key="extension">
+        <Extension />
       </TabPane>
       <TabPane tab="备份和更新" key="backup">
         <Backup
