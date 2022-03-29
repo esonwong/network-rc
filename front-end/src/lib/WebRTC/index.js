@@ -61,9 +61,9 @@ export default class WebRTC {
       // sdpSemantics: 'unified-plan',
       iceServers: [
         {
-          urls: "stun:gz.esonwong.com:3478",
-          username: "eson",
-          credential: "networkrc",
+          urls: "stun:gz.esonwong.com:34578",
+          username: "network-rc",
+          credential: "network-rc",
         },
         { urls: ["stun:turn2.l.google.com"] },
         {
