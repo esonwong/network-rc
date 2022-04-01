@@ -47,8 +47,8 @@ cd network-rc/front-end
 yarn # or npm install
 yarn build # or npm run build
 cd ..
-yarn # or npm install
-sudo node index.js
+npm install # only supports npm
+node index.js
 ```
 
 open `http://[your raspberry pi's ip adress]:8080`
