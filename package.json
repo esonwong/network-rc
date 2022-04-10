@@ -23,7 +23,7 @@
     "js-yaml": "^3.13.1",
     "md5": "^2.2.1",
     "microsoft-cognitiveservices-speech-sdk": "^1.20.0",
-    "moment": "^2.25.3",
+    "moment": "^2.29.2",
     "multer": "^1.4.4",
     "pulseaudio2": "^0.5.2",
     "qrcode": "^1.4.4",
