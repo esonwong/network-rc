@@ -74,9 +74,20 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
 
 ## ToDo
 
+- [ ] ♻️ 重写控制器代码
+  - [ ] 设计设置界面
+  - [ ] 设计首页
+  - [ ] hook
+  - [ ] provider
+  - [ ] router
+  - [ ] jest
+  - [ ] api
+- [ ] 🔢 分享排队系统
+  - [ ] 流程设计
+  - [ ] 数据逻辑
+  - [ ] UI 实现
 - [ ] 音频上传
-- [ ] 延迟暂停添加复位通道选项
-- [ ] 设置麦克风灵敏度
+- [x] 设置麦克风灵敏度
 - [x] 摄像头 bug
 - [x] 一键安装脚本
 - [x] 添加远程获取 frps 配置的功能
