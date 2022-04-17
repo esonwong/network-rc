@@ -13,7 +13,7 @@ export default function Map({ editabled = false, statusInfo: { gps } = {} }) {
     : [117.2, 34.2];
   const { lat = defaultLat, lng = defaultLng } = gps || {};
   const center = [lng, lat];
-  const [enabled, setEnabled] = useState(store.get("map enabled") || true);
+  const [enabled, setEnabled] = useState(store.get("map enabled"));
   const [zoom, setZoom] = useState(store.get("map zoom") || 15);
 
   useEffect(() => {

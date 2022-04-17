@@ -86,6 +86,7 @@ node index.js -f -o 9088 --frpServer xxxxxxxxxx --frpServerPort xxx --frpServerT
   - [ ] 流程设计
   - [ ] 数据逻辑
   - [ ] UI 实现
+  - [ ] test
 - [ ] 音频上传
 - [x] 设置麦克风灵敏度
 - [x] 摄像头 bug
