@@ -1,0 +1,16 @@
+{
+  "name": "Network RC",
+  "short_name": "N-RC",
+  "description": "Network RC - Remote Control Car Software For Raspberry Pi",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#fff",
+  "theme_color": "#e62662",
+  "icons": [
+    {
+      "src": "/logo-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}
