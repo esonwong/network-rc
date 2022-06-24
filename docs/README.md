@@ -34,10 +34,6 @@ footer: MIT Licensed | Copyright © 2020-present Eson Wong
 
 <img src="./assets/community.jpg" style="width:280px" alt="Network RC 社群" />
 
-### 微信群
-
-<img src="./assets/wechat-group.jpg" style="width:280px" alt="Network RC 微信群" />
-
 ### Discord
 
 [Network RC Discord](https://discord.gg/mhHmHtmbZj)
