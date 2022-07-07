@@ -48,8 +48,8 @@ export default defineUserConfig<DefaultThemeOptions>({
 
   themeConfig: {
     logo: '/logo-256.png',
-    repo: 'itiwll/network-rc',
-    docsRepo: 'itiwll/network-rc-doc',
+    repo: 'esonwong/network-rc',
+    docsRepo: 'esonwong/network-rc',
     navbar: [
       {
         text: '主页',
