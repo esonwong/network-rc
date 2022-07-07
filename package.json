@@ -3,7 +3,7 @@
   "version": "2.7.2",
   "description": "网络控制遥控车",
   "main": "index.js",
-  "repository": "git@github.com:itiwll/network-rc.git",
+  "repository": "git@github.com:esonwong/network-rc.git",
   "author": "Eson Wong <itiwll@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {

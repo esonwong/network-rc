@@ -45,7 +45,7 @@ export default function Nav(props) {
         <YoutubeOutlined /> Youtube
       </a>
       <a
-        href="https://github.com/itiwll/network-rc"
+        href="https://github.com/esonwong/network-rc"
         target="_blank"
         rel="noopener noreferrer"
       >

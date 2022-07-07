@@ -37,7 +37,7 @@ bash <(curl -sL https://download.esonwong.com/network-rc/install.sh)
 ## 代码贡献指引
 
 ```bash
-git clone https://github.com/itiwll/network-rc.git
+git clone https://github.com/esonwong/network-rc.git
 cd network-rc/front-end
 yarn # or npm install
 yarn build # or npm run build

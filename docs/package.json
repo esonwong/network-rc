@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Network RC 使用文档",
   "main": "index.js",
-  "repository": "https://github.com/itiwll/network-rc-doc",
+  "repository": "https://github.com/esonwong/network-rc-doc",
   "author": "Eson Wong <itiwll@gmail.com>",
   "license": "MIT",
   "private": false,
