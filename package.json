@@ -16,7 +16,7 @@
     "ads1115": "^1.2.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "fluent-ffmpeg": "^2.1.2",
     "fs-path": "^0.0.25",
     "i2c-bus": "^5.2.2",
