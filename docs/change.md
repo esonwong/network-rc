@@ -1,5 +1,11 @@
 # 更新记录
 
+## 3.0.0
+
+- 支持 bullseye 系统
+  - 日志文件路径 `～/network-rc/logs/`
+  - 查看实时日志 `tail -n 100 -f ~/network-rc/logs/all.log`
+
 ## 2.7.3
 
 - 🐞 兼容 TTS 服务异常的情况
