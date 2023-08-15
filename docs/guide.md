@@ -4,11 +4,9 @@
 
 ### 安装树莓派操作系统
 
-根据这篇教程的“方法二”安装树莓派系统，并启用 SSH， 连接到 WiFi。
-
-[树莓派 4B【RaspBerry Pi 4 Model B】系统安装及配置教程](http://article.docway.net/it/details/606bfa970a6c642cafe259fc)
-
 > Network RC 仅支持 buster 系统。比如：[2021-12-02-raspios-buster-armhf.zip](https://downloads.raspberrypi.org/raspios_oldstable_armhf/images/raspios_oldstable_armhf-2021-12-02/2021-12-02-raspios-buster-armhf.zip)
+
+配置 WiFi 和 SSH：[无屏幕和键盘配置树莓派WiFi和SSH](https://shumeipai.nxez.com/2017/09/13/raspberry-pi-network-configuration-before-boot.html)
 
 ### 打开摄像头
 
